@@ -1,0 +1,156 @@
+{
+  "id": "scratch-basics",
+  "language": "scratch",
+  "title": "Scratch-Grundlagen",
+  "description": "Starte in wenigen Minuten mit sichtbaren Ergebnissen: Figuren sprechen lassen, bewegen und kleine Ideen bauen.",
+  "free": true,
+  "lessons": [
+    {
+      "id": "hello-sprite",
+      "title": "Deine Figur spricht",
+      "summary": "Lass deine Scratch-Figur mit einem Klick etwas sagen.",
+      "explanation": "Scratch besteht aus bunten Blöcken. Du ziehst Blöcke zusammen und sagst deiner Figur damit, was sie tun soll.",
+      "demo": "Wenn die grüne Flagge angeklickt wird -> sage 'Hallo ScratchLab!' für 2 Sekunden.",
+      "xp": 40,
+      "premium": false,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue ein Mini-Programm, bei dem deine Figur dich begruesst.",
+        "steps": [
+          "Oeffne Scratch in einem zweiten Tab.",
+          "Waehle den Block 'Wenn grüne Flagge angeklickt'.",
+          "Haenge den Block 'sage ... für 2 Sekunden' darunter.",
+          "Schreibe eine eigene Begruessung hinein und starte mit der gruenen Flagge."
+        ],
+        "checks": [
+          "Die Figur sagt einen eigenen Satz.",
+          "Das Ergebnis ist sichtbar, sobald du die gruene Flagge klickst."
+        ]
+      },
+      "success_message": "Stark: Deine erste Figur reagiert schon auf einen Start-Klick."
+    },
+    {
+      "id": "move-sprite",
+      "title": "Bewegung mit Energie",
+      "summary": "Bewege deine Figur ueber die Buehne.",
+      "explanation": "Bewegungsbloecke veraendern die Position deiner Figur. Kleine Zahlen bewegen sie wenig, groessere Zahlen weiter.",
+      "demo": "Wenn grüne Flagge angeklickt wird -> gehe 10er-Schritte -> sage 'Ich bewege mich!'.",
+      "xp": 55,
+      "premium": false,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Lass deine Figur nach rechts laufen und danach etwas sagen.",
+        "steps": [
+          "Nutze wieder den Startblock mit der gruenen Flagge.",
+          "Fuege den Block 'gehe 10er-Schritt' hinzu.",
+          "Fuege danach einen Sprechblock hinzu.",
+          "Teste verschiedene Schrittzahlen."
+        ],
+        "checks": [
+          "Die Figur bewegt sich sichtbar.",
+          "Die Figur sagt nach der Bewegung einen Satz."
+        ]
+      },
+      "success_message": "Nice: Du hast gerade Verhalten aus mehreren Blöcken gebaut."
+    },
+    {
+      "id": "first-animation",
+      "title": "Deine erste Animation",
+      "summary": "Kombiniere Wiederholung, Bewegung und Aussehen.",
+      "explanation": "Animation entsteht, wenn sich kleine Veraenderungen schnell hintereinander abspielen.",
+      "demo": "Wiederhole 10 mal -> gehe 5er-Schritt -> naechstes Kostuem -> warte kurz.",
+      "xp": 70,
+      "premium": false,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue eine kurze Animation mit Bewegung und Kostuemwechsel.",
+        "steps": [
+          "Fuege einen Wiederholungsblock ein.",
+          "Lege Bewegung und Kostuemwechsel in die Wiederholung.",
+          "Nutze einen kurzen Warteblock, damit man die Animation erkennt.",
+          "Starte und passe die Zahlen an, bis es gut aussieht."
+        ],
+        "checks": [
+          "Die Figur bewegt sich mehrfach.",
+          "Die Figur wechselt sichtbar ihr Aussehen."
+        ]
+      },
+      "success_message": "Das ist schon ein echter Mini-Effekt. Genau so entstehen Spiele."
+    },
+    {
+      "id": "score-counter",
+      "title": "Punkte zaehlen",
+      "summary": "Baue eine Variable, die Punkte speichert.",
+      "explanation": "Variablen sind kleine Speicher. In Spielen nutzt du sie zum Beispiel fuer Punkte, Leben oder Zeit.",
+      "demo": "Wenn Figur angeklickt wird -> aendere Punkte um 1 -> sage Punkte.",
+      "xp": 85,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Erstelle eine Punkte-Variable und erhoehe sie, wenn du deine Figur anklickst.",
+        "steps": [
+          "Erstelle eine Variable namens Punkte.",
+          "Setze Punkte beim Start auf 0.",
+          "Aendere Punkte um 1, wenn die Figur angeklickt wird.",
+          "Teste, ob die Zahl sichtbar steigt."
+        ],
+        "checks": [
+          "Die Variable Punkte ist sichtbar.",
+          "Beim Klick wird die Zahl groesser."
+        ]
+      },
+      "success_message": "Sehr gut: Du hast den ersten echten Spiel-Baustein gebaut."
+    },
+    {
+      "id": "simple-loop",
+      "title": "Schleifen verstehen",
+      "summary": "Lass Scratch etwas mehrfach wiederholen.",
+      "explanation": "Eine Schleife spart Arbeit: Du sagst Scratch einmal, was passieren soll, und Scratch wiederholt es.",
+      "demo": "Wiederhole 10 mal -> gehe 5 Schritte -> warte 0.1 Sekunden.",
+      "xp": 90,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue eine Bewegung, die sich zehnmal automatisch wiederholt.",
+        "steps": [
+          "Nutze den Block Wiederhole 10 mal.",
+          "Lege einen Bewegungsblock hinein.",
+          "Fuege eine kurze Wartezeit ein.",
+          "Teste, ob die Bewegung fluessig wirkt."
+        ],
+        "checks": [
+          "Die Figur bewegt sich mehrfach automatisch.",
+          "Du kannst erklaeren, was die Schleife wiederholt."
+        ]
+      },
+      "success_message": "Sauber: Wiederholung ist eine der wichtigsten Ideen beim Programmieren."
+    },
+    {
+      "id": "mini-game-start",
+      "title": "Start deines Mini-Spiels",
+      "summary": "Kombiniere Bewegung, Punkte und Wiederholung.",
+      "explanation": "Ein Spiel entsteht, wenn mehrere kleine Regeln zusammenarbeiten.",
+      "demo": "Start -> Punkte auf 0 -> Figur bewegen -> beim Klick Punkte erhoehen.",
+      "xp": 110,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue ein Mini-Spiel, bei dem man eine Figur anklickt und Punkte sammelt.",
+        "steps": [
+          "Setze Punkte beim Start auf 0.",
+          "Lass deine Figur sichtbar erscheinen.",
+          "Erhoehe Punkte beim Anklicken.",
+          "Fuege einen kurzen Erfolgssatz hinzu."
+        ],
+        "checks": [
+          "Das Spiel hat ein klares Ziel.",
+          "Punkte steigen beim Spielen."
+        ]
+      },
+      "success_message": "Boom: Du hast aus einzelnen Ideen ein spielbares Mini-Projekt gemacht."
+    }
+  ]
+}

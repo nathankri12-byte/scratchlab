@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ScratchLab</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#/">
+        <span class="brand-mark">SL</span>
+        <span>ScratchLab</span>
+      </a>
+      <nav class="nav">
+        <a href="#/learn">Lernen</a>
+        <a href="#/projects">Projekte</a>
+        <button id="authAction" class="ghost-button">Einloggen</button>
+      </nav>
+    </header>
+
+    <main id="app"></main>
+
+    <template id="landingTemplate">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Scratch lernen, ohne Schulgefuehl</p>
+          <h1>ScratchLab</h1>
+          <p class="lead">Baue in wenigen Minuten deine erste sprechende Figur, sammle XP und lerne Programmieren durch Ausprobieren.</p>
+          <div class="hero-actions">
+            <a class="primary-button" href="#/signup">Kostenlos starten</a>
+            <a class="secondary-button" href="#/learn">Kurs ansehen</a>
+          </div>
+        </div>
+        <div class="play-stage" aria-label="ScratchLab Vorschau">
+          <div class="stage-header">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="sprite"></div>
+          <div class="speech">Hallo ScratchLab!</div>
+          <div class="blocks">
+            <span>Wenn Flagge geklickt</span>
+            <span>sage Hallo</span>
+            <span>+40 XP</span>
+          </div>
+        </div>
+      </section>
+      <section class="feature-band">
+        <article>
+          <strong>Schneller Erfolg</strong>
+          <span>Keine Textwaende. Erst sehen, dann selbst bauen.</span>
+        </article>
+        <article>
+          <strong>Eigenes Tempo</strong>
+          <span>Lernen, pausieren, wiederkommen. Dein Fortschritt bleibt.</span>
+        </article>
+        <article>
+          <strong>KI als Coach</strong>
+          <span>Hinweise und Erklaerungen, aber keine Copy-Paste-Loesungen.</span>
+        </article>
+      </section>
+    </template>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
