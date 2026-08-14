@@ -638,7 +638,7 @@ class Handler(SimpleHTTPRequestHandler):
 def main() -> None:
     init_db()
     port = int(os.environ.get("PORT", "8080"))
-    server = ScratchLabServer(("127.0.0.1", port), Handler)
+    server = ScratchLabServer(("0.0.0.0", port), Handler)
     print(f"ScratchLab laeuft auf http://localhost:{port}")
     server.serve_forever()
 
