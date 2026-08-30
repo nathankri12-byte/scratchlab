@@ -1,0 +1,201 @@
+{
+  "id": "06-nachrichten-events",
+  "language": "scratch",
+  "title": "Nachrichten und Events",
+  "description": "Lass Figuren miteinander kommunizieren.",
+  "difficulty": "Fortgeschritten",
+  "free": false,
+  "order": 6,
+  "lessons": [
+    {
+      "id": "broadcast-start",
+      "title": "Nachricht senden",
+      "summary": "Broadcasts starten Aktionen bei anderen Figuren.",
+      "learning_goal": "Broadcasts starten Aktionen bei anderen Figuren.",
+      "explanation": "In dieser Lektion lernst du: Broadcasts starten Aktionen bei anderen Figuren. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit event_whenbroadcastreceived, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze event_broadcast zusammen mit event_whenbroadcastreceived.",
+      "xp": 120,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Sende eine Nachricht und lasse eine zweite Figur reagieren.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ event_broadcast hinzu.",
+          "Kombiniere ihn mit event_whenbroadcastreceived.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "event_broadcast",
+          "event_whenbroadcastreceived"
+        ]
+      },
+      "challenge": "Fuege einen Sound zur Reaktion hinzu.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Nachricht senden. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "scene-change",
+      "title": "Szenenwechsel",
+      "summary": "Nachrichten koennen neue Szenen starten.",
+      "learning_goal": "Nachrichten koennen neue Szenen starten.",
+      "explanation": "In dieser Lektion lernst du: Nachrichten koennen neue Szenen starten. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit looks_switchbackdropto, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze event_broadcast zusammen mit looks_switchbackdropto.",
+      "xp": 125,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Wechsle per Nachricht den Hintergrund.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ event_broadcast hinzu.",
+          "Kombiniere ihn mit looks_switchbackdropto.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "event_broadcast",
+          "looks_switchbackdropto"
+        ]
+      },
+      "challenge": "Lass alle Figuren neu positionieren.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Szenenwechsel. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "dialogue",
+      "title": "Dialog zwischen Figuren",
+      "summary": "Mit Nachrichten entsteht ein Gespraech.",
+      "learning_goal": "Mit Nachrichten entsteht ein Gespraech.",
+      "explanation": "In dieser Lektion lernst du: Mit Nachrichten entsteht ein Gespraech. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit looks_sayforsecs, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze event_whenbroadcastreceived zusammen mit looks_sayforsecs.",
+      "xp": 130,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue einen kurzen Dialog mit zwei Figuren.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ event_whenbroadcastreceived hinzu.",
+          "Kombiniere ihn mit looks_sayforsecs.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "event_whenbroadcastreceived",
+          "looks_sayforsecs"
+        ]
+      },
+      "challenge": "Fuege eine dritte Antwort hinzu.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Dialog zwischen Figuren. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "level-start",
+      "title": "Level starten",
+      "summary": "Events ordnen groessere Spiele.",
+      "learning_goal": "Events ordnen groessere Spiele.",
+      "explanation": "In dieser Lektion lernst du: Events ordnen groessere Spiele. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit data_setvariableto, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze event_broadcast zusammen mit data_setvariableto.",
+      "xp": 135,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Starte ein Level per Nachricht.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ event_broadcast hinzu.",
+          "Kombiniere ihn mit data_setvariableto.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "event_broadcast",
+          "data_setvariableto"
+        ]
+      },
+      "challenge": "Setze Punkte und Zeit beim Levelstart.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Level starten. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "custom-event-chain",
+      "title": "Ereigniskette",
+      "summary": "Mehrere Nachrichten koennen eine Kette bilden.",
+      "learning_goal": "Mehrere Nachrichten koennen eine Kette bilden.",
+      "explanation": "In dieser Lektion lernst du: Mehrere Nachrichten koennen eine Kette bilden. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit event_whenbroadcastreceived, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze event_broadcastandwait zusammen mit event_whenbroadcastreceived.",
+      "xp": 140,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue drei Aktionen nacheinander.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ event_broadcastandwait hinzu.",
+          "Kombiniere ihn mit event_whenbroadcastreceived.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "event_broadcastandwait",
+          "event_whenbroadcastreceived"
+        ]
+      },
+      "challenge": "Nutze broadcast and wait.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Ereigniskette. Genau so waechst dein Scratch-Werkzeugkasten."
+    }
+  ]
+}

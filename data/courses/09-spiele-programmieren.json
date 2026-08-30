@@ -1,0 +1,201 @@
+{
+  "id": "09-spiele-programmieren",
+  "language": "scratch",
+  "title": "Spiele programmieren",
+  "description": "Kombiniere alles zu echten Mini-Spielen.",
+  "difficulty": "Profi",
+  "free": false,
+  "order": 9,
+  "lessons": [
+    {
+      "id": "catch-game",
+      "title": "Fangspiel",
+      "summary": "Ein Ziel, Punkte und Bewegung ergeben ein Spiel.",
+      "learning_goal": "Ein Ziel, Punkte und Bewegung ergeben ein Spiel.",
+      "explanation": "In dieser Lektion lernst du: Ein Ziel, Punkte und Bewegung ergeben ein Spiel. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit data_changevariableby, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze sensing_touchingobject zusammen mit data_changevariableby.",
+      "xp": 180,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue ein Spiel, in dem man Objekte faengt.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ sensing_touchingobject hinzu.",
+          "Kombiniere ihn mit data_changevariableby.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "sensing_touchingobject",
+          "data_changevariableby"
+        ]
+      },
+      "challenge": "Fuege Zeitlimit hinzu.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Fangspiel. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "maze-game",
+      "title": "Labyrinth",
+      "summary": "Farb- und Randregeln erzeugen Level.",
+      "learning_goal": "Farb- und Randregeln erzeugen Level.",
+      "explanation": "In dieser Lektion lernst du: Farb- und Randregeln erzeugen Level. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit motion_gotoxy, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze sensing_touchingcolor zusammen mit motion_gotoxy.",
+      "xp": 185,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue ein kleines Labyrinth.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ sensing_touchingcolor hinzu.",
+          "Kombiniere ihn mit motion_gotoxy.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "sensing_touchingcolor",
+          "motion_gotoxy"
+        ]
+      },
+      "challenge": "Setze die Figur bei Wandkontakt zurueck.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Labyrinth. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "clicker-game",
+      "title": "Clicker-Spiel",
+      "summary": "Klicks, Punkte und Upgrades motivieren.",
+      "learning_goal": "Klicks, Punkte und Upgrades motivieren.",
+      "explanation": "In dieser Lektion lernst du: Klicks, Punkte und Upgrades motivieren. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit data_changevariableby, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze event_whenthisspriteclicked zusammen mit data_changevariableby.",
+      "xp": 175,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue ein Klickspiel mit Punkten.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ event_whenthisspriteclicked hinzu.",
+          "Kombiniere ihn mit data_changevariableby.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "event_whenthisspriteclicked",
+          "data_changevariableby"
+        ]
+      },
+      "challenge": "Fuege ein Upgrade mit Bedingung hinzu.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Clicker-Spiel. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "dodge-game",
+      "title": "Ausweichspiel",
+      "summary": "Bewegung und Klone erzeugen Spannung.",
+      "learning_goal": "Bewegung und Klone erzeugen Spannung.",
+      "explanation": "In dieser Lektion lernst du: Bewegung und Klone erzeugen Spannung. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit sensing_touchingobject, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze control_create_clone_of zusammen mit sensing_touchingobject.",
+      "xp": 195,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue ein Spiel, in dem man Hindernissen ausweicht.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ control_create_clone_of hinzu.",
+          "Kombiniere ihn mit sensing_touchingobject.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "control_create_clone_of",
+          "sensing_touchingobject"
+        ]
+      },
+      "challenge": "Mache es jede Runde schneller.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Ausweichspiel. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "platform-idea",
+      "title": "Platformer-Idee",
+      "summary": "Sprung, Schwerkraft und Kollision bilden Plattformspiele.",
+      "learning_goal": "Sprung, Schwerkraft und Kollision bilden Plattformspiele.",
+      "explanation": "In dieser Lektion lernst du: Sprung, Schwerkraft und Kollision bilden Plattformspiele. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit operator_lt, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze motion_changeyby zusammen mit operator_lt.",
+      "xp": 210,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue eine einfache Sprungbewegung.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ motion_changeyby hinzu.",
+          "Kombiniere ihn mit operator_lt.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "motion_changeyby",
+          "operator_lt"
+        ]
+      },
+      "challenge": "Stoppe die Figur auf einer Plattform.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Platformer-Idee. Genau so waechst dein Scratch-Werkzeugkasten."
+    }
+  ]
+}

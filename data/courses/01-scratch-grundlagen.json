@@ -1,0 +1,201 @@
+{
+  "id": "01-scratch-grundlagen",
+  "language": "scratch",
+  "title": "Scratch Grundlagen",
+  "description": "Lerne die Buehne, Figuren und erste sichtbare Aktionen kennen.",
+  "difficulty": "Anfaenger",
+  "free": true,
+  "order": 1,
+  "lessons": [
+    {
+      "id": "hello-sprite",
+      "title": "Deine Figur spricht",
+      "summary": "Die Figur reagiert auf die gruene Flagge.",
+      "learning_goal": "Die Figur reagiert auf die gruene Flagge.",
+      "explanation": "In dieser Lektion lernst du: Die Figur reagiert auf die gruene Flagge. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit looks_sayforsecs, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze event_whenflagclicked zusammen mit looks_sayforsecs.",
+      "xp": 40,
+      "premium": false,
+      "price_eur": 0,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Sage einen eigenen Begruessungssatz.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ event_whenflagclicked hinzu.",
+          "Kombiniere ihn mit looks_sayforsecs.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "event_whenflagclicked",
+          "looks_sayforsecs"
+        ]
+      },
+      "challenge": "Aendere Text und Dauer.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Deine Figur spricht. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "move-sprite",
+      "title": "Bewegung mit Energie",
+      "summary": "Eine Figur bewegt sich sichtbar auf der Buehne.",
+      "learning_goal": "Eine Figur bewegt sich sichtbar auf der Buehne.",
+      "explanation": "In dieser Lektion lernst du: Eine Figur bewegt sich sichtbar auf der Buehne. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit motion_movesteps, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze event_whenflagclicked zusammen mit motion_movesteps.",
+      "xp": 55,
+      "premium": false,
+      "price_eur": 0,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Lass deine Figur laufen und danach sprechen.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ event_whenflagclicked hinzu.",
+          "Kombiniere ihn mit motion_movesteps.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "event_whenflagclicked",
+          "motion_movesteps"
+        ]
+      },
+      "challenge": "Teste drei verschiedene Schrittzahlen.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Bewegung mit Energie. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "first-animation",
+      "title": "Deine erste Animation",
+      "summary": "Bewegung und Kostuemwechsel erzeugen Animation.",
+      "learning_goal": "Bewegung und Kostuemwechsel erzeugen Animation.",
+      "explanation": "In dieser Lektion lernst du: Bewegung und Kostuemwechsel erzeugen Animation. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit looks_nextcostume, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze control_repeat zusammen mit looks_nextcostume.",
+      "xp": 70,
+      "premium": false,
+      "price_eur": 0,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue eine kurze Laufanimation.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ control_repeat hinzu.",
+          "Kombiniere ihn mit looks_nextcostume.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "control_repeat",
+          "looks_nextcostume"
+        ]
+      },
+      "challenge": "Fuege eine Wartezeit ein.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Deine erste Animation. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "stage-background",
+      "title": "Buehne wechseln",
+      "summary": "Hintergruende machen Szenen lebendig.",
+      "learning_goal": "Hintergruende machen Szenen lebendig.",
+      "explanation": "In dieser Lektion lernst du: Hintergruende machen Szenen lebendig. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit looks_switchbackdropto, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze event_whenflagclicked zusammen mit looks_switchbackdropto.",
+      "xp": 65,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Wechsle beim Start den Hintergrund.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ event_whenflagclicked hinzu.",
+          "Kombiniere ihn mit looks_switchbackdropto.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "event_whenflagclicked",
+          "looks_switchbackdropto"
+        ]
+      },
+      "challenge": "Lass die Figur passend dazu sprechen.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Buehne wechseln. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "sound-start",
+      "title": "Sound beim Start",
+      "summary": "Klang gibt Projekten direkt Feedback.",
+      "learning_goal": "Klang gibt Projekten direkt Feedback.",
+      "explanation": "In dieser Lektion lernst du: Klang gibt Projekten direkt Feedback. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit sound_play, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze event_whenflagclicked zusammen mit sound_play.",
+      "xp": 65,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Spiele beim Start einen Sound ab.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ event_whenflagclicked hinzu.",
+          "Kombiniere ihn mit sound_play.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "event_whenflagclicked",
+          "sound_play"
+        ]
+      },
+      "challenge": "Kombiniere Sound mit Bewegung.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Sound beim Start. Genau so waechst dein Scratch-Werkzeugkasten."
+    }
+  ]
+}

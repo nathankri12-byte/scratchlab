@@ -1,0 +1,201 @@
+{
+  "id": "08-listen",
+  "language": "scratch",
+  "title": "Listen",
+  "description": "Speichere mehrere Werte und baue Inventar- oder Quizideen.",
+  "difficulty": "Profi",
+  "free": false,
+  "order": 8,
+  "lessons": [
+    {
+      "id": "list-basics",
+      "title": "Erste Liste",
+      "summary": "Listen speichern mehrere Eintraege.",
+      "learning_goal": "Listen speichern mehrere Eintraege.",
+      "explanation": "In dieser Lektion lernst du: Listen speichern mehrere Eintraege. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit data_showlist, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze data_addtolist zusammen mit data_showlist.",
+      "xp": 145,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Fuege drei Woerter zu einer Liste hinzu.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ data_addtolist hinzu.",
+          "Kombiniere ihn mit data_showlist.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "data_addtolist",
+          "data_showlist"
+        ]
+      },
+      "challenge": "Lass die Figur ein zufaelliges Wort sagen.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Erste Liste. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "quiz-list",
+      "title": "Quizfragen sammeln",
+      "summary": "Listen koennen Fragen und Antworten organisieren.",
+      "learning_goal": "Listen koennen Fragen und Antworten organisieren.",
+      "explanation": "In dieser Lektion lernst du: Listen koennen Fragen und Antworten organisieren. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit sensing_askandwait, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze data_itemoflist zusammen mit sensing_askandwait.",
+      "xp": 160,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Stelle eine Frage aus einer Liste.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ data_itemoflist hinzu.",
+          "Kombiniere ihn mit sensing_askandwait.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "data_itemoflist",
+          "sensing_askandwait"
+        ]
+      },
+      "challenge": "Pruefe die Antwort mit einer Bedingung.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Quizfragen sammeln. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "inventory",
+      "title": "Inventar bauen",
+      "summary": "Ein Inventar merkt sich gesammelte Dinge.",
+      "learning_goal": "Ein Inventar merkt sich gesammelte Dinge.",
+      "explanation": "In dieser Lektion lernst du: Ein Inventar merkt sich gesammelte Dinge. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit sensing_touchingobject, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze data_addtolist zusammen mit sensing_touchingobject.",
+      "xp": 165,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Fuege ein Item hinzu, wenn es eingesammelt wird.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ data_addtolist hinzu.",
+          "Kombiniere ihn mit sensing_touchingobject.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "data_addtolist",
+          "sensing_touchingobject"
+        ]
+      },
+      "challenge": "Verhindere doppelte Eintraege.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Inventar bauen. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "remove-item",
+      "title": "Eintrag entfernen",
+      "summary": "Listen lassen sich veraendern.",
+      "learning_goal": "Listen lassen sich veraendern.",
+      "explanation": "In dieser Lektion lernst du: Listen lassen sich veraendern. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit data_itemnumoflist, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze data_deleteoflist zusammen mit data_itemnumoflist.",
+      "xp": 170,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Entferne ein Item, wenn es benutzt wird.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ data_deleteoflist hinzu.",
+          "Kombiniere ihn mit data_itemnumoflist.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "data_deleteoflist",
+          "data_itemnumoflist"
+        ]
+      },
+      "challenge": "Zeige vorher eine Meldung.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Eintrag entfernen. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "list-debug",
+      "title": "Listen pruefen",
+      "summary": "Listen sichtbar zu machen hilft beim Testen.",
+      "learning_goal": "Listen sichtbar zu machen hilft beim Testen.",
+      "explanation": "In dieser Lektion lernst du: Listen sichtbar zu machen hilft beim Testen. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit looks_sayforsecs, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze data_showlist zusammen mit looks_sayforsecs.",
+      "xp": 150,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Zeige eine Liste waehrend des Tests.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ data_showlist hinzu.",
+          "Kombiniere ihn mit looks_sayforsecs.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "data_showlist",
+          "looks_sayforsecs"
+        ]
+      },
+      "challenge": "Verstecke sie im fertigen Spiel.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Listen pruefen. Genau so waechst dein Scratch-Werkzeugkasten."
+    }
+  ]
+}

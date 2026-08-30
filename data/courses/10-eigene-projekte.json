@@ -1,0 +1,201 @@
+{
+  "id": "10-eigene-projekte",
+  "language": "scratch",
+  "title": "Eigene Projekte",
+  "description": "Plane, baue, teste und verbessere dein eigenes Scratch-Projekt.",
+  "difficulty": "Profi",
+  "free": false,
+  "order": 10,
+  "lessons": [
+    {
+      "id": "project-plan",
+      "title": "Projekt planen",
+      "summary": "Eine klare Idee macht das Bauen leichter.",
+      "learning_goal": "Eine klare Idee macht das Bauen leichter.",
+      "explanation": "In dieser Lektion lernst du: Eine klare Idee macht das Bauen leichter. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit event_whenflagclicked, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze looks_sayforsecs zusammen mit event_whenflagclicked.",
+      "xp": 120,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Schreibe Ziel, Figuren und Regeln deines Projekts auf.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ looks_sayforsecs hinzu.",
+          "Kombiniere ihn mit event_whenflagclicked.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "looks_sayforsecs",
+          "event_whenflagclicked"
+        ]
+      },
+      "challenge": "Baue eine Startszene.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Projekt planen. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "prototype",
+      "title": "Prototyp bauen",
+      "summary": "Ein Prototyp testet nur die wichtigste Idee.",
+      "learning_goal": "Ein Prototyp testet nur die wichtigste Idee.",
+      "explanation": "In dieser Lektion lernst du: Ein Prototyp testet nur die wichtigste Idee. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit control_forever, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze event_whenflagclicked zusammen mit control_forever.",
+      "xp": 180,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue die Kernmechanik deines Projekts.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ event_whenflagclicked hinzu.",
+          "Kombiniere ihn mit control_forever.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "event_whenflagclicked",
+          "control_forever"
+        ]
+      },
+      "challenge": "Lass Optik erstmal einfach.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Prototyp bauen. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "playtest",
+      "title": "Playtest machen",
+      "summary": "Testen zeigt, was noch unklar ist.",
+      "learning_goal": "Testen zeigt, was noch unklar ist.",
+      "explanation": "In dieser Lektion lernst du: Testen zeigt, was noch unklar ist. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit data_showvariable, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze looks_sayforsecs zusammen mit data_showvariable.",
+      "xp": 150,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Teste dein Projekt und notiere drei Verbesserungen.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ looks_sayforsecs hinzu.",
+          "Kombiniere ihn mit data_showvariable.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "looks_sayforsecs",
+          "data_showvariable"
+        ]
+      },
+      "challenge": "Frage eine andere Person nach Feedback.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Playtest machen. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "polish",
+      "title": "Projekt polieren",
+      "summary": "Kleine Details machen Projekte hochwertig.",
+      "learning_goal": "Kleine Details machen Projekte hochwertig.",
+      "explanation": "In dieser Lektion lernst du: Kleine Details machen Projekte hochwertig. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit looks_nextcostume, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze sound_play zusammen mit looks_nextcostume.",
+      "xp": 170,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Fuege Sound, Animation oder bessere Texte hinzu.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ sound_play hinzu.",
+          "Kombiniere ihn mit looks_nextcostume.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "sound_play",
+          "looks_nextcostume"
+        ]
+      },
+      "challenge": "Entferne sichtbare Debug-Variablen.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Projekt polieren. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "publish-project",
+      "title": "Projekt vorstellen",
+      "summary": "Eine gute Beschreibung hilft anderen.",
+      "learning_goal": "Eine gute Beschreibung hilft anderen.",
+      "explanation": "In dieser Lektion lernst du: Eine gute Beschreibung hilft anderen. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit looks_sayforsecs, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze event_whenflagclicked zusammen mit looks_sayforsecs.",
+      "xp": 160,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Gib deinem Projekt einen Titel und eine Beschreibung.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ event_whenflagclicked hinzu.",
+          "Kombiniere ihn mit looks_sayforsecs.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "event_whenflagclicked",
+          "looks_sayforsecs"
+        ]
+      },
+      "challenge": "Speichere es in ScratchLab als eigenes Projekt.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Projekt vorstellen. Genau so waechst dein Scratch-Werkzeugkasten."
+    }
+  ]
+}

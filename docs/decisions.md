@@ -19,3 +19,11 @@ Die ersten Scratch-Grundlagen bleiben kostenlos. Danach werden Premium-Lektionen
 ## ADR-005: Kein Schulplattform-Look
 
 Die UI ist dunkel, klar und spielerisch. Fortschritt, Aufgabe und naechster Schritt sind jederzeit sichtbar.
+
+## ADR-006: Scratch-Aufgaben ueber `.sb3` pruefen
+
+ScratchLab speichert keine Scratch-Logins und erfindet keine inoffizielle Account-API. Aufgaben werden sicher ueber hochgeladene `.sb3`-Dateien analysiert. Das MVP prueft Block-OpCodes, Variablen, Listen und Broadcasts gegen Lektionsanforderungen.
+
+## ADR-007: Stripe nur sicher vorbereitet
+
+Stripe Checkout wird vorbereitet, aber ohne vollstaendige Stripe-Konfiguration nicht aktiviert. ScratchLab speichert niemals Karten- oder Bankdaten; Auszahlung und Bankkonto gehoeren ausschliesslich ins Stripe-Dashboard.

@@ -3,11 +3,13 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
+import io
 import json
 import os
 import re
 import secrets
 import sqlite3
+import zipfile
 from datetime import datetime, timezone
 from http import HTTPStatus
 from http.cookies import SimpleCookie
@@ -37,6 +39,9 @@ PBKDF2_ITERATIONS = 210_000
 GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
 SINGLE_LESSON_PRICE_EUR = 5
 PREMIUM_MONTHLY_PRICE_EUR = 15
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "").strip()
+STRIPE_PREMIUM_PRICE_ID = os.environ.get("STRIPE_PREMIUM_PRICE_ID", "").strip()
+STRIPE_LESSON_PRICE_ID = os.environ.get("STRIPE_LESSON_PRICE_ID", "").strip()
 
 
 def now_iso() -> str:
@@ -90,6 +95,12 @@ def find_lesson(lesson_id: str) -> tuple[dict[str, Any], dict[str, Any]] | tuple
 
 def validate_email(email: str) -> bool:
     return bool(re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email))
+
+
+def ensure_column(db: sqlite3.Connection, table: str, column: str, definition: str) -> None:
+    existing = {row["name"] for row in db.execute(f"PRAGMA table_info({table})")}
+    if column not in existing:
+        db.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
 
 
 def init_db(db_path: Path = DB_PATH) -> None:
@@ -166,14 +177,45 @@ def init_db(db_path: Path = DB_PATH) -> None:
                 created_at TEXT NOT NULL,
                 PRIMARY KEY (user_id, lesson_id)
             );
+
+            CREATE TABLE IF NOT EXISTS project_checks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                project_id INTEGER REFERENCES projects(id) ON DELETE SET NULL,
+                lesson_id TEXT,
+                score INTEGER NOT NULL,
+                total INTEGER NOT NULL,
+                feedback TEXT NOT NULL,
+                details TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS subscriptions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                provider TEXT NOT NULL,
+                provider_reference TEXT NOT NULL,
+                status TEXT NOT NULL,
+                current_period_end TEXT,
+                created_at TEXT NOT NULL
+            );
             """
         )
+        ensure_column(db, "users", "current_lesson_id", "TEXT")
+        ensure_column(db, "users", "last_lesson_id", "TEXT")
+        ensure_column(db, "projects", "sb3_summary", "TEXT NOT NULL DEFAULT ''")
         db.executemany(
             "INSERT OR IGNORE INTO badges (id, name, description, icon) VALUES (?, ?, ?, ?)",
             [
                 ("first-step", "Erster Start", "Du hast deine erste Lektion geschafft.", "*"),
                 ("motion-maker", "Bewegungs-Profi", "Du hast Bewegung in dein Projekt gebracht.", ">"),
                 ("mini-maker", "Mini-Maker", "Du hast drei Lektionen abgeschlossen.", "#"),
+                ("block-builder", "Block Builder", "Du hast fuenf Lektionen abgeschlossen.", "BB"),
+                ("loop-pro", "Schleifen-Profi", "Du hast Schleifen gemeistert.", "LO"),
+                ("variable-keeper", "Variablen-Kenner", "Du arbeitest sicher mit Variablen.", "VA"),
+                ("debugger", "Debugger", "Du hast ein Projekt automatisch pruefen lassen.", "DG"),
+                ("game-maker", "Game Maker", "Du hast ein Spiele-Thema abgeschlossen.", "GM"),
+                ("scratch-master", "Scratch Master", "Du hast 50 Lektionen geschafft.", "SM"),
             ],
         )
 
@@ -186,7 +228,48 @@ def public_user(row: sqlite3.Row) -> dict[str, Any]:
         "xp": row["xp"],
         "level": row["level"],
         "premiumStatus": row["premium_status"],
+        "currentLessonId": row["current_lesson_id"] if "current_lesson_id" in row.keys() else None,
+        "lastLessonId": row["last_lesson_id"] if "last_lesson_id" in row.keys() else None,
     }
+
+
+def all_lessons() -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    ordered: list[tuple[dict[str, Any], dict[str, Any]]] = []
+    for course in sorted(load_courses(), key=lambda item: item.get("order", 999)):
+        for lesson in course.get("lessons", []):
+            ordered.append((course, lesson))
+    return ordered
+
+
+def next_lesson_after(completed_lesson_ids: set[str]) -> dict[str, Any] | None:
+    for course, lesson in all_lessons():
+        if lesson["id"] not in completed_lesson_ids and not lesson.get("premium"):
+            return {"courseId": course["id"], **lesson}
+    for course, lesson in all_lessons():
+        if lesson["id"] not in completed_lesson_ids:
+            return {"courseId": course["id"], **lesson}
+    return None
+
+
+def course_progress(completed_lesson_ids: set[str]) -> list[dict[str, Any]]:
+    result = []
+    for course in sorted(load_courses(), key=lambda item: item.get("order", 999)):
+        lessons = course.get("lessons", [])
+        completed = sum(1 for lesson in lessons if lesson["id"] in completed_lesson_ids)
+        total = len(lessons)
+        result.append(
+            {
+                "id": course["id"],
+                "title": course["title"],
+                "description": course["description"],
+                "difficulty": course.get("difficulty", "Anfaenger"),
+                "lessonCount": total,
+                "completedCount": completed,
+                "percent": round((completed / total) * 100) if total else 0,
+                "isComplete": completed == total and total > 0,
+            }
+        )
+    return result
 
 
 def lesson_context(lesson_id: str | None) -> dict[str, Any] | None:
@@ -196,7 +279,7 @@ def lesson_context(lesson_id: str | None) -> dict[str, Any] | None:
     return lesson
 
 
-def build_assistant_prompt(message: str, lesson_id: str | None) -> str:
+def build_assistant_prompt(message: str, lesson_id: str | None, learner_context: str = "") -> str:
     lesson = lesson_context(lesson_id)
     lesson_text = ""
     if lesson:
@@ -214,12 +297,13 @@ def build_assistant_prompt(message: str, lesson_id: str | None) -> str:
         "Fuehre den Nutzer mit 1 bis 3 Hinweisen zum eigenen Denken. "
         "Wenn der Nutzer nach kompletter Loesung fragt, erklaere knapp, warum du nur Hinweise gibst. "
         "Nutze einfache Sprache, passend fuer Kinder, Jugendliche und Erwachsene.\n\n"
+        f"Lernstand: {learner_context or 'Noch kein Lernstand uebergeben.'}\n"
         f"{lesson_text}\n"
         f"Frage des Nutzers: {message}"
     )
 
 
-def call_gemini(message: str, lesson_id: str | None, history: list[sqlite3.Row]) -> tuple[str, str] | None:
+def call_gemini(message: str, lesson_id: str | None, history: list[sqlite3.Row], learner_context: str = "") -> tuple[str, str] | None:
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key:
         return None
@@ -227,7 +311,7 @@ def call_gemini(message: str, lesson_id: str | None, history: list[sqlite3.Row])
     for item in history[-6:]:
         contents.append({"role": "user", "parts": [{"text": item["message"]}]})
         contents.append({"role": "model", "parts": [{"text": item["response"]}]})
-    contents.append({"role": "user", "parts": [{"text": build_assistant_prompt(message, lesson_id)}]})
+    contents.append({"role": "user", "parts": [{"text": build_assistant_prompt(message, lesson_id, learner_context)}]})
     body = {
         "contents": contents,
         "generationConfig": {
@@ -298,6 +382,74 @@ def assistant_reply(message: str, lesson_id: str | None, previous_count: int = 0
     return (prefix + general[previous_count % len(general)], label)
 
 
+def analyze_scratch_project(sb3_bytes: bytes) -> dict[str, Any]:
+    if len(sb3_bytes) > 10 * 1024 * 1024:
+        raise ValueError("Die Datei ist zu gross. Bitte lade eine kleinere .sb3-Datei hoch.")
+    try:
+        with zipfile.ZipFile(io.BytesIO(sb3_bytes)) as archive:
+            with archive.open("project.json") as project_file:
+                project = json.loads(project_file.read().decode("utf-8"))
+    except (zipfile.BadZipFile, KeyError, json.JSONDecodeError, UnicodeDecodeError):
+        raise ValueError("Die .sb3-Datei konnte nicht gelesen werden.")
+
+    opcodes: set[str] = set()
+    variables: set[str] = set()
+    lists: set[str] = set()
+    broadcasts: set[str] = set()
+    target_count = 0
+
+    for target in project.get("targets", []):
+        target_count += 1
+        for block in target.get("blocks", {}).values():
+            if isinstance(block, dict) and block.get("opcode"):
+                opcodes.add(block["opcode"])
+                for field in block.get("fields", {}).values():
+                    if isinstance(field, list) and field:
+                        value = str(field[0])
+                        if "message" in value.lower() or "broadcast" in value.lower():
+                            broadcasts.add(value)
+        for variable in target.get("variables", {}).values():
+            if isinstance(variable, list) and variable:
+                variables.add(str(variable[0]))
+        for item in target.get("lists", {}).values():
+            if isinstance(item, list) and item:
+                lists.add(str(item[0]))
+        for broadcast in target.get("broadcasts", {}).values():
+            broadcasts.add(str(broadcast))
+
+    return {
+        "targetCount": target_count,
+        "opcodes": sorted(opcodes),
+        "variables": sorted(variables),
+        "lists": sorted(lists),
+        "broadcasts": sorted(broadcasts),
+    }
+
+
+def evaluate_project_for_lesson(analysis: dict[str, Any], lesson: dict[str, Any]) -> dict[str, Any]:
+    task = lesson.get("task", {})
+    required_opcodes = task.get("required_opcodes", [])
+    details = []
+    score = 0
+    total = len(required_opcodes)
+    opcodes = set(analysis.get("opcodes", []))
+    for opcode in required_opcodes:
+        if opcode in opcodes:
+            score += 1
+            details.append({"requirement": opcode, "passed": True, "message": f"{opcode} gefunden."})
+        else:
+            details.append({"requirement": opcode, "passed": False, "message": f"{opcode} fehlt noch."})
+
+    feedback = f"{score} von {total} Anforderungen erfuellt."
+    if total and score == total:
+        feedback += " Stark, die wichtigsten Scratch-Bausteine sind vorhanden."
+    elif score:
+        feedback += " Du bist nah dran. Pruefe die fehlenden Bloecke."
+    else:
+        feedback += " Starte mit dem ersten geforderten Block aus der Aufgabe."
+    return {"score": score, "total": total, "feedback": feedback, "details": details}
+
+
 class ScratchLabServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
@@ -358,10 +510,16 @@ class Handler(SimpleHTTPRequestHandler):
                 self.projects()
             elif method == "POST" and path == "/api/projects":
                 self.create_project()
+            elif method == "POST" and path == "/api/projects/check":
+                self.check_project()
             elif method == "DELETE" and path.startswith("/api/projects/"):
                 self.delete_project(int(path.rsplit("/", 1)[1]))
             elif method == "POST" and path == "/api/assistant":
                 self.assistant()
+            elif method == "POST" and path == "/api/checkout/premium":
+                self.checkout_premium()
+            elif method == "POST" and path == "/api/checkout/lesson":
+                self.checkout_lesson()
             else:
                 self.json_response({"error": "Not found"}, HTTPStatus.NOT_FOUND)
         except ValueError as exc:
@@ -371,7 +529,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def read_json(self) -> dict[str, Any]:
         length = int(self.headers.get("Content-Length", "0"))
-        if length > 20_000:
+        if length > 14_000_000:
             raise ValueError("Request too large")
         raw = self.rfile.read(length) if length else b"{}"
         return json.loads(raw.decode("utf-8"))
@@ -465,12 +623,25 @@ class Handler(SimpleHTTPRequestHandler):
         if not user:
             return
         with connect() as db:
-            completed = [dict(row) for row in db.execute("SELECT * FROM progress WHERE user_id = ?", (user["id"],))]
+            completed = [dict(row) for row in db.execute("SELECT * FROM progress WHERE user_id = ? ORDER BY completed_at DESC", (user["id"],))]
             badges = [dict(row) for row in db.execute(
                 "SELECT badges.* FROM badges JOIN user_badges ON user_badges.badge_id = badges.id WHERE user_badges.user_id = ?",
                 (user["id"],),
             )]
-        self.json_response({"completed": completed, "badges": badges, "user": public_user(user)})
+            projects = [dict(row) for row in db.execute("SELECT id, title, updated_at, is_public FROM projects WHERE user_id = ? ORDER BY updated_at DESC LIMIT 5", (user["id"],))]
+        completed_ids = {item["lesson_id"] for item in completed}
+        recommended = next_lesson_after(completed_ids)
+        self.json_response(
+            {
+                "completed": completed,
+                "badges": badges,
+                "user": public_user(user),
+                "courseProgress": course_progress(completed_ids),
+                "nextLesson": recommended,
+                "recentActivity": completed[:5],
+                "projects": projects,
+            }
+        )
 
     def complete_lesson(self, lesson_id: str) -> None:
         user = self.require_user_or_401()
@@ -498,7 +669,15 @@ class Handler(SimpleHTTPRequestHandler):
                     (user["id"], course["id"], lesson_id, awarded, now_iso()),
                 )
                 new_xp = user["xp"] + awarded
-                db.execute("UPDATE users SET xp = ?, level = ? WHERE id = ?", (new_xp, calculate_level(new_xp), user["id"]))
+                completed_ids = {
+                    row["lesson_id"]
+                    for row in db.execute("SELECT lesson_id FROM progress WHERE user_id = ?", (user["id"],)).fetchall()
+                }
+                next_lesson = next_lesson_after(completed_ids)
+                db.execute(
+                    "UPDATE users SET xp = ?, level = ?, last_lesson_id = ?, current_lesson_id = ? WHERE id = ?",
+                    (new_xp, calculate_level(new_xp), lesson_id, next_lesson["id"] if next_lesson else None, user["id"]),
+                )
                 self.award_badges(db, user["id"])
             updated = db.execute("SELECT * FROM users WHERE id = ?", (user["id"],)).fetchone()
         self.json_response({"awardedXp": awarded, "user": public_user(updated), "message": lesson["success_message"]})
@@ -526,6 +705,16 @@ class Handler(SimpleHTTPRequestHandler):
             rules.append("motion-maker")
         if count >= 3:
             rules.append("mini-maker")
+        if count >= 5:
+            rules.append("block-builder")
+        if count >= 50:
+            rules.append("scratch-master")
+        if db.execute("SELECT 1 FROM progress WHERE user_id = ? AND lesson_id IN ('repeat-loop', 'forever-loop', 'repeat-until')", (user_id,)).fetchone():
+            rules.append("loop-pro")
+        if db.execute("SELECT 1 FROM progress WHERE user_id = ? AND lesson_id IN ('score-counter', 'timer', 'lives')", (user_id,)).fetchone():
+            rules.append("variable-keeper")
+        if db.execute("SELECT 1 FROM progress WHERE user_id = ? AND lesson_id IN ('catch-game', 'maze-game', 'dodge-game')", (user_id,)).fetchone():
+            rules.append("game-maker")
         for badge_id in rules:
             db.execute(
                 "INSERT OR IGNORE INTO user_badges (user_id, badge_id, awarded_at) VALUES (?, ?, ?)",
@@ -574,6 +763,102 @@ class Handler(SimpleHTTPRequestHandler):
             db.execute("DELETE FROM projects WHERE id = ? AND user_id = ?", (project_id, user["id"]))
         self.json_response({"ok": True})
 
+    def check_project(self) -> None:
+        user = self.require_user_or_401()
+        if not user:
+            return
+        payload = self.read_json()
+        lesson_id = str(payload.get("lessonId", "")).strip() or None
+        project_id = payload.get("projectId")
+        encoded = str(payload.get("dataBase64", "")).strip()
+        if not encoded:
+            raise ValueError("Bitte lade eine .sb3-Datei hoch.")
+        try:
+            sb3_bytes = base64.b64decode(encoded, validate=True)
+        except ValueError:
+            raise ValueError("Die Datei konnte nicht gelesen werden.")
+        analysis = analyze_scratch_project(sb3_bytes)
+        _, lesson = find_lesson(lesson_id) if lesson_id else (None, None)
+        result = evaluate_project_for_lesson(analysis, lesson) if lesson else {
+            "score": 0,
+            "total": 0,
+            "feedback": "Projekt analysiert. Waehle eine Lektion aus, um konkrete Anforderungen zu pruefen.",
+            "details": [],
+        }
+        with connect() as db:
+            db.execute(
+                """
+                INSERT INTO project_checks (user_id, project_id, lesson_id, score, total, feedback, details, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    user["id"],
+                    int(project_id) if project_id else None,
+                    lesson_id,
+                    result["score"],
+                    result["total"],
+                    result["feedback"],
+                    json.dumps(result["details"], ensure_ascii=False),
+                    now_iso(),
+                ),
+            )
+            db.execute(
+                "INSERT OR IGNORE INTO user_badges (user_id, badge_id, awarded_at) VALUES (?, 'debugger', ?)",
+                (user["id"], now_iso()),
+            )
+        self.json_response({"analysis": analysis, "result": result})
+
+    def checkout_premium(self) -> None:
+        user = self.require_user_or_401()
+        if not user:
+            return
+        if not STRIPE_SECRET_KEY or not STRIPE_PREMIUM_PRICE_ID:
+            self.json_response(
+                {
+                    "error": "Stripe Checkout ist noch nicht vollstaendig konfiguriert.",
+                    "checkoutReady": False,
+                },
+                HTTPStatus.SERVICE_UNAVAILABLE,
+            )
+            return
+        self.json_response(
+            {
+                "error": "Stripe Checkout ist vorbereitet, aber die echte Session-Erstellung wird erst nach vollstaendiger Stripe-Konfiguration aktiviert.",
+                "checkoutReady": False,
+            },
+            HTTPStatus.SERVICE_UNAVAILABLE,
+        )
+
+    def checkout_lesson(self) -> None:
+        user = self.require_user_or_401()
+        if not user:
+            return
+        payload = self.read_json()
+        lesson_id = str(payload.get("lessonId", "")).strip()
+        _, lesson = find_lesson(lesson_id)
+        if not lesson:
+            self.json_response({"error": "Lektion nicht gefunden."}, HTTPStatus.NOT_FOUND)
+            return
+        if not lesson.get("premium"):
+            self.json_response({"error": "Diese Lektion ist kostenlos."}, HTTPStatus.BAD_REQUEST)
+            return
+        if not STRIPE_SECRET_KEY or not STRIPE_LESSON_PRICE_ID:
+            self.json_response(
+                {
+                    "error": "Stripe Checkout ist noch nicht vollstaendig konfiguriert.",
+                    "checkoutReady": False,
+                },
+                HTTPStatus.SERVICE_UNAVAILABLE,
+            )
+            return
+        self.json_response(
+            {
+                "error": "Stripe Checkout ist vorbereitet, aber die echte Session-Erstellung wird erst nach vollstaendiger Stripe-Konfiguration aktiviert.",
+                "checkoutReady": False,
+            },
+            HTTPStatus.SERVICE_UNAVAILABLE,
+        )
+
     def assistant(self) -> None:
         user = self.current_user()
         payload = self.read_json()
@@ -588,13 +873,16 @@ class Handler(SimpleHTTPRequestHandler):
                     (user["id"], lesson_id),
                 ).fetchall()
                 previous_count = len(history)
+                completed_count = db.execute("SELECT COUNT(*) AS c FROM progress WHERE user_id = ?", (user["id"],)).fetchone()["c"]
+                learner_context = f"Level {user['level']}, {user['xp']} XP, {completed_count} abgeschlossene Lektionen."
             else:
                 history = db.execute(
                     "SELECT message, response FROM ai_interactions WHERE user_id IS NULL AND lesson_id = ? ORDER BY id DESC LIMIT 6",
                     (lesson_id,),
                 ).fetchall()
                 previous_count = len(history)
-            response, label = call_gemini(message, lesson_id, list(reversed(history))) or assistant_reply(message, lesson_id, previous_count)
+                learner_context = "Nicht eingeloggter Nutzer ohne gespeicherten Fortschritt."
+            response, label = call_gemini(message, lesson_id, list(reversed(history)), learner_context) or assistant_reply(message, lesson_id, previous_count)
             db.execute(
                 """
                 INSERT INTO ai_interactions (user_id, lesson_id, message, response, safety_label, created_at)
@@ -615,7 +903,8 @@ class Handler(SimpleHTTPRequestHandler):
                     "Mehr KI-Hilfe mit fairen Limits",
                     "Kosmetische Belohnungen",
                 ],
-                "checkoutReady": False,
+                "checkoutReady": bool(STRIPE_SECRET_KEY and STRIPE_PREMIUM_PRICE_ID and STRIPE_LESSON_PRICE_ID),
+                "stripeConfigured": bool(STRIPE_SECRET_KEY and STRIPE_PREMIUM_PRICE_ID and STRIPE_LESSON_PRICE_ID),
             }
         )
 

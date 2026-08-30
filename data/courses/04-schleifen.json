@@ -1,0 +1,201 @@
+{
+  "id": "04-schleifen",
+  "language": "scratch",
+  "title": "Schleifen",
+  "description": "Wiederhole Aktionen automatisch und baue lebendige Ablaufe.",
+  "difficulty": "Fortgeschritten",
+  "free": false,
+  "order": 4,
+  "lessons": [
+    {
+      "id": "repeat-loop",
+      "title": "Wiederhole mal",
+      "summary": "Eine feste Schleife wiederholt eine Aktion begrenzt.",
+      "learning_goal": "Eine feste Schleife wiederholt eine Aktion begrenzt.",
+      "explanation": "In dieser Lektion lernst du: Eine feste Schleife wiederholt eine Aktion begrenzt. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit motion_movesteps, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze control_repeat zusammen mit motion_movesteps.",
+      "xp": 90,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Lass eine Figur zehn Schritte mehrfach laufen.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ control_repeat hinzu.",
+          "Kombiniere ihn mit motion_movesteps.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "control_repeat",
+          "motion_movesteps"
+        ]
+      },
+      "challenge": "Aendere die Wiederholungszahl.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Wiederhole mal. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "forever-loop",
+      "title": "Endlos-Schleife",
+      "summary": "Endlos-Schleifen halten Spiele am Laufen.",
+      "learning_goal": "Endlos-Schleifen halten Spiele am Laufen.",
+      "explanation": "In dieser Lektion lernst du: Endlos-Schleifen halten Spiele am Laufen. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit motion_movesteps, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze control_forever zusammen mit motion_movesteps.",
+      "xp": 100,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Lass die Figur dauerhaft laufen.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ control_forever hinzu.",
+          "Kombiniere ihn mit motion_movesteps.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "control_forever",
+          "motion_movesteps"
+        ]
+      },
+      "challenge": "Fuege Rand-Abprallen hinzu.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Endlos-Schleife. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "wait-loop",
+      "title": "Tempo mit Wartezeit",
+      "summary": "Warten macht Animationen kontrollierbar.",
+      "learning_goal": "Warten macht Animationen kontrollierbar.",
+      "explanation": "In dieser Lektion lernst du: Warten macht Animationen kontrollierbar. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit control_repeat, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze control_wait zusammen mit control_repeat.",
+      "xp": 95,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue eine langsame Blinkanimation.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ control_wait hinzu.",
+          "Kombiniere ihn mit control_repeat.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "control_wait",
+          "control_repeat"
+        ]
+      },
+      "challenge": "Mache sie schneller und langsamer.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Tempo mit Wartezeit. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "repeat-until",
+      "title": "Wiederholen bis",
+      "summary": "Diese Schleife stoppt bei einer Bedingung.",
+      "learning_goal": "Diese Schleife stoppt bei einer Bedingung.",
+      "explanation": "In dieser Lektion lernst du: Diese Schleife stoppt bei einer Bedingung. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit sensing_touchingobject, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze control_repeat_until zusammen mit sensing_touchingobject.",
+      "xp": 115,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Lass eine Figur laufen, bis sie ein Ziel beruehrt.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ control_repeat_until hinzu.",
+          "Kombiniere ihn mit sensing_touchingobject.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "control_repeat_until",
+          "sensing_touchingobject"
+        ]
+      },
+      "challenge": "Fuege einen Erfolgssatz hinzu.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Wiederholen bis. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "loop-pattern",
+      "title": "Muster bauen",
+      "summary": "Schleifen koennen Formen und Muster erzeugen.",
+      "learning_goal": "Schleifen koennen Formen und Muster erzeugen.",
+      "explanation": "In dieser Lektion lernst du: Schleifen koennen Formen und Muster erzeugen. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit motion_turnright, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze control_repeat zusammen mit motion_turnright.",
+      "xp": 120,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue eine einfache Kreis- oder Quadratbewegung.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ control_repeat hinzu.",
+          "Kombiniere ihn mit motion_turnright.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "control_repeat",
+          "motion_turnright"
+        ]
+      },
+      "challenge": "Experimentiere mit Winkeln.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Muster bauen. Genau so waechst dein Scratch-Werkzeugkasten."
+    }
+  ]
+}

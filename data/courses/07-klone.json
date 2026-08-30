@@ -1,0 +1,201 @@
+{
+  "id": "07-klone",
+  "language": "scratch",
+  "title": "Klone",
+  "description": "Erzeuge viele gleiche Objekte, ohne alles mehrfach zu bauen.",
+  "difficulty": "Profi",
+  "free": false,
+  "order": 7,
+  "lessons": [
+    {
+      "id": "clone-basics",
+      "title": "Erster Klon",
+      "summary": "Klone kopieren eine Figur zur Laufzeit.",
+      "learning_goal": "Klone kopieren eine Figur zur Laufzeit.",
+      "explanation": "In dieser Lektion lernst du: Klone kopieren eine Figur zur Laufzeit. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit control_start_as_clone, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze control_create_clone_of zusammen mit control_start_as_clone.",
+      "xp": 140,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Erzeuge beim Start einen Klon.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ control_create_clone_of hinzu.",
+          "Kombiniere ihn mit control_start_as_clone.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "control_create_clone_of",
+          "control_start_as_clone"
+        ]
+      },
+      "challenge": "Lass Original und Klon anders aussehen.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Erster Klon. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "falling-clones",
+      "title": "Fallende Objekte",
+      "summary": "Klone eignen sich fuer Sammelobjekte.",
+      "learning_goal": "Klone eignen sich fuer Sammelobjekte.",
+      "explanation": "In dieser Lektion lernst du: Klone eignen sich fuer Sammelobjekte. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit control_create_clone_of, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze motion_gotoxy zusammen mit control_create_clone_of.",
+      "xp": 150,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Lass mehrere Objekte von oben fallen.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ motion_gotoxy hinzu.",
+          "Kombiniere ihn mit control_create_clone_of.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "motion_gotoxy",
+          "control_create_clone_of"
+        ]
+      },
+      "challenge": "Nutze zufaellige X-Positionen.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Fallende Objekte. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "delete-clones",
+      "title": "Klone loeschen",
+      "summary": "Geloeschte Klone halten das Projekt schnell.",
+      "learning_goal": "Geloeschte Klone halten das Projekt schnell.",
+      "explanation": "In dieser Lektion lernst du: Geloeschte Klone halten das Projekt schnell. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit sensing_touchingobject, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze control_delete_this_clone zusammen mit sensing_touchingobject.",
+      "xp": 145,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Loesche einen Klon, wenn er den Rand erreicht.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ control_delete_this_clone hinzu.",
+          "Kombiniere ihn mit sensing_touchingobject.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "control_delete_this_clone",
+          "sensing_touchingobject"
+        ]
+      },
+      "challenge": "Loesche ihn auch beim Einsammeln.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Klone loeschen. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "clone-randomness",
+      "title": "Zufall mit Klonen",
+      "summary": "Zufall macht Spiele weniger vorhersehbar.",
+      "learning_goal": "Zufall macht Spiele weniger vorhersehbar.",
+      "explanation": "In dieser Lektion lernst du: Zufall macht Spiele weniger vorhersehbar. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit motion_gotoxy, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze operator_random zusammen mit motion_gotoxy.",
+      "xp": 155,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Erzeuge Klone an zufaelligen Orten.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ operator_random hinzu.",
+          "Kombiniere ihn mit motion_gotoxy.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "operator_random",
+          "motion_gotoxy"
+        ]
+      },
+      "challenge": "Aendere Groesse oder Kostuem zufaellig.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Zufall mit Klonen. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "enemy-wave",
+      "title": "Gegnerwelle",
+      "summary": "Viele Klone koennen eine Herausforderung bilden.",
+      "learning_goal": "Viele Klone koennen eine Herausforderung bilden.",
+      "explanation": "In dieser Lektion lernst du: Viele Klone koennen eine Herausforderung bilden. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit control_create_clone_of, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze control_forever zusammen mit control_create_clone_of.",
+      "xp": 165,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Baue eine einfache Gegnerwelle.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ control_forever hinzu.",
+          "Kombiniere ihn mit control_create_clone_of.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "control_forever",
+          "control_create_clone_of"
+        ]
+      },
+      "challenge": "Erhoehe mit Zeit die Geschwindigkeit.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Gegnerwelle. Genau so waechst dein Scratch-Werkzeugkasten."
+    }
+  ]
+}

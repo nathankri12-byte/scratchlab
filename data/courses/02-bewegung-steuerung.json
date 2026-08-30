@@ -1,0 +1,201 @@
+{
+  "id": "02-bewegung-steuerung",
+  "language": "scratch",
+  "title": "Bewegung und Steuerung",
+  "description": "Steuere Figuren mit Tastatur, Maus und Koordinaten.",
+  "difficulty": "Anfaenger",
+  "free": false,
+  "order": 2,
+  "lessons": [
+    {
+      "id": "arrow-control",
+      "title": "Mit Pfeiltasten steuern",
+      "summary": "Events koennen auf Tastendruck reagieren.",
+      "learning_goal": "Events koennen auf Tastendruck reagieren.",
+      "explanation": "In dieser Lektion lernst du: Events koennen auf Tastendruck reagieren. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit motion_changexby, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze event_whenkeypressed zusammen mit motion_changexby.",
+      "xp": 75,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Bewege die Figur mit einer Pfeiltaste.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ event_whenkeypressed hinzu.",
+          "Kombiniere ihn mit motion_changexby.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "event_whenkeypressed",
+          "motion_changexby"
+        ]
+      },
+      "challenge": "Fuege eine zweite Richtung hinzu.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Mit Pfeiltasten steuern. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "coordinates",
+      "title": "X und Y verstehen",
+      "summary": "Koordinaten bestimmen die Position auf der Buehne.",
+      "learning_goal": "Koordinaten bestimmen die Position auf der Buehne.",
+      "explanation": "In dieser Lektion lernst du: Koordinaten bestimmen die Position auf der Buehne. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit motion_changeyby, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze motion_gotoxy zusammen mit motion_changeyby.",
+      "xp": 80,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Setze die Figur an eine feste Position.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ motion_gotoxy hinzu.",
+          "Kombiniere ihn mit motion_changeyby.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "motion_gotoxy",
+          "motion_changeyby"
+        ]
+      },
+      "challenge": "Lass sie danach nach oben wandern.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: X und Y verstehen. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "follow-mouse",
+      "title": "Der Maus folgen",
+      "summary": "Figuren koennen sich an anderen Punkten orientieren.",
+      "learning_goal": "Figuren koennen sich an anderen Punkten orientieren.",
+      "explanation": "In dieser Lektion lernst du: Figuren koennen sich an anderen Punkten orientieren. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit motion_movesteps, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze motion_pointtowards zusammen mit motion_movesteps.",
+      "xp": 85,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Lass die Figur zur Maus laufen.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ motion_pointtowards hinzu.",
+          "Kombiniere ihn mit motion_movesteps.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "motion_pointtowards",
+          "motion_movesteps"
+        ]
+      },
+      "challenge": "Begrenze die Geschwindigkeit.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Der Maus folgen. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "edge-bounce",
+      "title": "Am Rand abprallen",
+      "summary": "Rand-Erkennung verhindert, dass Figuren verschwinden.",
+      "learning_goal": "Rand-Erkennung verhindert, dass Figuren verschwinden.",
+      "explanation": "In dieser Lektion lernst du: Rand-Erkennung verhindert, dass Figuren verschwinden. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit motion_movesteps, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze motion_ifonedgebounce zusammen mit motion_movesteps.",
+      "xp": 85,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Lass die Figur abprallen.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ motion_ifonedgebounce hinzu.",
+          "Kombiniere ihn mit motion_movesteps.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "motion_ifonedgebounce",
+          "motion_movesteps"
+        ]
+      },
+      "challenge": "Aendere den Drehstil.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Am Rand abprallen. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "smooth-glide",
+      "title": "Sanft gleiten",
+      "summary": "Gleiten erzeugt ruhige Bewegungen.",
+      "learning_goal": "Gleiten erzeugt ruhige Bewegungen.",
+      "explanation": "In dieser Lektion lernst du: Gleiten erzeugt ruhige Bewegungen. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit event_whenflagclicked, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze motion_glidesecstoxy zusammen mit event_whenflagclicked.",
+      "xp": 90,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Lass die Figur sanft zu einem Punkt gleiten.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ motion_glidesecstoxy hinzu.",
+          "Kombiniere ihn mit event_whenflagclicked.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "motion_glidesecstoxy",
+          "event_whenflagclicked"
+        ]
+      },
+      "challenge": "Baue zwei Gleitpunkte nacheinander.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Sanft gleiten. Genau so waechst dein Scratch-Werkzeugkasten."
+    }
+  ]
+}

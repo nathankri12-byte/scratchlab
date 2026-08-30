@@ -1,0 +1,201 @@
+{
+  "id": "03-bedingungen-logik",
+  "language": "scratch",
+  "title": "Bedingungen und Logik",
+  "description": "Baue Entscheidungen: Wenn etwas passiert, reagiert dein Projekt.",
+  "difficulty": "Fortgeschritten",
+  "free": false,
+  "order": 3,
+  "lessons": [
+    {
+      "id": "if-touching",
+      "title": "Wenn beruehrt",
+      "summary": "Bedingungen pruefen, ob etwas wahr ist.",
+      "learning_goal": "Bedingungen pruefen, ob etwas wahr ist.",
+      "explanation": "In dieser Lektion lernst du: Bedingungen pruefen, ob etwas wahr ist. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit sensing_touchingobject, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze control_if zusammen mit sensing_touchingobject.",
+      "xp": 95,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Wenn zwei Figuren sich beruehren, soll eine sprechen.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ control_if hinzu.",
+          "Kombiniere ihn mit sensing_touchingobject.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "control_if",
+          "sensing_touchingobject"
+        ]
+      },
+      "challenge": "Fuege danach einen Sound hinzu.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Wenn beruehrt. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "color-detect",
+      "title": "Farbe erkennen",
+      "summary": "Scratch kann Farben auf der Buehne erkennen.",
+      "learning_goal": "Scratch kann Farben auf der Buehne erkennen.",
+      "explanation": "In dieser Lektion lernst du: Scratch kann Farben auf der Buehne erkennen. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit control_if, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze sensing_touchingcolor zusammen mit control_if.",
+      "xp": 100,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Reagiere, wenn deine Figur eine Farbe beruehrt.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ sensing_touchingcolor hinzu.",
+          "Kombiniere ihn mit control_if.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "sensing_touchingcolor",
+          "control_if"
+        ]
+      },
+      "challenge": "Mache daraus eine Ziellinie.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Farbe erkennen. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "if-else-choice",
+      "title": "Wenn oder sonst",
+      "summary": "If-Else entscheidet zwischen zwei Wegen.",
+      "learning_goal": "If-Else entscheidet zwischen zwei Wegen.",
+      "explanation": "In dieser Lektion lernst du: If-Else entscheidet zwischen zwei Wegen. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit operator_gt, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze control_if_else zusammen mit operator_gt.",
+      "xp": 105,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Lass Scratch je nach Punktzahl anders reagieren.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ control_if_else hinzu.",
+          "Kombiniere ihn mit operator_gt.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "control_if_else",
+          "operator_gt"
+        ]
+      },
+      "challenge": "Aendere die Grenze.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Wenn oder sonst. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "logic-and",
+      "title": "Und/Oder nutzen",
+      "summary": "Logik verbindet mehrere Bedingungen.",
+      "learning_goal": "Logik verbindet mehrere Bedingungen.",
+      "explanation": "In dieser Lektion lernst du: Logik verbindet mehrere Bedingungen. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit control_if, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze operator_and zusammen mit control_if.",
+      "xp": 110,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Pruefe zwei Bedingungen gleichzeitig.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ operator_and hinzu.",
+          "Kombiniere ihn mit control_if.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "operator_and",
+          "control_if"
+        ]
+      },
+      "challenge": "Baue eine Oder-Regel.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Und/Oder nutzen. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "game-over-condition",
+      "title": "Game Over erkennen",
+      "summary": "Spiele brauchen klare Endbedingungen.",
+      "learning_goal": "Spiele brauchen klare Endbedingungen.",
+      "explanation": "In dieser Lektion lernst du: Spiele brauchen klare Endbedingungen. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit control_stop, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze control_if zusammen mit control_stop.",
+      "xp": 115,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Stoppe ein Spiel, wenn eine Bedingung erfuellt ist.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ control_if hinzu.",
+          "Kombiniere ihn mit control_stop.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "control_if",
+          "control_stop"
+        ]
+      },
+      "challenge": "Zeige vorher eine Game-Over-Nachricht.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Game Over erkennen. Genau so waechst dein Scratch-Werkzeugkasten."
+    }
+  ]
+}

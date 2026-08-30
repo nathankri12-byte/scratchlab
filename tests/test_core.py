@@ -1,4 +1,7 @@
+import io
 import os
+import json
+import zipfile
 import tempfile
 import unittest
 from pathlib import Path
@@ -29,9 +32,12 @@ class ScratchLabCoreTests(unittest.TestCase):
 
     def test_courses_are_data_driven(self):
         courses = app.load_courses()
-        self.assertGreaterEqual(len(courses), 1)
+        self.assertGreaterEqual(len(courses), 10)
         self.assertEqual(courses[0]["language"], "scratch")
-        self.assertGreaterEqual(len(courses[0]["lessons"]), 3)
+        self.assertGreaterEqual(sum(len(course["lessons"]) for course in courses), 50)
+        first_lesson = courses[0]["lessons"][0]
+        for key in ["learning_goal", "example", "challenge", "hints", "success_condition"]:
+            self.assertIn(key, first_lesson)
 
     def test_assistant_refuses_complete_solution(self):
         response, label = app.assistant_reply("Gib mir die komplette Loesung", "hello-sprite")
@@ -55,7 +61,39 @@ class ScratchLabCoreTests(unittest.TestCase):
     def test_badges_are_seeded(self):
         with app.connect(self.db_path) as db:
             count = db.execute("SELECT COUNT(*) AS c FROM badges").fetchone()["c"]
-        self.assertGreaterEqual(count, 3)
+        self.assertGreaterEqual(count, 9)
+
+    def test_course_progress_recommends_first_open_lesson(self):
+        completed = {"hello-sprite"}
+        progress = app.course_progress(completed)
+        self.assertEqual(progress[0]["completedCount"], 1)
+        self.assertEqual(app.next_lesson_after(completed)["id"], "move-sprite")
+
+    def test_sb3_analysis_and_lesson_evaluation(self):
+        project = {
+            "targets": [
+                {
+                    "blocks": {
+                        "a": {"opcode": "event_whenflagclicked", "fields": {}},
+                        "b": {"opcode": "looks_sayforsecs", "fields": {}},
+                    },
+                    "variables": {},
+                    "lists": {},
+                    "broadcasts": {},
+                }
+            ]
+        }
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, "w") as archive:
+            archive.writestr("project.json", json.dumps(project))
+        analysis = app.analyze_scratch_project(buffer.getvalue())
+        _, lesson = app.find_lesson("hello-sprite")
+        result = app.evaluate_project_for_lesson(analysis, lesson)
+        self.assertEqual(result["score"], result["total"])
+
+    def test_pricing_constants_match_product_model(self):
+        self.assertEqual(app.SINGLE_LESSON_PRICE_EUR, 5)
+        self.assertEqual(app.PREMIUM_MONTHLY_PRICE_EUR, 15)
 
 
 if __name__ == "__main__":

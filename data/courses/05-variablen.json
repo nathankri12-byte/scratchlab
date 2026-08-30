@@ -1,0 +1,201 @@
+{
+  "id": "05-variablen",
+  "language": "scratch",
+  "title": "Variablen",
+  "description": "Speichere Punkte, Leben, Zeit und Spielwerte.",
+  "difficulty": "Fortgeschritten",
+  "free": false,
+  "order": 5,
+  "lessons": [
+    {
+      "id": "score-counter",
+      "title": "Punkte zaehlen",
+      "summary": "Eine Variable speichert den aktuellen Punktestand.",
+      "learning_goal": "Eine Variable speichert den aktuellen Punktestand.",
+      "explanation": "In dieser Lektion lernst du: Eine Variable speichert den aktuellen Punktestand. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit event_whenthisspriteclicked, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze data_changevariableby zusammen mit event_whenthisspriteclicked.",
+      "xp": 85,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Erhoehe Punkte beim Klick auf eine Figur.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ data_changevariableby hinzu.",
+          "Kombiniere ihn mit event_whenthisspriteclicked.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "data_changevariableby",
+          "event_whenthisspriteclicked"
+        ]
+      },
+      "challenge": "Setze Punkte beim Start auf 0.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Punkte zaehlen. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "timer",
+      "title": "Timer bauen",
+      "summary": "Zeitdruck macht Spiele spannender.",
+      "learning_goal": "Zeitdruck macht Spiele spannender.",
+      "explanation": "In dieser Lektion lernst du: Zeitdruck macht Spiele spannender. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit control_wait, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze data_changevariableby zusammen mit control_wait.",
+      "xp": 115,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Zaehle eine Zeitvariable herunter.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ data_changevariableby hinzu.",
+          "Kombiniere ihn mit control_wait.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "data_changevariableby",
+          "control_wait"
+        ]
+      },
+      "challenge": "Stoppe bei 0.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Timer bauen. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "lives",
+      "title": "Leben verwenden",
+      "summary": "Leben zeigen, wie viele Versuche bleiben.",
+      "learning_goal": "Leben zeigen, wie viele Versuche bleiben.",
+      "explanation": "In dieser Lektion lernst du: Leben zeigen, wie viele Versuche bleiben. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit data_changevariableby, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze data_setvariableto zusammen mit data_changevariableby.",
+      "xp": 120,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Ziehe ein Leben ab, wenn etwas beruehrt wird.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ data_setvariableto hinzu.",
+          "Kombiniere ihn mit data_changevariableby.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "data_setvariableto",
+          "data_changevariableby"
+        ]
+      },
+      "challenge": "Baue Game Over bei 0 Leben.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Leben verwenden. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "high-score-idea",
+      "title": "Highscore-Idee",
+      "summary": "Ein hoher Wert kann als Rekord gespeichert werden.",
+      "learning_goal": "Ein hoher Wert kann als Rekord gespeichert werden.",
+      "explanation": "In dieser Lektion lernst du: Ein hoher Wert kann als Rekord gespeichert werden. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit data_setvariableto, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze operator_gt zusammen mit data_setvariableto.",
+      "xp": 125,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Aktualisiere Rekord, wenn Punkte groesser sind.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ operator_gt hinzu.",
+          "Kombiniere ihn mit data_setvariableto.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "operator_gt",
+          "data_setvariableto"
+        ]
+      },
+      "challenge": "Lass die Figur den Rekord sagen.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Highscore-Idee. Genau so waechst dein Scratch-Werkzeugkasten."
+    },
+    {
+      "id": "variable-debug",
+      "title": "Variablen debuggen",
+      "summary": "Sichtbare Variablen helfen beim Fehlersuchen.",
+      "learning_goal": "Sichtbare Variablen helfen beim Fehlersuchen.",
+      "explanation": "In dieser Lektion lernst du: Sichtbare Variablen helfen beim Fehlersuchen. Du baust sofort etwas Sichtbares in Scratch und testest danach, ob es funktioniert.",
+      "example": "Beispiel: Kombiniere einen passenden Startblock mit looks_sayforsecs, teste dein Projekt und veraendere danach eine Zahl oder einen Text.",
+      "demo": "Nutze data_showvariable zusammen mit looks_sayforsecs.",
+      "xp": 95,
+      "premium": true,
+      "price_eur": 5,
+      "task": {
+        "kind": "scratch-build",
+        "prompt": "Zeige eine Variable und pruefe ihren Wert.",
+        "steps": [
+          "Oeffne dein Scratch-Projekt.",
+          "Fuege einen Block vom Typ data_showvariable hinzu.",
+          "Kombiniere ihn mit looks_sayforsecs.",
+          "Starte das Projekt und beobachte, was sichtbar passiert."
+        ],
+        "checks": [
+          "Das Ergebnis ist auf der Buehne sichtbar.",
+          "Du kannst erklaeren, welcher Block den Effekt ausloest."
+        ],
+        "required_opcodes": [
+          "data_showvariable",
+          "looks_sayforsecs"
+        ]
+      },
+      "challenge": "Verstecke sie erst am Ende.",
+      "hints": [
+        "Teste immer nur eine kleine Aenderung auf einmal.",
+        "Wenn nichts passiert, pruefe zuerst den Startblock.",
+        "Nutze sichtbare Variablen oder Sprechblasen, um Fehler zu finden."
+      ],
+      "success_condition": "Die geforderten Bloecke sind vorhanden und das Projekt zeigt den beschriebenen Effekt.",
+      "success_message": "Lektion abgeschlossen: Variablen debuggen. Genau so waechst dein Scratch-Werkzeugkasten."
+    }
+  ]
+}
