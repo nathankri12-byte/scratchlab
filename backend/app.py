@@ -1311,8 +1311,10 @@ class Handler(SimpleHTTPRequestHandler):
             returning=False,
         )
 
-        self.award_badges(user["id"])
-
+        # Do not run the full badge calculation synchronously here.
+        # It performs several remote database queries and can make a project
+        # check feel like it is hanging. The debugger badge is cosmetic and
+        # can be awarded later without delaying the result.
         self.json_response({"analysis": analysis, "result": result})
 
     def check_project_link(self) -> None:
