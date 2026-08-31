@@ -522,18 +522,34 @@ def call_gemini(
     learner_context: str,
     image_base64: str | None = None,
     image_mime_type: str | None = None,
-) -> str | None:
-    if not GEMINI_API_KEY:
-        return None
+) -> str:
+    api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError(
+            "GEMINI_API_KEY ist auf dem Server nicht gesetzt."
+        )
 
     contents: list[dict[str, Any]] = []
+
     for item in history[-6:]:
-        contents.append(
-            {"role": "user", "parts": [{"text": item.get("message", "")}]}
-        )
-        contents.append(
-            {"role": "model", "parts": [{"text": item.get("response", "")}]}
-        )
+        old_message = str(item.get("message", "")).strip()
+        old_response = str(item.get("response", "")).strip()
+
+        if old_message:
+            contents.append(
+                {
+                    "role": "user",
+                    "parts": [{"text": old_message}],
+                }
+            )
+
+        if old_response:
+            contents.append(
+                {
+                    "role": "model",
+                    "parts": [{"text": old_response}],
+                }
+            )
 
     user_parts: list[dict[str, Any]] = [
         {
@@ -555,7 +571,12 @@ def call_gemini(
             }
         )
 
-    contents.append({"role": "user", "parts": user_parts})
+    contents.append(
+        {
+            "role": "user",
+            "parts": user_parts,
+        }
+    )
 
     body = {
         "contents": contents,
@@ -565,30 +586,86 @@ def call_gemini(
         },
     }
 
+    model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash").strip()
     url = (
         "https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{quote(GEMINI_MODEL)}:generateContent"
+        f"{quote(model)}:generateContent"
     )
 
     request = Request(
         url,
-        data=json.dumps(body).encode("utf-8"),
+        data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
         headers={
             "Content-Type": "application/json",
-            "x-goog-api-key": GEMINI_API_KEY,
+            "x-goog-api-key": api_key,
         },
         method="POST",
     )
 
     try:
-        with urlopen(request, timeout=35) as response:
-            payload = json.loads(response.read().decode("utf-8"))
-        return (
-            payload["candidates"][0]["content"]["parts"][0]["text"]
-            .strip()[:1800]
+        with urlopen(request, timeout=45) as response:
+            raw = response.read().decode("utf-8")
+            payload = json.loads(raw)
+    except HTTPError as exc:
+        try:
+            detail = exc.read().decode("utf-8")
+        except Exception:
+            detail = ""
+        print("Gemini HTTP error:", exc.code, detail[:1000])
+        raise RuntimeError(
+            f"Gemini API Fehler ({exc.code}). "
+            "Prüfe GEMINI_API_KEY, GEMINI_MODEL und die Render-Umgebungsvariablen."
+        ) from exc
+    except (URLError, TimeoutError) as exc:
+        print("Gemini network error:", repr(exc))
+        raise RuntimeError(
+            "Gemini ist momentan nicht erreichbar."
+        ) from exc
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(
+            "Gemini hat keine gültige Antwort geliefert."
+        ) from exc
+
+    try:
+        candidates = payload.get("candidates") or []
+        if not candidates:
+            error_message = (
+                payload.get("error", {}).get("message")
+                if isinstance(payload.get("error"), dict)
+                else None
+            )
+            raise RuntimeError(
+                error_message or "Gemini hat keine Antwort erzeugt."
+            )
+
+        parts = (
+            candidates[0]
+            .get("content", {})
+            .get("parts", [])
         )
-    except Exception:
-        return None
+
+        text_parts = [
+            str(part.get("text", "")).strip()
+            for part in parts
+            if isinstance(part, dict) and part.get("text")
+        ]
+
+        answer = "\n".join(part for part in text_parts if part).strip()
+
+        if not answer:
+            raise RuntimeError(
+                "Gemini hat keine Textantwort erzeugt."
+            )
+
+        return answer[:1800]
+
+    except RuntimeError:
+        raise
+    except Exception as exc:
+        print("Gemini response parsing error:", repr(exc))
+        raise RuntimeError(
+            "Die Gemini-Antwort konnte nicht verarbeitet werden."
+        ) from exc
 
 
 class ScratchLabServer(ThreadingMixIn, HTTPServer):
@@ -694,6 +771,8 @@ class Handler(SimpleHTTPRequestHandler):
         except PermissionError as exc:
             self.json_response({"error": str(exc)}, HTTPStatus.UNAUTHORIZED)
         except SupabaseError as exc:
+            self.json_response({"error": str(exc)}, HTTPStatus.SERVICE_UNAVAILABLE)
+        except RuntimeError as exc:
             self.json_response({"error": str(exc)}, HTTPStatus.SERVICE_UNAVAILABLE)
         except Exception as exc:
             print("ScratchLab server error:", repr(exc))
@@ -956,8 +1035,6 @@ class Handler(SimpleHTTPRequestHandler):
 
     def complete_lesson(self, lesson_id: str) -> None:
         user = self.require_user()
-        payload = self.read_json()
-        verification_token = str(payload.get("verificationToken", "")).strip()
         course, lesson = find_lesson(lesson_id)
 
         if not lesson or not course:
@@ -986,55 +1063,42 @@ class Handler(SimpleHTTPRequestHandler):
             limit=1,
         )
 
-        # Every new completion requires a fresh, successful project check.
         if not already_done:
-            if not verification_token:
-                self.json_response(
-                    {
-                        "error": (
-                            "Prüfe zuerst dein .sb3-Projekt. "
-                            "Für jede neue Lektion ist eine frische Projektprüfung erforderlich."
-                        ),
-                        "requiresProjectCheck": True,
-                    },
-                    HTTPStatus.CONFLICT,
-                )
-                return
-
-            verification_rows = sb_select(
+            verification = sb_select(
                 "project_checks",
-                select="id,score,total,verification_token,used_at",
+                select="score,total",
                 filters=[
                     ("user_id", f"eq.{user['id']}"),
                     ("lesson_id", f"eq.{lesson_id}"),
-                    ("verification_token", f"eq.{verification_token}"),
+                    ("total", "gt.0"),
+                    ("score", f"eq.{0}"),
                 ],
+                order="created_at.desc",
                 limit=1,
             )
-
-            if not verification_rows:
+            # PostgREST cannot express score=total in the simple query above.
+            # Read recent checks instead and compare server-side.
+            recent = sb_select(
+                "project_checks",
+                select="score,total",
+                filters=[
+                    ("user_id", f"eq.{user['id']}"),
+                    ("lesson_id", f"eq.{lesson_id}"),
+                ],
+                order="created_at.desc",
+                limit=10,
+            )
+            passed = any(
+                int(item.get("total") or 0) > 0
+                and int(item.get("score") or 0) == int(item.get("total") or 0)
+                for item in recent
+            )
+            if not passed:
                 self.json_response(
                     {
                         "error": (
-                            "Diese Projektprüfung ist nicht gültig. "
-                            "Lade dein .sb3-Projekt erneut hoch und prüfe es."
-                        ),
-                        "requiresProjectCheck": True,
-                    },
-                    HTTPStatus.CONFLICT,
-                )
-                return
-
-            verification = verification_rows[0]
-            score = int(verification.get("score") or 0)
-            total = int(verification.get("total") or 0)
-
-            if verification.get("used_at") or total <= 0 or score != total:
-                self.json_response(
-                    {
-                        "error": (
-                            "Die Projektprüfung ist abgelaufen oder wurde bereits verwendet. "
-                            "Bitte führe eine neue Prüfung durch."
+                            "Prüfe zuerst dein .sb3-Projekt erfolgreich. "
+                            "Erst danach kannst du die Lektion abschließen."
                         ),
                         "requiresProjectCheck": True,
                     },
@@ -1056,17 +1120,6 @@ class Handler(SimpleHTTPRequestHandler):
                 },
                 returning=False,
             )
-
-            if verification_token:
-                sb_update(
-                    "project_checks",
-                    {"used_at": now_iso()},
-                    filters=[
-                        ("user_id", f"eq.{user['id']}"),
-                        ("lesson_id", f"eq.{lesson_id}"),
-                        ("verification_token", f"eq.{verification_token}"),
-                    ],
-                )
 
             new_xp = int(user.get("xp") or 0) + awarded
             completed_rows = sb_select(
@@ -1189,10 +1242,6 @@ class Handler(SimpleHTTPRequestHandler):
         _, lesson = find_lesson(lesson_id) if lesson_id else (None, None)
         result = evaluate_project_for_lesson(analysis, lesson)
 
-        verification_token = (
-            secrets.token_urlsafe(32) if result.get("passed") else None
-        )
-
         sb_insert(
             "project_checks",
             {
@@ -1204,21 +1253,13 @@ class Handler(SimpleHTTPRequestHandler):
                 "feedback": result["feedback"],
                 "details": json.dumps(result["details"], ensure_ascii=False),
                 "created_at": now_iso(),
-                "verification_token": verification_token,
-                "used_at": None,
             },
             returning=False,
         )
 
         self.award_badges(user["id"])
 
-        self.json_response(
-            {
-                "analysis": analysis,
-                "result": result,
-                "verificationToken": verification_token,
-            }
-        )
+        self.json_response({"analysis": analysis, "result": result})
 
     def assistant(self) -> None:
         user = self.current_user()
@@ -1241,9 +1282,14 @@ class Handler(SimpleHTTPRequestHandler):
                 "image/jpeg",
                 "image/webp",
             }:
-                raise ValueError("Bitte nutze PNG, JPG/JPEG oder WebP.")
+                raise ValueError(
+                    "Bitte nutze PNG, JPG/JPEG oder WebP."
+                )
+
             if len(image_base64) > 7_000_000:
-                raise ValueError("Der Screenshot darf maximal 5 MB groß sein.")
+                raise ValueError(
+                    "Der Screenshot darf maximal 5 MB groß sein."
+                )
 
         if user:
             history = sb_select(
@@ -1251,16 +1297,23 @@ class Handler(SimpleHTTPRequestHandler):
                 select="message,response",
                 filters=[
                     ("user_id", f"eq.{user['id']}"),
-                    ("lesson_id", f"eq.{lesson_id}" if lesson_id else "is.null"),
+                    (
+                        "lesson_id",
+                        f"eq.{lesson_id}"
+                        if lesson_id
+                        else "is.null",
+                    ),
                 ],
                 order="created_at.desc",
                 limit=6,
             )
+
             completed = sb_select(
                 "progress",
                 select="lesson_id",
                 filters=[("user_id", f"eq.{user['id']}")],
             )
+
             learner_context = (
                 f"Level {user.get('level', 1)}, "
                 f"{user.get('xp', 0)} XP, "
@@ -1272,6 +1325,7 @@ class Handler(SimpleHTTPRequestHandler):
 
         history = list(reversed(history))
 
+        # Important: Never silently replace Gemini with pre-written answers.
         response = call_gemini(
             message,
             lesson_id,
@@ -1281,13 +1335,6 @@ class Handler(SimpleHTTPRequestHandler):
             image_mime_type,
         )
 
-        if not response:
-            response = (
-                "Achte noch einmal auf den Teil der Aufgabe, der gerade "
-                "anders funktioniert als erwartet. Prüfe zuerst den Block, "
-                "der unmittelbar davor ausgeführt wird."
-            )
-
         sb_insert(
             "ai_interactions",
             {
@@ -1295,13 +1342,18 @@ class Handler(SimpleHTTPRequestHandler):
                 "lesson_id": lesson_id,
                 "message": message,
                 "response": response,
-                "safety_label": "hint",
+                "safety_label": "gemini_hint",
                 "created_at": now_iso(),
             },
             returning=False,
         )
 
-        self.json_response({"response": response, "safetyLabel": "hint"})
+        self.json_response(
+            {
+                "response": response,
+                "safetyLabel": "gemini_hint",
+            }
+        )
 
     def feedback(self) -> None:
         user = self.current_user()
