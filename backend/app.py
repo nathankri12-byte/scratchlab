@@ -26,7 +26,7 @@ DATA = ROOT / "data" / "courses"
 
 SESSION_COOKIE = "scratchlab_session"
 PBKDF2_ITERATIONS = 210_000
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-3.5-flash")
 SINGLE_LESSON_PRICE_EUR = 5
 PREMIUM_MONTHLY_PRICE_EUR = 15
 
@@ -525,9 +525,7 @@ def call_gemini(
 ) -> str:
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key:
-        raise RuntimeError(
-            "GEMINI_API_KEY ist auf dem Server nicht gesetzt."
-        )
+        raise RuntimeError("GEMINI_API_KEY ist auf dem Server nicht gesetzt.")
 
     contents: list[dict[str, Any]] = []
 
@@ -536,47 +534,36 @@ def call_gemini(
         old_response = str(item.get("response", "")).strip()
 
         if old_message:
-            contents.append(
-                {
-                    "role": "user",
-                    "parts": [{"text": old_message}],
-                }
-            )
-
+            contents.append({
+                "role": "user",
+                "parts": [{"text": old_message}],
+            })
         if old_response:
-            contents.append(
-                {
-                    "role": "model",
-                    "parts": [{"text": old_response}],
-                }
-            )
+            contents.append({
+                "role": "model",
+                "parts": [{"text": old_response}],
+            })
 
-    user_parts: list[dict[str, Any]] = [
-        {
-            "text": build_assistant_prompt(
-                message,
-                lesson_id,
-                learner_context,
-            )
-        }
-    ]
+    user_parts = [{
+        "text": build_assistant_prompt(
+            message,
+            lesson_id,
+            learner_context,
+        )
+    }]
 
     if image_base64:
-        user_parts.append(
-            {
-                "inline_data": {
-                    "mime_type": image_mime_type or "image/jpeg",
-                    "data": image_base64,
-                }
+        user_parts.append({
+            "inline_data": {
+                "mime_type": image_mime_type or "image/jpeg",
+                "data": image_base64,
             }
-        )
+        })
 
-    contents.append(
-        {
-            "role": "user",
-            "parts": user_parts,
-        }
-    )
+    contents.append({
+        "role": "user",
+        "parts": user_parts,
+    })
 
     body = {
         "contents": contents,
@@ -586,137 +573,108 @@ def call_gemini(
         },
     }
 
-    model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash").strip()
-    url = (
-        "https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{quote(model)}:generateContent"
-    )
+    configured_model = os.environ.get(
+        "GEMINI_MODEL",
+        GEMINI_MODEL,
+    ).strip()
 
-    request = Request(
-        url,
-        data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
-        headers={
-            "Content-Type": "application/json",
-            "x-goog-api-key": api_key,
-        },
-        method="POST",
-    )
+    models_to_try: list[str] = []
+    for candidate in [
+        configured_model,
+        "gemini-3.7-flash",
+        "gemini-3.6-flash",
+        "gemini-3.5-flash",
+        "gemini-2.5-flash",
+    ]:
+        if candidate and candidate not in models_to_try:
+            models_to_try.append(candidate)
 
-    try:
-        with urlopen(request, timeout=45) as response:
-            raw = response.read().decode("utf-8")
-            payload = json.loads(raw)
-    except HTTPError as exc:
-        try:
-            detail = exc.read().decode("utf-8")
-        except Exception:
-            detail = ""
-        print("Gemini HTTP error:", exc.code, detail[:1000])
-        raise RuntimeError(
-            f"Gemini API Fehler ({exc.code}). "
-            "Prüfe GEMINI_API_KEY, GEMINI_MODEL und die Render-Umgebungsvariablen."
-        ) from exc
-    except (URLError, TimeoutError) as exc:
-        print("Gemini network error:", repr(exc))
-        raise RuntimeError(
-            "Gemini ist momentan nicht erreichbar."
-        ) from exc
-    except json.JSONDecodeError as exc:
-        raise RuntimeError(
-            "Gemini hat keine gültige Antwort geliefert."
-        ) from exc
+    last_404_detail = ""
 
-    try:
-        candidates = payload.get("candidates") or []
-        if not candidates:
-            error_message = (
-                payload.get("error", {}).get("message")
-                if isinstance(payload.get("error"), dict)
-                else None
-            )
-            raise RuntimeError(
-                error_message or "Gemini hat keine Antwort erzeugt."
-            )
-
-        parts = (
-            candidates[0]
-            .get("content", {})
-            .get("parts", [])
+    for model in models_to_try:
+        url = (
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            f"{quote(model)}:generateContent"
         )
 
-        text_parts = [
+        request = Request(
+            url,
+            data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+            headers={
+                "Content-Type": "application/json",
+                "x-goog-api-key": api_key,
+            },
+            method="POST",
+        )
+
+        try:
+            with urlopen(request, timeout=25) as response:
+                payload = json.loads(
+                    response.read().decode("utf-8")
+                )
+        except HTTPError as exc:
+            try:
+                detail = exc.read().decode("utf-8")
+            except Exception:
+                detail = ""
+
+            print("Gemini HTTP error:", exc.code, detail[:800])
+
+            if exc.code == 404:
+                last_404_detail = detail
+                continue
+
+            if exc.code in (400, 401, 403, 429):
+                raise RuntimeError(
+                    f"Gemini API Fehler ({exc.code}). "
+                    "Prüfe API-Key, API-Zugriff und Kontingent."
+                ) from exc
+
+            raise RuntimeError(
+                f"Gemini API Fehler ({exc.code})."
+            ) from exc
+
+        except (URLError, TimeoutError) as exc:
+            print("Gemini network error:", repr(exc))
+            raise RuntimeError(
+                "Gemini ist momentan nicht erreichbar."
+            ) from exc
+
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(
+                "Gemini hat keine gültige Antwort geliefert."
+            ) from exc
+
+        if isinstance(payload.get("error"), dict):
+            error_message = payload["error"].get("message")
+            raise RuntimeError(
+                error_message or "Gemini hat einen Fehler gemeldet."
+            )
+
+        candidates = payload.get("candidates") or []
+        if not candidates:
+            raise RuntimeError("Gemini hat keine Antwort erzeugt.")
+
+        parts = (
+            candidates[0].get("content", {}).get("parts", [])
+        )
+
+        answer = "\n".join(
             str(part.get("text", "")).strip()
             for part in parts
             if isinstance(part, dict) and part.get("text")
-        ]
+        ).strip()
 
-        answer = "\n".join(part for part in text_parts if part).strip()
+        if answer:
+            return answer[:1800]
 
-        if not answer:
-            raise RuntimeError(
-                "Gemini hat keine Textantwort erzeugt."
-            )
+        raise RuntimeError("Gemini hat keine Textantwort erzeugt.")
 
-        return answer[:1800]
-
-    except RuntimeError:
-        raise
-    except Exception as exc:
-        print("Gemini response parsing error:", repr(exc))
-        raise RuntimeError(
-            "Die Gemini-Antwort konnte nicht verarbeitet werden."
-        ) from exc
-
-
-def scratch_project_id_from_url(value: str) -> str:
-    value = str(value or "").strip()
-    if re.fullmatch(r"\d{1,20}", value):
-        return value
-    parsed = urlparse(value)
-    if parsed.netloc.lower() not in {"scratch.mit.edu", "www.scratch.mit.edu"}:
-        raise ValueError("Bitte füge einen gültigen Scratch-Projekt-Link ein.")
-    match = re.search(r"/projects/(\d+)", parsed.path)
-    if not match:
-        raise ValueError("Im Scratch-Link wurde keine Projekt-ID gefunden.")
-    return match.group(1)
-
-
-def fetch_scratch_project_json(project_id: str) -> dict[str, Any]:
-    request = Request(
-        f"https://api.scratch.mit.edu/projects/{quote(project_id)}",
-        headers={"User-Agent": "ScratchLab/0.4"},
-        method="GET",
+    raise RuntimeError(
+        "Keines der verfügbaren Gemini-Modelle konnte gefunden werden. "
+        "Prüfe deinen GEMINI_API_KEY und ob die Gemini API für dein Projekt aktiviert ist."
+        + (f" Details: {last_404_detail[:300]}" if last_404_detail else "")
     )
-    try:
-        with urlopen(request, timeout=15) as response:
-            metadata = json.loads(response.read().decode("utf-8"))
-    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
-        raise ValueError(
-            "Das Scratch-Projekt konnte nicht abgerufen werden. "
-            "Prüfe den Link und ob das Projekt öffentlich geteilt ist."
-        ) from exc
-
-    token = metadata.get("project_token")
-    if not token:
-        raise ValueError("Das Scratch-Projekt muss öffentlich geteilt sein.")
-
-    request = Request(
-        f"https://projects.scratch.mit.edu/{quote(project_id)}?token={quote(str(token))}",
-        headers={"User-Agent": "ScratchLab/0.4"},
-        method="GET",
-    )
-    try:
-        with urlopen(request, timeout=20) as response:
-            project = json.loads(response.read().decode("utf-8"))
-    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, UnicodeDecodeError) as exc:
-        raise ValueError(
-            "Die Scratch-Projektdaten konnten nicht geladen werden. "
-            "Prüfe, ob das Projekt öffentlich geteilt ist."
-        ) from exc
-
-    if not isinstance(project, dict) or not isinstance(project.get("targets"), list):
-        raise ValueError("Scratch hat keine gültigen Projektdaten zurückgegeben.")
-    return project
 
 
 class ScratchLabServer(ThreadingMixIn, HTTPServer):
@@ -1089,6 +1047,11 @@ class Handler(SimpleHTTPRequestHandler):
 
     def complete_lesson(self, lesson_id: str) -> None:
         user = self.require_user()
+        payload = self.read_json()
+        verification_token = (
+            str(payload.get("verificationToken", "")).strip()
+        )
+
         course, lesson = find_lesson(lesson_id)
 
         if not lesson or not course:
@@ -1118,41 +1081,60 @@ class Handler(SimpleHTTPRequestHandler):
         )
 
         if not already_done:
-            verification = sb_select(
-                "project_checks",
-                select="score,total",
-                filters=[
-                    ("user_id", f"eq.{user['id']}"),
-                    ("lesson_id", f"eq.{lesson_id}"),
-                    ("total", "gt.0"),
-                    ("score", f"eq.{0}"),
-                ],
-                order="created_at.desc",
-                limit=1,
-            )
-            # PostgREST cannot express score=total in the simple query above.
-            # Read recent checks instead and compare server-side.
-            recent = sb_select(
-                "project_checks",
-                select="score,total",
-                filters=[
-                    ("user_id", f"eq.{user['id']}"),
-                    ("lesson_id", f"eq.{lesson_id}"),
-                ],
-                order="created_at.desc",
-                limit=10,
-            )
-            passed = any(
-                int(item.get("total") or 0) > 0
-                and int(item.get("score") or 0) == int(item.get("total") or 0)
-                for item in recent
-            )
-            if not passed:
+            if not verification_token:
                 self.json_response(
                     {
                         "error": (
-                            "Prüfe zuerst dein .sb3-Projekt erfolgreich. "
+                            "Prüfe zuerst dein Scratch-Projekt erfolgreich. "
                             "Erst danach kannst du die Lektion abschließen."
+                        ),
+                        "requiresProjectCheck": True,
+                    },
+                    HTTPStatus.CONFLICT,
+                )
+                return
+
+            checks = sb_select(
+                "project_checks",
+                select="id,score,total,verification_token,used_at",
+                filters=[
+                    ("user_id", f"eq.{user['id']}"),
+                    ("lesson_id", f"eq.{lesson_id}"),
+                    (
+                        "verification_token",
+                        f"eq.{verification_token}",
+                    ),
+                ],
+                limit=1,
+            )
+
+            if not checks:
+                self.json_response(
+                    {
+                        "error": (
+                            "Die Projektprüfung ist nicht gültig. "
+                            "Bitte prüfe deine Scratch-Datei erneut."
+                        ),
+                        "requiresProjectCheck": True,
+                    },
+                    HTTPStatus.CONFLICT,
+                )
+                return
+
+            check = checks[0]
+            score = int(check.get("score") or 0)
+            total = int(check.get("total") or 0)
+
+            if (
+                check.get("used_at")
+                or total <= 0
+                or score != total
+            ):
+                self.json_response(
+                    {
+                        "error": (
+                            "Diese Projektprüfung wurde bereits verwendet. "
+                            "Bitte führe eine neue Prüfung durch."
                         ),
                         "requiresProjectCheck": True,
                     },
@@ -1175,13 +1157,29 @@ class Handler(SimpleHTTPRequestHandler):
                 returning=False,
             )
 
+            sb_update(
+                "project_checks",
+                {"used_at": now_iso()},
+                filters=[
+                    ("user_id", f"eq.{user['id']}"),
+                    ("lesson_id", f"eq.{lesson_id}"),
+                    (
+                        "verification_token",
+                        f"eq.{verification_token}",
+                    ),
+                ],
+            )
+
             new_xp = int(user.get("xp") or 0) + awarded
             completed_rows = sb_select(
                 "progress",
                 select="lesson_id",
                 filters=[("user_id", f"eq.{user['id']}")],
             )
-            completed_ids = {str(row["lesson_id"]) for row in completed_rows}
+            completed_ids = {
+                str(row["lesson_id"])
+                for row in completed_rows
+            }
             next_lesson = next_lesson_after(completed_ids)
 
             updated_rows = sb_update(
@@ -1190,15 +1188,22 @@ class Handler(SimpleHTTPRequestHandler):
                     "xp": new_xp,
                     "level": calculate_level(new_xp),
                     "last_lesson_id": lesson_id,
-                    "current_lesson_id": next_lesson["id"] if next_lesson else None,
+                    "current_lesson_id": (
+                        next_lesson["id"]
+                        if next_lesson
+                        else None
+                    ),
                 },
                 filters=[("id", f"eq.{user['id']}")],
             )
+
             if updated_rows:
                 user = updated_rows[0]
+
             self.award_badges(user["id"])
 
         fresh = find_user_by_id(user["id"]) or user
+
         self.json_response(
             {
                 "awardedXp": awarded,
@@ -1288,13 +1293,19 @@ class Handler(SimpleHTTPRequestHandler):
         encoded = str(payload.get("dataBase64", "")).strip()
 
         if not encoded:
-            raise ValueError("Bitte lade eine .sb3-Datei hoch.")
+            raise ValueError("Bitte wähle zuerst eine Scratch-Datei aus.")
 
         sb3_bytes = self.read_sb3_from_payload(encoded)
         analysis = analyze_scratch_project(sb3_bytes)
 
         _, lesson = find_lesson(lesson_id) if lesson_id else (None, None)
         result = evaluate_project_for_lesson(analysis, lesson)
+
+        verification_token = (
+            secrets.token_urlsafe(32)
+            if result.get("passed")
+            else None
+        )
 
         sb_insert(
             "project_checks",
@@ -1305,17 +1316,22 @@ class Handler(SimpleHTTPRequestHandler):
                 "score": result["score"],
                 "total": result["total"],
                 "feedback": result["feedback"],
-                "details": json.dumps(result["details"], ensure_ascii=False),
+                "details": json.dumps(
+                    result["details"],
+                    ensure_ascii=False,
+                ),
                 "created_at": now_iso(),
+                "verification_token": verification_token,
+                "used_at": None,
             },
             returning=False,
         )
 
-        # Do not run the full badge calculation synchronously here.
-        # It performs several remote database queries and can make a project
-        # check feel like it is hanging. The debugger badge is cosmetic and
-        # can be awarded later without delaying the result.
-        self.json_response({"analysis": analysis, "result": result})
+        self.json_response({
+            "analysis": analysis,
+            "result": result,
+            "verificationToken": verification_token,
+        })
 
     def check_project_link(self) -> None:
         user = self.require_user()
@@ -1367,8 +1383,19 @@ class Handler(SimpleHTTPRequestHandler):
 
         message = str(payload.get("message", "")).strip()[:1200]
         lesson_id = str(payload.get("lessonId", "")).strip() or None
-        image_base64 = str(payload.get("imageBase64", "")).strip() or None
-        image_mime_type = str(payload.get("imageMimeType", "")).strip() or None
+        raw_image_base64 = payload.get("imageBase64")
+        raw_image_mime_type = payload.get("imageMimeType")
+
+        image_base64 = (
+            str(raw_image_base64).strip()
+            if raw_image_base64
+            else None
+        )
+        image_mime_type = (
+            str(raw_image_mime_type).strip()
+            if raw_image_mime_type
+            else None
+        )
 
         if len(message) < 2 and not image_base64:
             raise ValueError(
