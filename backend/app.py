@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import base64
 import hashlib
@@ -515,6 +515,67 @@ def build_assistant_prompt(
     )
 
 
+_GEMINI_MODEL_CACHE = None
+
+
+def discover_gemini_model(api_key: str) -> str:
+    global _GEMINI_MODEL_CACHE
+    now = datetime.now(timezone.utc).timestamp()
+    if _GEMINI_MODEL_CACHE and now - _GEMINI_MODEL_CACHE[0] < 600:
+        return _GEMINI_MODEL_CACHE[1]
+
+    req = Request(
+        "https://generativelanguage.googleapis.com/v1beta/models?pageSize=1000",
+        headers={"x-goog-api-key": api_key, "Accept": "application/json"},
+        method="GET",
+    )
+    try:
+        with urlopen(req, timeout=15) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except HTTPError as exc:
+        try:
+            detail = exc.read().decode("utf-8")
+        except Exception:
+            detail = ""
+        raise RuntimeError(f"Gemini-Modellliste Fehler ({exc.code}). {detail[:500]}") from exc
+    except (URLError, TimeoutError, json.JSONDecodeError) as exc:
+        raise RuntimeError("Gemini-Modellliste ist momentan nicht erreichbar.") from exc
+
+    available = []
+    for item in data.get("models", []):
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name", "")).strip()
+        if name.startswith("models/"):
+            name = name[7:]
+        methods = item.get("supportedGenerationMethods") or []
+        if name and "generateContent" in methods:
+            available.append(name)
+
+    if not available:
+        raise RuntimeError("Dein Gemini-API-Key bietet kein Modell fÃ¼r generateContent an.")
+
+    preferred = [
+        os.environ.get("GEMINI_MODEL", "").strip(),
+        "gemini-3.7-flash",
+        "gemini-3.6-flash",
+        "gemini-3.5-flash",
+        "gemini-3.1-flash-lite",
+        "gemini-flash-latest",
+    ]
+    for wanted in preferred:
+        if wanted and wanted in available:
+            _GEMINI_MODEL_CACHE = (now, wanted)
+            print("ScratchLab Gemini-Modell:", wanted)
+            return wanted
+
+    flash = [x for x in available if "flash" in x.lower() and "image" not in x.lower() and "tts" not in x.lower() and "live" not in x.lower()]
+    chosen = sorted(flash or available)[-1]
+    _GEMINI_MODEL_CACHE = (now, chosen)
+    print("ScratchLab Gemini-Modell automatisch gewÃ¤hlt:", chosen)
+    return chosen
+
+
 def call_gemini(
     message: str,
     lesson_id: str | None,
@@ -525,158 +586,58 @@ def call_gemini(
 ) -> str:
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key:
-        raise RuntimeError("GEMINI_API_KEY ist auf dem Server nicht gesetzt.")
+        raise RuntimeError("GEMINI_API_KEY ist auf Render nicht gesetzt.")
 
-    contents: list[dict[str, Any]] = []
+    model = discover_gemini_model(api_key)
+    contents = []
 
     for item in history[-6:]:
         old_message = str(item.get("message", "")).strip()
         old_response = str(item.get("response", "")).strip()
-
         if old_message:
-            contents.append({
-                "role": "user",
-                "parts": [{"text": old_message}],
-            })
+            contents.append({"role": "user", "parts": [{"text": old_message}]})
         if old_response:
-            contents.append({
-                "role": "model",
-                "parts": [{"text": old_response}],
-            })
+            contents.append({"role": "model", "parts": [{"text": old_response}]})
 
-    user_parts = [{
-        "text": build_assistant_prompt(
-            message,
-            lesson_id,
-            learner_context,
-        )
-    }]
-
+    parts = [{"text": build_assistant_prompt(message, lesson_id, learner_context)}]
     if image_base64:
-        user_parts.append({
-            "inline_data": {
-                "mime_type": image_mime_type or "image/jpeg",
-                "data": image_base64,
-            }
-        })
+        parts.append({"inline_data": {"mime_type": image_mime_type or "image/jpeg", "data": image_base64}})
 
-    contents.append({
-        "role": "user",
-        "parts": user_parts,
-    })
+    contents.append({"role": "user", "parts": parts})
+    body = {"contents": contents, "generationConfig": {"maxOutputTokens": 700}}
 
-    body = {
-        "contents": contents,
-        "generationConfig": {
-            "temperature": 0.4,
-            "maxOutputTokens": 700,
-        },
-    }
-
-    configured_model = os.environ.get(
-        "GEMINI_MODEL",
-        GEMINI_MODEL,
-    ).strip()
-
-    models_to_try: list[str] = []
-    for candidate in [
-        configured_model,
-        "gemini-3.7-flash",
-        "gemini-3.6-flash",
-        "gemini-3.5-flash",
-        "gemini-2.5-flash",
-    ]:
-        if candidate and candidate not in models_to_try:
-            models_to_try.append(candidate)
-
-    last_404_detail = ""
-
-    for model in models_to_try:
-        url = (
-            "https://generativelanguage.googleapis.com/v1beta/models/"
-            f"{quote(model)}:generateContent"
-        )
-
-        request = Request(
-            url,
-            data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
-            headers={
-                "Content-Type": "application/json",
-                "x-goog-api-key": api_key,
-            },
-            method="POST",
-        )
-
-        try:
-            with urlopen(request, timeout=25) as response:
-                payload = json.loads(
-                    response.read().decode("utf-8")
-                )
-        except HTTPError as exc:
-            try:
-                detail = exc.read().decode("utf-8")
-            except Exception:
-                detail = ""
-
-            print("Gemini HTTP error:", exc.code, detail[:800])
-
-            if exc.code == 404:
-                last_404_detail = detail
-                continue
-
-            if exc.code in (400, 401, 403, 429):
-                raise RuntimeError(
-                    f"Gemini API Fehler ({exc.code}). "
-                    "Prüfe API-Key, API-Zugriff und Kontingent."
-                ) from exc
-
-            raise RuntimeError(
-                f"Gemini API Fehler ({exc.code})."
-            ) from exc
-
-        except (URLError, TimeoutError) as exc:
-            print("Gemini network error:", repr(exc))
-            raise RuntimeError(
-                "Gemini ist momentan nicht erreichbar."
-            ) from exc
-
-        except json.JSONDecodeError as exc:
-            raise RuntimeError(
-                "Gemini hat keine gültige Antwort geliefert."
-            ) from exc
-
-        if isinstance(payload.get("error"), dict):
-            error_message = payload["error"].get("message")
-            raise RuntimeError(
-                error_message or "Gemini hat einen Fehler gemeldet."
-            )
-
-        candidates = payload.get("candidates") or []
-        if not candidates:
-            raise RuntimeError("Gemini hat keine Antwort erzeugt.")
-
-        parts = (
-            candidates[0].get("content", {}).get("parts", [])
-        )
-
-        answer = "\n".join(
-            str(part.get("text", "")).strip()
-            for part in parts
-            if isinstance(part, dict) and part.get("text")
-        ).strip()
-
-        if answer:
-            return answer[:1800]
-
-        raise RuntimeError("Gemini hat keine Textantwort erzeugt.")
-
-    raise RuntimeError(
-        "Keines der verfügbaren Gemini-Modelle konnte gefunden werden. "
-        "Prüfe deinen GEMINI_API_KEY und ob die Gemini API für dein Projekt aktiviert ist."
-        + (f" Details: {last_404_detail[:300]}" if last_404_detail else "")
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{quote(model)}:generateContent"
+    req = Request(
+        url,
+        data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+        headers={"Content-Type": "application/json", "x-goog-api-key": api_key, "Accept": "application/json"},
+        method="POST",
     )
+    try:
+        with urlopen(req, timeout=25) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except HTTPError as exc:
+        try:
+            detail = exc.read().decode("utf-8")
+        except Exception:
+            detail = ""
+        raise RuntimeError(f"Gemini API Fehler ({exc.code}) mit Modell {model}. {detail[:500]}") from exc
+    except (URLError, TimeoutError) as exc:
+        raise RuntimeError("Gemini ist momentan nicht erreichbar.") from exc
+    except json.JSONDecodeError as exc:
+        raise RuntimeError("Gemini hat keine gÃ¼ltige Antwort geliefert.") from exc
 
+    if isinstance(payload.get("error"), dict):
+        raise RuntimeError(payload["error"].get("message") or "Gemini hat einen Fehler gemeldet.")
 
+    candidates = payload.get("candidates") or []
+    if not candidates:
+        raise RuntimeError("Gemini hat keine Antwort erzeugt.")
+    response_parts = candidates[0].get("content", {}).get("parts", [])
+    answer = "\n".join(str(p.get("text", "")).strip() for p in response_parts if isinstance(p, dict) and p.get("text")).strip()
+    if not answer:
+        raise RuntimeError("Gemini hat keine Textantwort erzeugt.")
+    return answer[:1800]
 class ScratchLabServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 

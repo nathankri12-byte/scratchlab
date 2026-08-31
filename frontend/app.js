@@ -1,4 +1,4 @@
-const app = document.querySelector("#app");
+﻿const app = document.querySelector("#app");
 const authAction = document.querySelector("#authAction");
 
 const EMPTY_PROGRESS = {
@@ -62,37 +62,37 @@ function setView(html) {
 }
 
 async function api(path, options = {}) {
+  const controller = new AbortController();
+  const timeoutMs = options.timeoutMs || 30000;
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   const config = {
     credentials: "same-origin",
     ...options,
+    signal: controller.signal,
     headers: {
-      ...(options.body
-        ? { "Content-Type": "application/json" }
-        : {}),
-      ...(options.headers || {})
-    }
+      Accept: "application/json",
+      ...(options.body ? { "Content-Type": "application/json" } : {}),
+      ...(options.headers || {}),
+    },
   };
-
-  const response = await fetch(path, config);
-
-  let data = {};
+  delete config.timeoutMs;
   try {
-    data = await response.json();
-  } catch {
-    data = {};
+    const response = await fetch(path, config);
+    let data = {};
+    try { data = await response.json(); } catch {}
+    if (!response.ok) {
+      throw new Error(data?.error || data?.message || `Serverfehler (${response.status})`);
+    }
+    return data;
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error("Die Anfrage dauert zu lange. Bitte versuche es erneut.");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
   }
-
-  if (!response.ok) {
-    throw new Error(
-      data?.error ||
-      data?.message ||
-      `Serverfehler (${response.status})`
-    );
-  }
-
-  return data;
 }
-
 async function refresh() {
   const [me, courses, pricing] = await Promise.all([
     api("/api/me"),
@@ -743,7 +743,7 @@ async function checkLessonProject(lesson) {
   try {
     const dataBase64 = await fileToBase64(file);
 
-    const result = await api("/api/projects/check", {
+    const result = await api("/api/projects/check", { timeoutMs: 25000,
       method: "POST",
       body: JSON.stringify({
         lessonId: lesson.id,
@@ -807,7 +807,7 @@ async function checkScratchLink(lesson) {
   resultBox.innerHTML = `<p class="muted">🔎 Dein Scratch-Projekt wird geprüft...</p>`;
 
   try {
-    const result = await api("/api/projects/check-link", {
+    const result = await api("/api/projects/check-link", { timeoutMs: 25000,
       method: "POST",
       body: JSON.stringify({
         lessonId: lesson.id,
@@ -892,75 +892,66 @@ async function completeLesson(lesson) {
 }
 
 async function askAssistant(lessonId, form) {
-  const text = String(form.querySelector("textarea")?.value || "").trim();
+  const textarea = form.querySelector('textarea[name="message"]');
   const imageInput = form.querySelector("#assistantImage");
-  const image = imageInput?.files?.[0];
   const answerBox = document.querySelector("#assistantAnswer");
   const statusBox = document.querySelector("#assistantStatus");
-  const submitButton = form.querySelector("button[type='submit']");
+  const button = form.querySelector('button[type="submit"]');
+  const text = String(textarea?.value || "").trim();
+  const image = imageInput?.files?.length ? imageInput.files[0] : null;
+  const hasImage = image instanceof File && image.size > 0;
 
-  if (!text && !image) return;
+  if (!text && !hasImage) return;
 
   answerBox.insertAdjacentHTML(
     "beforeend",
     `<div class="chat-turn user-turn">${escapeHtml(text || "Screenshot hochgeladen")}</div>`
   );
-
-  if (submitButton) {
-    submitButton.disabled = true;
-    submitButton.textContent = "Antwort wird erstellt...";
-  }
-  if (statusBox) statusBox.textContent = "KI denkt...";
+  if (button) { button.disabled = true; button.textContent = "KI antwortet..."; }
+  if (statusBox) statusBox.textContent = "KI denkt nach...";
 
   try {
-    let imageBase64 = null;
-    let imageMimeType = null;
+    const body = {
+      message: text || "Analysiere meinen Screenshot und hilf mir bei dieser Scratch-Lektion.",
+      lessonId,
+    };
 
-    if (image) {
-      if (!["image/png", "image/jpeg", "image/webp"].includes(image.type)) {
-        throw new Error("Bitte nutze PNG, JPG/JPEG oder WebP.");
-      }
-      if (image.size > 5 * 1024 * 1024) {
-        throw new Error("Der Screenshot darf maximal 5 MB groß sein.");
-      }
-
-      imageBase64 = await fileToBase64(image);
-      imageMimeType = image.type;
+    if (hasImage) {
+      let mimeType = image.type;
+      if (!mimeType && image.name.toLowerCase().endsWith(".jpg")) mimeType = "image/jpeg";
+      if (!mimeType && image.name.toLowerCase().endsWith(".jpeg")) mimeType = "image/jpeg";
+      if (!mimeType && image.name.toLowerCase().endsWith(".png")) mimeType = "image/png";
+      if (!mimeType && image.name.toLowerCase().endsWith(".webp")) mimeType = "image/webp";
+      if (!["image/png", "image/jpeg", "image/webp"].includes(mimeType)) throw new Error("Bitte nutze PNG, JPG/JPEG oder WebP.");
+      if (image.size > 5 * 1024 * 1024) throw new Error("Der Screenshot darf maximal 5 MB groÃŸ sein.");
+      body.imageBase64 = await fileToBase64(image);
+      body.imageMimeType = mimeType;
     }
 
     const result = await api("/api/assistant", {
+      timeoutMs: 40000,
       method: "POST",
-      body: JSON.stringify({
-        message: text || "Analysiere meinen Screenshot und sage mir, worauf ich achten sollte.",
-        lessonId,
-        imageBase64,
-        imageMimeType
-      })
+      body: JSON.stringify(body),
     });
 
     answerBox.insertAdjacentHTML(
       "beforeend",
-      `<div class="chat-turn coach-turn">${escapeHtml(result.response || "")}</div>`
+      `<div class="chat-turn coach-turn">${escapeHtml(result?.response || "Gemini hat keine Antwort geliefert.")}</div>`
     );
-
-    form.querySelector("textarea").value = "";
+    textarea.value = "";
     if (imageInput) imageInput.value = "";
     if (statusBox) statusBox.textContent = "";
     answerBox.scrollTop = answerBox.scrollHeight;
   } catch (error) {
     answerBox.insertAdjacentHTML(
       "beforeend",
-      `<div class="chat-turn coach-turn">${escapeHtml(error.message)}</div>`
+      `<div class="chat-turn coach-turn">âš ï¸ ${escapeHtml(error?.message || "Die KI konnte gerade nicht antworten.")}</div>`
     );
     if (statusBox) statusBox.textContent = "";
   } finally {
-    if (submitButton) {
-      submitButton.disabled = false;
-      submitButton.textContent = "Fragen";
-    }
+    if (button) { button.disabled = false; button.textContent = "Fragen"; }
   }
 }
-
 function formatBytes(bytes) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -1287,7 +1278,7 @@ async function checkProject(event) {
   resultBox.innerHTML = `<p class="muted">🔎 Projekt wird geprüft...</p>`;
 
   try {
-    const result = await api("/api/projects/check", {
+    const result = await api("/api/projects/check", { timeoutMs: 25000,
       method: "POST",
       body: JSON.stringify({
         lessonId: form.get("lessonId"),
