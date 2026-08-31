@@ -1,43 +1,25 @@
 const app = document.querySelector("#app");
 const authAction = document.querySelector("#authAction");
 
+const EMPTY_PROGRESS = {
+  completed: [],
+  badges: [],
+  courseProgress: [],
+  projects: [],
+  recentActivity: []
+};
+
 const state = {
   user: null,
   courses: [],
-  progress: {
-    completed: [],
-    badges: [],
-    courseProgress: [],
-    projects: []
-  },
-  projects: {
-    own: [],
-    public: []
-  },
-  pricing: null
+  progress: { ...EMPTY_PROGRESS },
+  projects: { own: [], public: [] },
+  pricing: {
+    singleLessonPriceEur: 5,
+    premiumMonthlyPriceEur: 15,
+    checkoutReady: false
+  }
 };
-
-/* =========================
-   HELPERS
-========================= */
-
-const completedIds = () =>
-  new Set(
-    (state.progress.completed || [])
-      .map(item => item.lesson_id)
-      .filter(Boolean)
-  );
-
-const allLessons = () =>
-  state.courses.flatMap(course =>
-    Array.isArray(course.lessons)
-      ? course.lessons.map(lesson => ({
-          ...lesson,
-          courseId: course.id,
-          courseTitle: course.title
-        }))
-      : []
-  );
 
 function escapeHtml(value) {
   return String(value ?? "").replace(
@@ -48,34 +30,52 @@ function escapeHtml(value) {
       ">": "&gt;",
       '"': "&quot;",
       "'": "&#039;"
-    }[char])
+    })[char]
   );
+}
+
+function completedIds() {
+  return new Set(
+    Array.isArray(state.progress.completed)
+      ? state.progress.completed.map(item => String(item.lesson_id))
+      : []
+  );
+}
+
+function allLessons() {
+  return Array.isArray(state.courses)
+    ? state.courses.flatMap(course =>
+        Array.isArray(course.lessons)
+          ? course.lessons.map(lesson => ({
+              ...lesson,
+              courseId: course.id,
+              courseTitle: course.title
+            }))
+          : []
+      )
+    : [];
 }
 
 function setView(html) {
   app.innerHTML = html;
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-/* =========================
-   API
-========================= */
-
 async function api(path, options = {}) {
-  const response = await fetch(path, {
+  const config = {
     credentials: "same-origin",
     ...options,
     headers: {
-      "Content-Type": "application/json",
+      ...(options.body
+        ? { "Content-Type": "application/json" }
+        : {}),
       ...(options.headers || {})
     }
-  });
+  };
 
-  let data;
+  const response = await fetch(path, config);
 
+  let data = {};
   try {
     data = await response.json();
   } catch {
@@ -84,16 +84,14 @@ async function api(path, options = {}) {
 
   if (!response.ok) {
     throw new Error(
-      data.error || `Serverfehler (${response.status})`
+      data?.error ||
+      data?.message ||
+      `Serverfehler (${response.status})`
     );
   }
 
   return data;
 }
-
-/* =========================
-   REFRESH
-========================= */
 
 async function refresh() {
   const [me, courses, pricing] = await Promise.all([
@@ -102,80 +100,52 @@ async function refresh() {
     api("/api/pricing")
   ]);
 
-  state.user = me.user || null;
-
-  state.courses = Array.isArray(courses.courses)
-    ? courses.courses
-    : [];
-
-  state.pricing = pricing || {
-    singleLessonPriceEur: 5,
-    premiumMonthlyPriceEur: 15,
-    checkoutReady: false
+  state.user = me?.user || null;
+  state.courses = Array.isArray(courses?.courses) ? courses.courses : [];
+  state.pricing = {
+    ...state.pricing,
+    ...(pricing || {})
   };
 
   if (state.user) {
-    state.progress = await api("/api/progress");
+    try {
+      state.progress = {
+        ...EMPTY_PROGRESS,
+        ...(await api("/api/progress"))
+      };
+    } catch {
+      state.progress = { ...EMPTY_PROGRESS };
+    }
   } else {
-    state.progress = {
-      completed: [],
-      badges: [],
-      courseProgress: [],
-      projects: []
-    };
+    state.progress = { ...EMPTY_PROGRESS };
   }
 
-  authAction.textContent = state.user
-    ? "Logout"
-    : "Einloggen";
+  if (authAction) {
+    authAction.textContent = state.user ? "Logout" : "Einloggen";
+  }
 }
 
-/* =========================
-   LANDING
-========================= */
-
 function renderLanding() {
-  const lessonCount = allLessons().length;
-  const courseCount = state.courses.length;
+  const lessons = allLessons();
 
   setView(`
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">
-          Scratch lernen, ohne Schulgefuehl
-        </p>
-
+        <p class="eyebrow">Scratch lernen, ohne Schulgefühl</p>
         <h1>ScratchLab</h1>
-
         <p class="lead">
-          Programmieren lernen. Scratch verstehen.
-          Eigene Ideen bauen.
+          Programmieren lernen. Scratch verstehen. Eigene Ideen bauen.
         </p>
-
         <div class="hero-actions">
-          <a class="primary-button" href="#/signup">
-            Kostenlos starten
-          </a>
-
-          <a class="secondary-button" href="#/learn">
-            Kurse ansehen
-          </a>
+          <a class="primary-button" href="#/signup">Kostenlos starten</a>
+          <a class="secondary-button" href="#/learn">Kurse ansehen</a>
         </div>
       </div>
 
       <div class="play-stage" aria-label="ScratchLab Vorschau">
-        <div class="stage-header">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
-
+        <div class="stage-header"><span></span><span></span><span></span></div>
         <div class="sprite"></div>
-
-        <div class="speech">
-          Ich baue mein erstes Spiel!
-        </div>
-
+        <div class="speech">Ich baue mein erstes Spiel!</div>
         <div class="blocks">
           <span>Wenn Flagge geklickt</span>
           <span>bewege Figur</span>
@@ -187,65 +157,40 @@ function renderLanding() {
     <section class="feature-band">
       <article>
         <strong>1. Kurz verstehen</strong>
-        <span>
-          Jede Lektion startet mit einem klaren Lernziel.
-        </span>
+        <span>Jede Lektion startet mit einem klaren Lernziel.</span>
       </article>
-
       <article>
         <strong>2. Selbst bauen</strong>
-        <span>
-          Du probierst direkt in Scratch und siehst ein Ergebnis.
-        </span>
+        <span>Du probierst direkt in Scratch und siehst ein Ergebnis.</span>
       </article>
-
       <article>
         <strong>3. Weiter wachsen</strong>
-        <span>
-          XP, Badges, Projekte und KI-Hilfe halten dich im Flow.
-        </span>
+        <span>XP, Badges, Projekte und KI-Hilfe halten dich im Flow.</span>
       </article>
     </section>
 
     <section class="screen landing-grid">
       <div class="panel">
-        <h3>
-          ${courseCount} Kurse, ${lessonCount} Lektionen
-        </h3>
-
-        <p>
-          Von der ersten sprechenden Figur bis zum eigenen Mini-Spiel.
-        </p>
-
-        <a class="secondary-button" href="#/learn">
-          Kursuebersicht
-        </a>
+        <h3>${state.courses.length} Kurse, ${lessons.length} Lektionen</h3>
+        <p>Von der ersten Figur bis zum eigenen Mini-Spiel.</p>
+        <a class="secondary-button" href="#/learn">Kursübersicht</a>
       </div>
-
       <div class="panel">
         <h3>KI-Tutor</h3>
-
-        <p>
-          Gemini hilft mit Fragen, Tipps und kleinen Denkanstoessen,
-          ohne dir sofort alles fertig zu loesen.
-        </p>
+        <p>Die KI hilft mit Denkanstößen und Screenshot-Analyse.</p>
       </div>
-
       <div class="panel">
-        <h3>Projektpruefung</h3>
-
-        <p>
-          Lade spaeter deine .sb3-Datei hoch und ScratchLab
-          prueft wichtige Bloecke automatisch.
-        </p>
+        <h3>Projektprüfung</h3>
+        <p>Lade deine .sb3-Datei hoch und ScratchLab prüft die Anforderungen.</p>
+      </div>
+      <div class="panel">
+        <h3>Feedback & Hilfe</h3>
+        <p>Hilf uns, ScratchLab besser zu machen.</p>
+        <a class="secondary-button" href="#/feedback">Feedback geben</a>
       </div>
     </section>
   `);
 }
-
-/* =========================
-   AUTH
-========================= */
 
 function renderAuth(mode = "signup") {
   const isSignup = mode === "signup";
@@ -253,79 +198,44 @@ function renderAuth(mode = "signup") {
   setView(`
     <section class="screen grid two">
       <div>
-        <p class="eyebrow">
-          ${isSignup ? "Kostenlos starten" : "Willkommen zurueck"}
-        </p>
-
-        <h2>
-          ${
-            isSignup
-              ? "In 60 Sekunden bereit fuer die erste Scratch-Aufgabe."
-              : "Weiterlernen, wo du aufgehoert hast."
-          }
-        </h2>
-
-        <p>
-          Dein Fortschritt, XP, Badges und Projekte werden gespeichert.
-        </p>
+        <p class="eyebrow">${isSignup ? "Kostenlos starten" : "Willkommen zurück"}</p>
+        <h2>${isSignup ? "Erstelle deinen ScratchLab-Account." : "Weiterlernen, wo du aufgehört hast."}</h2>
+        <p>Dein Fortschritt und deine Projekte werden dauerhaft gespeichert.</p>
       </div>
 
       <div class="panel">
         <form id="authForm">
-
           ${
             isSignup
-              ? `
-                <label>
-                  Benutzername
-                  <input
-                    name="username"
-                    autocomplete="nickname"
-                    required
-                    minlength="3"
-                  >
-                </label>
-              `
+              ? `<label>Benutzername
+                  <input name="username" autocomplete="nickname" required minlength="3">
+                </label>`
               : ""
           }
 
-          <label>
-            E-Mail
-            <input
-              name="email"
-              type="email"
-              autocomplete="email"
-              required
-            >
+          <label>E-Mail
+            <input name="email" type="email" autocomplete="email" required>
           </label>
 
-          <label>
-            Passwort
+          <label>Passwort
             <input
               name="password"
               type="password"
-              autocomplete="${
-                isSignup ? "new-password" : "current-password"
-              }"
+              autocomplete="${isSignup ? "new-password" : "current-password"}"
               required
               minlength="8"
             >
           </label>
 
-          <button
-            class="primary-button"
-            type="submit"
-          >
+          <button class="primary-button" type="submit">
             ${isSignup ? "Account erstellen" : "Einloggen"}
           </button>
 
           <p class="muted">
             ${
               isSignup
-                ? `Schon dabei?
-                   <a href="#/login">Einloggen</a>`
-                : `Neu hier?
-                   <a href="#/signup">Kostenlos starten</a>`
+                ? `Schon dabei? <a href="#/login">Einloggen</a>`
+                : `Neu hier? <a href="#/signup">Kostenlos starten</a>`
             }
           </p>
 
@@ -335,1672 +245,1159 @@ function renderAuth(mode = "signup") {
     </section>
   `);
 
-  document
-    .querySelector("#authForm")
-    .addEventListener("submit", async event => {
-      event.preventDefault();
+  document.querySelector("#authForm")?.addEventListener("submit", async event => {
+    event.preventDefault();
 
-      const form = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const button = form.querySelector("button");
+    const errorBox = form.querySelector("#authError");
 
-      try {
-        const result = await api(
-          isSignup
-            ? "/api/auth/register"
-            : "/api/auth/login",
-          {
-            method: "POST",
-            body: JSON.stringify(
-              Object.fromEntries(form.entries())
-            )
-          }
-        );
+    button.disabled = true;
+    errorBox.textContent = "";
 
-        state.user = result.user;
-
-        location.hash = "#/dashboard";
-      } catch (error) {
-        document.querySelector("#authError").textContent =
-          error.message;
-      }
-    });
-}
-
-/* =========================
-   DASHBOARD
-========================= */
-
-function renderDashboard() {
-  if (!state.user) {
-    location.hash = "#/signup";
-    return;
-  }
-
-  const lessons = allLessons();
-
-  const next =
-    state.progress.nextLesson ||
-    lessons[0] ||
-    null;
-
-  const totalLessons = lessons.length;
-
-  const doneCount =
-    state.progress.completed?.length || 0;
-
-  const percent = totalLessons
-    ? Math.round(
-        (doneCount / totalLessons) * 100
-      )
-    : 0;
-
-  setView(`
-    <section class="screen">
-
-      <div class="screen-header">
-
-        <div>
-          <p class="eyebrow">Dashboard</p>
-
-          <h2>
-            Hi ${escapeHtml(state.user.username)},
-            weiter geht's.
-          </h2>
-
-          <p>
-            Dein naechster sinnvoller Schritt ist schon bereit.
-          </p>
-        </div>
-
-        ${statsHtml()}
-      </div>
-
-      <div class="panel">
-
-        <div class="progress-row">
-          <strong>Gesamtfortschritt</strong>
-          <span>
-            ${doneCount}/${totalLessons} Lektionen
-          </span>
-        </div>
-
-        <div class="progress-track">
-          <span style="width:${percent}%"></span>
-        </div>
-
-      </div>
-
-      <div class="grid two dashboard-grid">
-
-        <div class="panel">
-
-          <h3>Weiterlernen</h3>
-
-          ${
-            next
-              ? `
-                <p>
-                  <strong>
-                    ${escapeHtml(next.title)}
-                  </strong>
-                  <br>
-
-                  <span class="muted">
-                    ${escapeHtml(next.summary)}
-                  </span>
-                </p>
-
-                <a
-                  class="primary-button"
-                  href="${
-                    next.premium &&
-                    state.user.premiumStatus !== "premium"
-                      ? `#/locked/${next.id}`
-                      : `#/lesson/${next.id}`
-                  }"
-                >
-                  Weiterlernen
-                </a>
-              `
-              : `
-                <p class="muted">
-                  Keine Lektionen gefunden.
-                </p>
-              `
-          }
-
-        </div>
-
-        <div class="panel">
-
-          <h3>Badges</h3>
-
-          ${badgeHtml()}
-
-        </div>
-
-      </div>
-
-      <div class="grid two dashboard-grid">
-
-        <div class="panel">
-
-          <h3>Kursfortschritt</h3>
-
-          ${courseProgressHtml()}
-
-        </div>
-
-        <div class="panel">
-
-          <h3>Letzte Aktivitaeten</h3>
-
-          ${activityHtml()}
-
-        </div>
-
-      </div>
-
-    </section>
-  `);
-}
-
-/* =========================
-   LEARN
-========================= */
-
-function renderLearn() {
-  const done = completedIds();
-
-  const totalLessons = allLessons().length;
-
-  setView(`
-    <section class="screen">
-
-      <div class="screen-header">
-
-        <div>
-          <p class="eyebrow">Kurse</p>
-
-          <h2>
-            Scratch Schritt fuer Schritt
-          </h2>
-
-          <p>
-            ${state.courses.length} Kurse mit
-            ${totalLessons} Lektionen.
-            Alle Kurse bauen logisch aufeinander auf.
-          </p>
-        </div>
-
-        ${
-          state.user
-            ? statsHtml()
-            : `
-              <a
-                class="primary-button"
-                href="#/signup"
-              >
-                Fortschritt speichern
-              </a>
-            `
+    try {
+      const result = await api(
+        isSignup ? "/api/auth/register" : "/api/auth/login",
+        {
+          method: "POST",
+          body: JSON.stringify(Object.fromEntries(new FormData(form).entries()))
         }
+      );
 
-      </div>
+      state.user = result.user || null;
+      await refresh();
 
-      ${
-        state.courses.length
-          ? `
-            <div class="course-list">
-              ${state.courses
-                .map(course =>
-                  courseCard(course, done)
-                )
-                .join("")}
-            </div>
-          `
-          : `
-            <div class="panel">
-              <h3>Keine Kurse gefunden</h3>
-              <p class="error">
-                Die Kursdaten konnten nicht geladen werden.
-              </p>
-            </div>
-          `
+      if (!state.user) {
+        throw new Error("Die Anmeldung wurde nicht übernommen.");
       }
 
-    </section>
-  `);
+      location.hash = "#/dashboard";
+    } catch (error) {
+      errorBox.textContent = error.message;
+      button.disabled = false;
+    }
+  });
 }
-
-function courseCard(course, done) {
-  const lessons = Array.isArray(course.lessons)
-    ? course.lessons
-    : [];
-
-  const completed = lessons.filter(
-    lesson => done.has(lesson.id)
-  ).length;
-
-  const percent = lessons.length
-    ? Math.round(
-        (completed / lessons.length) * 100
-      )
-    : 0;
-
-  return `
-    <article class="panel course-card">
-
-      <div>
-
-        <span class="pill">
-          ${escapeHtml(
-            course.difficulty || "Anfaenger"
-          )}
-        </span>
-
-        <h3>
-          ${escapeHtml(course.title)}
-        </h3>
-
-        <p>
-          ${escapeHtml(course.description)}
-        </p>
-
-        <div class="progress-row">
-          <span>
-            ${completed}/${lessons.length} Lektionen
-          </span>
-
-          <span>${percent}%</span>
-        </div>
-
-        <div class="progress-track">
-          <span style="width:${percent}%"></span>
-        </div>
-
-      </div>
-
-      <div class="lesson-list compact">
-
-        ${lessons
-          .map(lesson =>
-            lessonRow(lesson, done)
-          )
-          .join("")}
-
-      </div>
-
-    </article>
-  `;
-}
-
-function lessonRow(lesson, done) {
-  const locked =
-    lesson.premium &&
-    (!state.user ||
-      state.user.premiumStatus !== "premium");
-
-  return `
-    <article
-      class="
-        lesson-card
-        ${done.has(lesson.id) ? "completed" : ""}
-        ${locked ? "locked" : ""}
-      "
-    >
-
-      <div>
-
-        <span class="pill">
-          ${
-            locked
-              ? "Premium"
-              : `${lesson.xp || 0} XP`
-          }
-        </span>
-
-        <h3>
-          ${escapeHtml(lesson.title)}
-        </h3>
-
-        <p>
-          ${escapeHtml(lesson.summary)}
-        </p>
-
-      </div>
-
-      <a
-        class="secondary-button"
-        href="${
-          locked
-            ? `#/locked/${lesson.id}`
-            : `#/lesson/${lesson.id}`
-        }"
-      >
-        ${
-          locked
-            ? "Freischalten"
-            : done.has(lesson.id)
-              ? "Wiederholen"
-              : "Starten"
-        }
-      </a>
-
-    </article>
-  `;
-}
-
-/* =========================
-   STATS
-========================= */
 
 function statsHtml() {
   return `
     <div class="stats">
-
-      <div class="stat">
-        <span>XP</span>
-        <strong>
-          ${state.user?.xp ?? 0}
-        </strong>
-      </div>
-
-      <div class="stat">
-        <span>Level</span>
-        <strong>
-          ${state.user?.level ?? 1}
-        </strong>
-      </div>
-
-      <div class="stat">
-        <span>Status</span>
-        <strong>
-          ${escapeHtml(
-            state.user?.premiumStatus || "free"
-          )}
-        </strong>
-      </div>
-
+      <div class="stat"><span>XP</span><strong>${state.user?.xp ?? 0}</strong></div>
+      <div class="stat"><span>Level</span><strong>${state.user?.level ?? 1}</strong></div>
+      <div class="stat"><span>Status</span><strong>${escapeHtml(state.user?.premiumStatus || "free")}</strong></div>
     </div>
   `;
 }
 
 function badgeHtml() {
-  const badges = state.progress.badges || [];
-
+  const badges = Array.isArray(state.progress.badges) ? state.progress.badges : [];
   if (!badges.length) {
-    return `
-      <p class="muted">
-        Dein erstes Badge wartet nach
-        der ersten abgeschlossenen Lektion.
-      </p>
-    `;
+    return `<p class="muted">Dein erstes Badge wartet nach der ersten abgeschlossenen Lektion.</p>`;
   }
 
-  return badges
-    .map(
-      badge => `
-        <p>
-
-          <span class="pill">
-            ${escapeHtml(badge.icon)}
-          </span>
-
-          <strong>
-            ${escapeHtml(badge.name)}
-          </strong>
-
-          <br>
-
-          <span class="muted">
-            ${escapeHtml(badge.description)}
-          </span>
-
-        </p>
-      `
-    )
-    .join("");
+  return badges.map(badge => `
+    <p>
+      <span class="pill">${escapeHtml(badge.icon || "🏆")}</span>
+      <strong>${escapeHtml(badge.name || "")}</strong><br>
+      <span class="muted">${escapeHtml(badge.description || "")}</span>
+    </p>
+  `).join("");
 }
 
 function courseProgressHtml() {
-  const courses =
-    state.progress.courseProgress || [];
+  const courses = Array.isArray(state.progress.courseProgress)
+    ? state.progress.courseProgress
+    : [];
 
   if (!courses.length) {
-    return `
-      <p class="muted">
-        Noch kein Kurs gestartet.
-      </p>
-    `;
+    return `<p class="muted">Noch kein Kurs gestartet.</p>`;
   }
 
-  return courses
-    .map(
-      course => `
-        <div class="mini-progress">
-
-          <div class="progress-row">
-
-            <strong>
-              ${escapeHtml(course.title)}
-            </strong>
-
-            <span>
-              ${course.completedCount}/${course.lessonCount}
-            </span>
-
-          </div>
-
-          <div class="progress-track">
-            <span
-              style="width:${course.percent}%"
-            ></span>
-          </div>
-
-        </div>
-      `
-    )
-    .join("");
+  return courses.map(course => `
+    <div class="mini-progress">
+      <div class="progress-row">
+        <strong>${escapeHtml(course.title)}</strong>
+        <span>${course.completedCount}/${course.lessonCount}</span>
+      </div>
+      <div class="progress-track">
+        <span style="width:${Number(course.percent) || 0}%"></span>
+      </div>
+    </div>
+  `).join("");
 }
 
 function activityHtml() {
-  const activity =
-    state.progress.recentActivity || [];
+  const activity = Array.isArray(state.progress.recentActivity)
+    ? state.progress.recentActivity
+    : [];
 
   if (!activity.length) {
-    return `
-      <p class="muted">
-        Schliesse deine erste Lektion ab,
-        dann erscheint sie hier.
-      </p>
-    `;
+    return `<p class="muted">Schließe deine erste Lektion ab, dann erscheint sie hier.</p>`;
   }
 
-  return activity
-    .map(
-      item => `
-        <p>
-
-          <span class="pill">
-            +${item.xp_awarded || 0} XP
-          </span>
-
-          ${escapeHtml(item.lesson_id)}
-
-        </p>
-      `
-    )
-    .join("");
+  return activity.map(item => `
+    <p>
+      <span class="pill">+${Number(item.xp_awarded) || 0} XP</span>
+      ${escapeHtml(item.lesson_id || "")}
+    </p>
+  `).join("");
 }
 
-/* =========================
-   LESSON
-========================= */
-
-function lessonById(id) {
-  for (const course of state.courses) {
-    const lessons = Array.isArray(course.lessons)
-      ? course.lessons
-      : [];
-
-    const lesson = lessons.find(
-      item => String(item.id) === String(id)
-    );
-
-    if (lesson) {
-      return {
-        course,
-        lesson
-      };
-    }
+function renderDashboard() {
+  if (!state.user) {
+    location.hash = "#/login";
+    return;
   }
 
-  return {};
+  const lessons = allLessons();
+  const done = completedIds();
+  const next = state.progress.nextLesson || lessons.find(item => !done.has(item.id)) || null;
+  const total = lessons.length;
+  const completed = done.size;
+  const percent = total ? Math.round(completed / total * 100) : 0;
+
+  setView(`
+    <section class="screen">
+      <div class="screen-header">
+        <div>
+          <p class="eyebrow">Dashboard</p>
+          <h2>Hi ${escapeHtml(state.user.username)}, weiter geht's.</h2>
+          <p>Dein Fortschritt bleibt dauerhaft gespeichert.</p>
+        </div>
+        ${statsHtml()}
+      </div>
+
+      <div class="panel">
+        <div class="progress-row">
+          <strong>Gesamtfortschritt</strong>
+          <span>${completed}/${total} Lektionen</span>
+        </div>
+        <div class="progress-track"><span style="width:${percent}%"></span></div>
+      </div>
+
+      <div class="grid two dashboard-grid">
+        <div class="panel">
+          <h3>Weiterlernen</h3>
+          ${
+            next
+              ? `<p><strong>${escapeHtml(next.title)}</strong><br><span class="muted">${escapeHtml(next.summary || "")}</span></p>
+                 <a class="primary-button" href="#/lesson/${encodeURIComponent(next.id)}">Weiterlernen</a>`
+              : `<p class="success">🎉 Alle verfügbaren Lektionen abgeschlossen!</p>`
+          }
+        </div>
+
+        <div class="panel">
+          <h3>Badges</h3>
+          ${badgeHtml()}
+        </div>
+      </div>
+
+      <div class="grid two dashboard-grid">
+        <div class="panel">
+          <h3>Kursfortschritt</h3>
+          ${courseProgressHtml()}
+        </div>
+        <div class="panel">
+          <h3>Letzte Aktivitäten</h3>
+          ${activityHtml()}
+        </div>
+      </div>
+    </section>
+  `);
+}
+
+function renderLearn() {
+  const done = completedIds();
+  const lessons = allLessons();
+
+  setView(`
+    <section class="screen">
+      <div class="screen-header">
+        <div>
+          <p class="eyebrow">Kurse</p>
+          <h2>Scratch Schritt für Schritt</h2>
+          <p>${state.courses.length} Kurse mit ${lessons.length} Lektionen.</p>
+        </div>
+        ${state.user ? statsHtml() : `<a class="primary-button" href="#/signup">Fortschritt speichern</a>`}
+      </div>
+
+      <div class="course-list">
+        ${
+          state.courses.length
+            ? state.courses.map(course => courseCard(course, done)).join("")
+            : `<div class="panel"><p class="error">Die Kursdaten konnten nicht geladen werden.</p></div>`
+        }
+      </div>
+    </section>
+  `);
+}
+
+function courseCard(course, done) {
+  const lessons = Array.isArray(course.lessons) ? course.lessons : [];
+  const completed = lessons.filter(lesson => done.has(lesson.id)).length;
+  const percent = lessons.length ? Math.round(completed / lessons.length * 100) : 0;
+
+  return `
+    <article class="panel course-card">
+      <div>
+        <span class="pill">${escapeHtml(course.difficulty || "Anfänger")}</span>
+        <h3>${escapeHtml(course.title)}</h3>
+        <p>${escapeHtml(course.description || "")}</p>
+
+        <div class="progress-row">
+          <span>${completed}/${lessons.length} Lektionen</span>
+          <span>${percent}%</span>
+        </div>
+
+        <div class="progress-track"><span style="width:${percent}%"></span></div>
+      </div>
+
+      <div class="lesson-list compact">
+        ${lessons.map(lesson => lessonRow(lesson, done)).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function lessonRow(lesson, done) {
+  const locked = lesson.premium &&
+    (!state.user || state.user.premiumStatus !== "premium");
+
+  const completed = done.has(lesson.id);
+
+  return `
+    <article class="lesson-card ${completed ? "completed" : ""} ${locked ? "locked" : ""}">
+      <div>
+        <span class="pill">${locked ? "Premium" : `${lesson.xp || 0} XP`}</span>
+        <h3>${escapeHtml(lesson.title)}</h3>
+        <p>${escapeHtml(lesson.summary || "")}</p>
+      </div>
+
+      <a
+        class="secondary-button"
+        href="${locked ? `#/locked/${encodeURIComponent(lesson.id)}` : `#/lesson/${encodeURIComponent(lesson.id)}`}"
+      >
+        ${locked ? "Freischalten" : completed ? "Wiederholen" : "Starten"}
+      </a>
+    </article>
+  `;
+}
+
+function lessonById(id) {
+  return allLessons().reduce(
+    (found, lesson) => found || (String(lesson.id) === String(id) ? lesson : null),
+    null
+  )
+    ? { lesson: allLessons().find(lesson => String(lesson.id) === String(id)) }
+    : {};
 }
 
 function renderLesson(id) {
-  const { lesson } = lessonById(id);
-
-  const done = completedIds();
+  const lesson = allLessons().find(item => String(item.id) === String(id));
 
   if (!lesson) {
     setView(`
       <section class="screen">
         <h2>Lektion nicht gefunden</h2>
-
-        <p class="error">
-          Die angeforderte Lektion existiert nicht.
-        </p>
-
-        <a
-          class="secondary-button"
-          href="#/learn"
-        >
-          Zurueck zu den Kursen
-        </a>
+        <a class="secondary-button" href="#/learn">Zurück zu den Kursen</a>
       </section>
     `);
-
     return;
   }
 
-  const locked =
+  if (
     lesson.premium &&
-    (!state.user ||
-      state.user.premiumStatus !== "premium");
-
-  if (locked) {
+    (!state.user || state.user.premiumStatus !== "premium")
+  ) {
     renderLockedLesson(id);
     return;
   }
 
-  const isCompleted = done.has(id);
-
-  const task = lesson.task || {
-    prompt: "Bearbeite diese Aufgabe in Scratch.",
-    steps: []
-  };
+  const completed = completedIds().has(lesson.id);
 
   setView(`
     <section class="screen lesson-layout">
-
       <article class="panel">
-
-        <a
-          class="secondary-button back-button"
-          href="#/learn"
-        >
-          Zurueck zum Kurs
-        </a>
-
-        <p class="eyebrow">
-          ${lesson.xp || 0} XP
-        </p>
-
-        <h2>
-          ${escapeHtml(lesson.title)}
-        </h2>
+        <a class="secondary-button back-button" href="#/learn">Zurück zum Kurs</a>
+        <p class="eyebrow">${lesson.xp || 0} XP</p>
+        <h2>${escapeHtml(lesson.title)}</h2>
 
         <div class="goal-box">
-
           <strong>Lernziel</strong>
-
-          <p>
-            ${escapeHtml(
-              lesson.learning_goal ||
-              lesson.summary
-            )}
-          </p>
-
+          <p>${escapeHtml(lesson.learning_goal || lesson.summary || "")}</p>
         </div>
 
-        <h3>Erklaerung</h3>
-
-        <p>
-          ${escapeHtml(lesson.explanation)}
-        </p>
+        <h3>Erklärung</h3>
+        <p>${escapeHtml(lesson.explanation || "")}</p>
 
         <div class="panel">
-
           <h3>Beispiel</h3>
-
-          <p>
-            ${escapeHtml(
-              lesson.example ||
-              lesson.demo ||
-              ""
-            )}
-          </p>
-
+          <p>${escapeHtml(lesson.example || lesson.demo || "")}</p>
         </div>
 
         <div class="panel task-box">
-
           <h3>Deine Aufgabe</h3>
-
-          <p>
-            ${escapeHtml(task.prompt)}
-          </p>
+          <p>${escapeHtml(lesson.task?.prompt || "Bearbeite diese Aufgabe in Scratch.")}</p>
 
           ${
-            Array.isArray(task.steps) &&
-            task.steps.length
-              ? `
-                <ol class="steps">
-                  ${task.steps
-                    .map(
-                      step =>
-                        `<li>${escapeHtml(step)}</li>`
-                    )
-                    .join("")}
-                </ol>
-              `
+            Array.isArray(lesson.task?.steps) && lesson.task.steps.length
+              ? `<ol class="steps">${lesson.task.steps.map(step => `<li>${escapeHtml(step)}</li>`).join("")}</ol>`
               : ""
           }
 
           <h3>Challenge</h3>
-
-          <p>
-            ${escapeHtml(
-              lesson.challenge ||
-              "Verbessere dein Projekt mit einer eigenen Idee."
-            )}
-          </p>
+          <p>${escapeHtml(lesson.challenge || "Verbessere dein Projekt mit einer eigenen Idee.")}</p>
 
           ${
-            Array.isArray(lesson.hints) &&
-            lesson.hints.length
-              ? `
-                <details>
-                  <summary>
-                    Hinweise anzeigen
-                  </summary>
-
-                  <ul>
-                    ${lesson.hints
-                      .map(
-                        hint =>
-                          `<li>${escapeHtml(hint)}</li>`
-                      )
-                      .join("")}
-                  </ul>
-                </details>
-              `
+            Array.isArray(lesson.hints) && lesson.hints.length
+              ? `<details><summary>Hinweise anzeigen</summary><ul>${lesson.hints.map(hint => `<li>${escapeHtml(hint)}</li>`).join("")}</ul></details>`
               : ""
           }
 
+          <div class="project-check-box">
+            <h3>Dein Scratch-Projekt</h3>
+
+            <p class="muted">
+              Prüfe deine Aufgabe direkt hier. Du kannst entweder
+              deinen Scratch-Projekt-Link einfügen oder deine
+              Scratch-Datei auswählen.
+            </p>
+
+            <label>
+              🔗 Scratch-Projekt-Link
+              <input
+                id="scratchProjectUrl"
+                type="url"
+                placeholder="https://scratch.mit.edu/projects/123456789/"
+                autocomplete="off"
+              >
+            </label>
+
+            <button
+              id="checkScratchLink"
+              class="secondary-button"
+              type="button"
+            >
+              🔍 Scratch-Link prüfen
+            </button>
+
+            <div class="muted" style="margin:16px 0;text-align:center;">
+              ───────── oder ─────────
+            </div>
+
+            <div
+              id="scratchDropZone"
+              class="scratch-upload-zone"
+              tabindex="0"
+              role="button"
+              aria-label="Scratch-Datei auswählen"
+            >
+              <div style="font-size:2rem;">📁</div>
+              <strong>Deine Scratch-Datei hier hineinziehen</strong>
+              <span class="muted">oder hier klicken und auswählen</span>
+              <small>Scratch-Datei (.sb3) · maximal 10 MB</small>
+
+              <input
+                id="lessonSb3"
+                type="file"
+                accept=".sb3,application/zip"
+                hidden
+              >
+            </div>
+
+            <p id="selectedScratchFile" class="muted">
+              Noch keine Scratch-Datei ausgewählt.
+            </p>
+
+            <button
+              id="checkLessonProject"
+              class="primary-button"
+              type="button"
+            >
+              ✅ Scratch-Datei prüfen
+            </button>
+
+            <div
+              id="lessonCheckResult"
+              class="check-result"
+            ></div>
+          </div>
+
+
           <button
             id="completeLesson"
-            class="${
-              isCompleted
-                ? "secondary-button"
-                : "primary-button"
-            }"
+            class="${completed ? "secondary-button" : "primary-button"}"
+            type="button"
+            ${completed ? "" : "disabled"}
           >
-            ${
-              state.user
-                ? isCompleted
-                  ? "Schon geschafft"
-                  : "Lektion abschliessen"
-                : "Zum Speichern anmelden"
-            }
+            ${completed ? "Schon geschafft" : "🔒 Erst Projekt prüfen"}
           </button>
 
-          <p
-            id="lessonResult"
-            class="success"
-          >
-            ${
-              isCompleted
-                ? "Diese Lektion ist gespeichert. Wiederholen ist jederzeit moeglich."
-                : ""
-            }
+          <p id="lessonResult" class="success">
+            ${completed ? "Diese Lektion ist gespeichert." : "Bestehe zuerst die Projektprüfung."}
           </p>
-
         </div>
-
       </article>
 
       <aside class="panel">
-
-        <h3>KI-Hilfe</h3>
-
-        <p class="muted">
-          Frag nach einem Hinweis.
-          ScratchLab hilft beim Denken,
-          nicht beim Abschreiben.
-        </p>
-
-        <div class="quick-actions">
-
-          <button
-            class="secondary-button ai-quick"
-            data-question="Gib mir einen Tipp zu dieser Aufgabe."
-          >
-            Tipp
-          </button>
-
-          <button
-            class="secondary-button ai-quick"
-            data-question="Erklaere diese Aufgabe einfacher."
-          >
-            Einfacher
-          </button>
-
-          <button
-            class="secondary-button ai-quick"
-            data-question="Warum funktioniert das bei mir nicht?"
-          >
-            Fehlerhilfe
-          </button>
-
-          <button
-            class="secondary-button ai-quick"
-            data-question="Was ist der naechste kleine Schritt?"
-          >
-            Naechster Schritt
-          </button>
-
-        </div>
+        <h3>KI-Lernassistent</h3>
+        <p class="muted">Frag jederzeit etwas zur Lektion. Die KI hilft mit Denkanstößen und kann deinen Screenshot analysieren.</p>
 
         <form id="assistantForm">
+          <textarea name="message" placeholder="Stelle deine Frage..."></textarea>
 
-          <textarea
-            name="message"
-            placeholder="Warum bewegt sich meine Figur nicht?"
-          ></textarea>
+          <label class="file-upload">
+            📷 Screenshot hinzufügen
+            <input id="assistantImage" type="file" accept="image/png,image/jpeg,image/webp">
+          </label>
 
-          <button
-            class="secondary-button"
-            type="submit"
-          >
-            Fragen
-          </button>
-
+          <button class="secondary-button" type="submit">Fragen</button>
         </form>
 
-        <div
-          id="assistantAnswer"
-          class="assistant-chat"
-        ></div>
-
+        <p id="assistantStatus" class="muted"></p>
+        <div id="assistantAnswer" class="assistant-chat"></div>
       </aside>
-
     </section>
   `);
 
-  document
-    .querySelector("#completeLesson")
-    .addEventListener(
-      "click",
-      () => completeLesson(lesson)
-    );
+  const scratchInput = document.querySelector("#lessonSb3");
+  const scratchDropZone = document.querySelector("#scratchDropZone");
+  const selectedScratchFile = document.querySelector("#selectedScratchFile");
 
-  document
-    .querySelector("#assistantForm")
-    .addEventListener(
-      "submit",
-      event => {
-        event.preventDefault();
+  const showScratchFile = () => {
+    const file = scratchInput?.files?.[0];
+    if (!selectedScratchFile) return;
+    selectedScratchFile.textContent = file
+      ? `Ausgewählt: ${file.name} (${formatBytes(file.size)})`
+      : "Noch keine Scratch-Datei ausgewählt.";
+  };
 
-        askAssistant(
-          lesson.id,
-          event.currentTarget.querySelector(
-            "textarea"
-          ).value,
-          event.currentTarget
-        );
-      }
-    );
+  scratchDropZone?.addEventListener("click", () => scratchInput?.click());
+  scratchDropZone?.addEventListener("keydown", event => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      scratchInput?.click();
+    }
+  });
 
-  document
-    .querySelectorAll(".ai-quick")
-    .forEach(button => {
-      button.addEventListener(
-        "click",
-        () => {
-          askAssistant(
-            lesson.id,
-            button.dataset.question,
-            document.querySelector(
-              "#assistantForm"
-            )
-          );
-        }
-      );
+  ["dragenter", "dragover"].forEach(type => {
+    scratchDropZone?.addEventListener(type, event => {
+      event.preventDefault();
+      event.stopPropagation();
+      scratchDropZone.classList.add("is-dragging");
     });
+  });
+
+  ["dragleave", "drop"].forEach(type => {
+    scratchDropZone?.addEventListener(type, event => {
+      event.preventDefault();
+      event.stopPropagation();
+      scratchDropZone.classList.remove("is-dragging");
+    });
+  });
+
+  scratchDropZone?.addEventListener("drop", event => {
+    const files = event.dataTransfer?.files;
+    if (!files?.length || !scratchInput) return;
+    scratchInput.files = files;
+    showScratchFile();
+  });
+
+  scratchInput?.addEventListener("change", showScratchFile);
+
+  document.querySelector("#checkLessonProject")?.addEventListener("click", () => checkLessonProject(lesson));
+  document.querySelector("#checkScratchLink")?.addEventListener("click", () => checkScratchLink(lesson));
+  document.querySelector("#completeLesson")?.addEventListener("click", () => completeLesson(lesson));
+  document.querySelector("#assistantForm")?.addEventListener("submit", event => {
+    event.preventDefault();
+    askAssistant(lesson.id, event.currentTarget);
+  });
 }
 
-/* =========================
-   COMPLETE LESSON
-========================= */
+async function checkLessonProject(lesson) {
+  const fileInput = document.querySelector("#lessonSb3");
+  const resultBox = document.querySelector("#lessonCheckResult");
+  const completeButton = document.querySelector("#completeLesson");
+  const file = fileInput?.files?.[0];
+
+  if (!file) {
+    resultBox.innerHTML = `<p class="error">Bitte wähle zuerst eine .sb3-Datei aus.</p>`;
+    return;
+  }
+
+  if (!file.name.toLowerCase().endsWith(".sb3")) {
+    resultBox.innerHTML = `<p class="error">Bitte lade eine echte Scratch-.sb3-Datei hoch.</p>`;
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    resultBox.innerHTML = `<p class="error">Die .sb3-Datei darf maximal 10 MB groß sein.</p>`;
+    return;
+  }
+
+  delete state.projectVerificationTokens[lesson.id];
+  resultBox.innerHTML = `<p class="muted">🔎 Deine Scratch-Datei wird geprüft...</p>`;
+  completeButton.disabled = true;
+  completeButton.textContent = "🔒 Erst Projekt prüfen";
+
+  try {
+    const dataBase64 = await fileToBase64(file);
+
+    const result = await api("/api/projects/check", {
+      method: "POST",
+      body: JSON.stringify({
+        lessonId: lesson.id,
+        dataBase64
+      })
+    });
+
+    const check = result?.result || {};
+
+    resultBox.innerHTML = `
+      <div class="${check.passed ? "success" : "error"}">
+        <strong>${check.passed ? "✅ Aufgabe erfüllt!" : "❌ Noch nicht erfüllt"}</strong>
+        <p>${escapeHtml(check.feedback || "")}</p>
+        ${
+          Array.isArray(check.details)
+            ? `<div class="check-details">
+                ${check.details.map(item => `
+                  <p>${item.passed ? "✅" : "❌"} ${escapeHtml(item.message || "")}</p>
+                `).join("")}
+              </div>`
+            : ""
+        }
+      </div>
+    `;
+
+    if (check.passed) {
+      completeButton.disabled = false;
+      completeButton.textContent = "Lektion abschließen";
+      completeButton.className = "primary-button";
+      document.querySelector("#lessonResult").textContent =
+        "Projekt erfolgreich geprüft. Jetzt kannst du die Lektion abschließen.";
+    } else {
+      completeButton.disabled = true;
+      completeButton.textContent = "🔒 Erst Projekt prüfen";
+      document.querySelector("#lessonResult").textContent =
+        "Achte noch einmal auf die fehlenden Anforderungen.";
+    }
+  } catch (error) {
+    resultBox.innerHTML = `<p class="error">${escapeHtml(error.message)}</p>`;
+    completeButton.disabled = true;
+  }
+}
+
+async function checkScratchLink(lesson) {
+  const input = document.querySelector("#scratchProjectUrl");
+  const resultBox = document.querySelector("#lessonCheckResult");
+  const completeButton = document.querySelector("#completeLesson");
+  const button = document.querySelector("#checkScratchLink");
+
+  const url = String(input?.value || "").trim();
+
+  if (!url) {
+    resultBox.innerHTML = `<p class="error">Bitte füge zuerst deinen Scratch-Projekt-Link ein.</p>`;
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Projekt wird geprüft...";
+  completeButton.disabled = true;
+  delete state.projectVerificationTokens[lesson.id];
+  resultBox.innerHTML = `<p class="muted">🔎 Dein Scratch-Projekt wird geprüft...</p>`;
+
+  try {
+    const result = await api("/api/projects/check-link", {
+      method: "POST",
+      body: JSON.stringify({
+        lessonId: lesson.id,
+        scratchUrl: url
+      })
+    });
+
+    const check = result?.result || {};
+
+    resultBox.innerHTML = `
+      <div class="${check.passed ? "success" : "error"}">
+        <strong>${check.passed ? "✅ Aufgabe erfüllt!" : "❌ Noch nicht erfüllt"}</strong>
+        <p>${escapeHtml(check.feedback || "")}</p>
+        ${
+          Array.isArray(check.details)
+            ? `<div class="check-details">
+                ${check.details.map(item =>
+                  `<p>${item.passed ? "✅" : "❌"} ${escapeHtml(item.message || "")}</p>`
+                ).join("")}
+              </div>`
+            : ""
+        }
+      </div>
+    `;
+
+    if (check.passed && result.verificationToken) {
+      state.projectVerificationTokens[lesson.id] = result.verificationToken;
+      completeButton.disabled = false;
+      completeButton.textContent = "Lektion abschließen";
+      completeButton.className = "primary-button";
+      document.querySelector("#lessonResult").textContent =
+        "Projekt erfolgreich geprüft. Jetzt kannst du die Lektion abschließen.";
+    } else {
+      delete state.projectVerificationTokens[lesson.id];
+      completeButton.disabled = true;
+      completeButton.textContent = "🔒 Erst Projekt prüfen";
+      document.querySelector("#lessonResult").textContent =
+        "Achte noch einmal auf die fehlenden Anforderungen.";
+    }
+  } catch (error) {
+    delete state.projectVerificationTokens[lesson.id];
+    resultBox.innerHTML = `<p class="error">${escapeHtml(error.message)}</p>`;
+    completeButton.disabled = true;
+    completeButton.textContent = "🔒 Erst Projekt prüfen";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Scratch-Projekt prüfen";
+  }
+}
 
 async function completeLesson(lesson) {
   if (!state.user) {
-    location.hash = "#/signup";
+    location.hash = "#/login";
     return;
   }
 
+  const button = document.querySelector("#completeLesson");
+  const resultBox = document.querySelector("#lessonResult");
+
+  button.disabled = true;
+  button.textContent = "Wird gespeichert...";
+
   try {
     const result = await api(
-      `/api/lessons/${lesson.id}/complete`,
-      {
-        method: "POST",
-        body: "{}"
-      }
+      `/api/lessons/${encodeURIComponent(lesson.id)}/complete`,
+      { method: "POST", body: "{}" }
     );
 
-    state.user = result.user;
+    state.user = result.user || state.user;
+    state.progress = { ...EMPTY_PROGRESS, ...(await api("/api/progress")) };
 
-    state.progress =
-      await api("/api/progress");
-
-    const button =
-      document.querySelector(
-        "#completeLesson"
-      );
-
-    button.textContent =
-      "Schon geschafft";
-
-    button.className =
-      "secondary-button";
-
-    document.querySelector(
-      "#lessonResult"
-    ).textContent = result.awardedXp
-      ? `Lektion abgeschlossen! +${result.awardedXp} XP.`
-      : "Diese Lektion war schon gespeichert. XP gibt es nur einmal.";
-
+    button.textContent = "Schon geschafft";
+    button.className = "secondary-button";
+    resultBox.textContent = result.awardedXp
+      ? `Lektion erfolgreich abgeschlossen! +${result.awardedXp} XP.`
+      : "Diese Lektion war schon gespeichert.";
   } catch (error) {
-    document.querySelector(
-      "#lessonResult"
-    ).textContent =
-      error.message;
+    button.disabled = false;
+    button.textContent = "Lektion abschließen";
+    resultBox.textContent = error.message;
   }
 }
 
-/* =========================
-   AI ASSISTANT
-========================= */
+async function askAssistant(lessonId, form) {
+  const text = String(form.querySelector("textarea")?.value || "").trim();
+  const imageInput = form.querySelector("#assistantImage");
+  const image = imageInput?.files?.[0];
+  const answerBox = document.querySelector("#assistantAnswer");
+  const statusBox = document.querySelector("#assistantStatus");
+  const submitButton = form.querySelector("button[type='submit']");
 
-async function askAssistant(
-  lessonId,
-  question,
-  form
-) {
-  const text = String(
-    question || ""
-  ).trim();
-
-  if (!text) return;
-
-  const answerBox =
-    document.querySelector(
-      "#assistantAnswer"
-    );
+  if (!text && !image) return;
 
   answerBox.insertAdjacentHTML(
     "beforeend",
-    `
-      <div class="chat-turn user-turn">
-        ${escapeHtml(text)}
-      </div>
-    `
+    `<div class="chat-turn user-turn">${escapeHtml(text || "Screenshot hochgeladen")}</div>`
   );
 
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = "Antwort wird erstellt...";
+  }
+  if (statusBox) statusBox.textContent = "KI denkt...";
+
   try {
-    const result = await api(
-      "/api/assistant",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          message: text,
-          lessonId
-        })
+    let imageBase64 = null;
+    let imageMimeType = null;
+
+    if (image) {
+      if (!["image/png", "image/jpeg", "image/webp"].includes(image.type)) {
+        throw new Error("Bitte nutze PNG, JPG/JPEG oder WebP.");
       }
-    );
+      if (image.size > 5 * 1024 * 1024) {
+        throw new Error("Der Screenshot darf maximal 5 MB groß sein.");
+      }
+
+      imageBase64 = await fileToBase64(image);
+      imageMimeType = image.type;
+    }
+
+    const result = await api("/api/assistant", {
+      method: "POST",
+      body: JSON.stringify({
+        message: text || "Analysiere meinen Screenshot und sage mir, worauf ich achten sollte.",
+        lessonId,
+        imageBase64,
+        imageMimeType
+      })
+    });
 
     answerBox.insertAdjacentHTML(
       "beforeend",
-      `
-        <div class="chat-turn coach-turn">
-          ${escapeHtml(
-            result.response
-          )}
-        </div>
-      `
+      `<div class="chat-turn coach-turn">${escapeHtml(result.response || "")}</div>`
     );
 
-    form.querySelector(
-      "textarea"
-    ).value = "";
-
-  } catch {
+    form.querySelector("textarea").value = "";
+    if (imageInput) imageInput.value = "";
+    if (statusBox) statusBox.textContent = "";
+    answerBox.scrollTop = answerBox.scrollHeight;
+  } catch (error) {
     answerBox.insertAdjacentHTML(
       "beforeend",
-      `
-        <div class="chat-turn coach-turn">
-          Die KI ist gerade nicht erreichbar.
-          Versuch es gleich noch einmal.
-        </div>
-      `
+      `<div class="chat-turn coach-turn">${escapeHtml(error.message)}</div>`
     );
+    if (statusBox) statusBox.textContent = "";
+  } finally {
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = "Fragen";
+    }
   }
 }
 
-/* =========================
-   PREMIUM
-========================= */
+function formatBytes(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+}
 
-function renderPremium() {
-  const pricing = state.pricing || {
-    singleLessonPriceEur: 5,
-    premiumMonthlyPriceEur: 15,
-    checkoutReady: false
-  };
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const value = String(reader.result);
+      const comma = value.indexOf(",");
+      resolve(comma >= 0 ? value.slice(comma + 1) : value);
+    };
+    reader.onerror = () => reject(new Error("Die Datei konnte nicht gelesen werden."));
+    reader.readAsDataURL(file);
+  });
+}
 
+function renderFeedback() {
   setView(`
     <section class="screen grid two">
-
       <div>
-
-        <p class="eyebrow">
-          Weiterlernen
-        </p>
-
-        <h2>
-          Alle Lektionen freischalten.
-        </h2>
-
-        <p>
-          Einzelne Premium-Lektion fuer
-          ${pricing.singleLessonPriceEur} EUR
-          oder Premium fuer
-          ${pricing.premiumMonthlyPriceEur}
-          EUR im Monat.
-        </p>
-
-        <a
-          class="secondary-button"
-          href="#/learn"
-        >
-          Zurueck zum Kurs
-        </a>
-
+        <p class="eyebrow">Feedback & Hilfe</p>
+        <h2>Hilf uns, ScratchLab besser zu machen.</h2>
+        <p>Was gefällt dir? Was fehlt? Oder ist etwas kaputt?</p>
       </div>
 
-      <div class="panel premium-panel">
+      <div class="panel">
+        <form id="feedbackForm">
+          <label>Bewertung
+            <select name="rating" required>
+              <option value="">Bitte auswählen</option>
+              <option value="5">⭐⭐⭐⭐⭐ – Sehr gut</option>
+              <option value="4">⭐⭐⭐⭐ – Gut</option>
+              <option value="3">⭐⭐⭐ – Okay</option>
+              <option value="2">⭐⭐ – Könnte besser sein</option>
+              <option value="1">⭐ – Nicht gut</option>
+            </select>
+          </label>
 
-        <h3>Premium</h3>
+          <label>Kategorie
+            <select name="type" required>
+              <option value="Lob">Lob</option>
+              <option value="Verbesserung">Verbesserung</option>
+              <option value="Fehler">Fehler</option>
+              <option value="Hilfe">Hilfe</option>
+            </select>
+          </label>
 
-        <div class="price">
-          ${pricing.premiumMonthlyPriceEur}
-          EUR
-          <span>/ Monat</span>
-        </div>
+          <label>Dein Feedback
+            <textarea name="message" required minlength="5" placeholder="Schreib hier dein Feedback..."></textarea>
+          </label>
 
-        <p>
-          Alle aktuellen und spaeteren
-          Scratch-Lektionen, mehr KI-Hilfe
-          und Belohnungen.
-        </p>
+          <label>E-Mail (optional)
+            <input name="email" type="email" placeholder="Nur wenn wir antworten sollen">
+          </label>
 
-        <button
-          id="upgradePremium"
-          class="primary-button"
-          type="button"
-        >
-          Jetzt auf Premium upgraden
-        </button>
-
-        <p
-          id="premiumMessage"
-          class="muted"
-        >
-          ${
-            pricing.checkoutReady
-              ? "Stripe ist konfiguriert."
-              : "Stripe Checkout ist noch nicht vollstaendig konfiguriert."
-          }
-        </p>
-
+          <button class="primary-button" type="submit">Feedback senden</button>
+          <p id="feedbackResult" class="success"></p>
+        </form>
       </div>
-
     </section>
   `);
 
-  document
-    .querySelector("#upgradePremium")
-    .addEventListener(
-      "click",
-      async () => {
-        const message =
-          document.querySelector(
-            "#premiumMessage"
-          );
+  document.querySelector("#feedbackForm")?.addEventListener("submit", async event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const resultBox = document.querySelector("#feedbackResult");
+    const button = form.querySelector("button");
 
-        try {
-          await api(
-            "/api/checkout/premium",
-            {
-              method: "POST",
-              body: "{}"
-            }
-          );
-        } catch (error) {
-          message.textContent =
-            error.message;
-        }
-      }
-    );
+    button.disabled = true;
+    resultBox.textContent = "";
+
+    try {
+      const data = Object.fromEntries(new FormData(form).entries());
+      await api("/api/feedback", {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
+
+      form.reset();
+      resultBox.textContent = "Danke! Dein Feedback wurde gespeichert.";
+    } catch (error) {
+      resultBox.textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
 }
 
-/* =========================
-   LOCKED LESSON
-========================= */
+function renderPremium() {
+  const pricing = state.pricing;
+
+  setView(`
+    <section class="screen grid two">
+      <div>
+        <p class="eyebrow">Weiterlernen</p>
+        <h2>Alle Lektionen freischalten.</h2>
+        <p>Eine Premium-Lektion kostet ${pricing.singleLessonPriceEur} € oder Premium kostet ${pricing.premiumMonthlyPriceEur} € im Monat.</p>
+        <a class="secondary-button" href="#/learn">Zurück zu den Kursen</a>
+      </div>
+
+      <div class="panel premium-panel">
+        <h3>Premium</h3>
+        <div class="price">${pricing.premiumMonthlyPriceEur} € <span>/ Monat</span></div>
+        <p>Alle aktuellen und späteren Scratch-Lektionen freischalten.</p>
+        <button id="upgradePremium" class="primary-button" type="button">Jetzt auf Premium upgraden</button>
+        <p id="premiumMessage" class="muted">
+          ${pricing.checkoutReady ? "Stripe ist konfiguriert." : "Stripe ist noch nicht vollständig konfiguriert."}
+        </p>
+      </div>
+    </section>
+  `);
+
+  document.querySelector("#upgradePremium")?.addEventListener("click", async () => {
+    const message = document.querySelector("#premiumMessage");
+    try {
+      const result = await api("/api/checkout/premium", {
+        method: "POST",
+        body: "{}"
+      });
+
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+      } else {
+        message.textContent = result.error || "Checkout konnte nicht gestartet werden.";
+      }
+    } catch (error) {
+      message.textContent = error.message;
+    }
+  });
+}
 
 function renderLockedLesson(id) {
-  const { lesson } =
-    lessonById(id);
+  const lesson = allLessons().find(item => String(item.id) === String(id));
 
   if (!lesson) {
-    setView(`
-      <section class="screen">
-        <h2>Lektion nicht gefunden</h2>
-      </section>
-    `);
-
+    setView(`<section class="screen"><h2>Lektion nicht gefunden</h2></section>`);
     return;
   }
 
-  const pricing = state.pricing || {
-    singleLessonPriceEur: 5,
-    premiumMonthlyPriceEur: 15
-  };
-
   setView(`
     <section class="screen grid two">
-
       <div>
-
-        <a
-          class="secondary-button back-button"
-          href="#/learn"
-        >
-          Zurueck zum Kurs
-        </a>
-
-        <p class="eyebrow">
-          Premium-Lektion
-        </p>
-
-        <h2>
-          ${escapeHtml(lesson.title)}
-        </h2>
-
-        <p>
-          ${escapeHtml(lesson.summary)}
-        </p>
-
+        <a class="secondary-button back-button" href="#/learn">Zurück zum Kurs</a>
+        <p class="eyebrow">Premium-Lektion</p>
+        <h2>${escapeHtml(lesson.title)}</h2>
+        <p>${escapeHtml(lesson.summary || "")}</p>
       </div>
 
       <div class="panel premium-panel">
-
         <h3>Freischalten</h3>
-
-        <div class="price">
-          ${
-            lesson.price_eur ||
-            pricing.singleLessonPriceEur
-          }
-          EUR
-          <span>einmalig</span>
-        </div>
-
-        <p>
-          Nur diese Lektion dauerhaft
-          freischalten.
-        </p>
-
-        <button
-          id="buyLesson"
-          class="secondary-button"
-          type="button"
-        >
-          Diese Lektion kaufen
-        </button>
-
+        <div class="price">${lesson.price_eur || state.pricing.singleLessonPriceEur} € <span>einmalig</span></div>
+        <button id="buyLesson" class="secondary-button" type="button">Diese Lektion kaufen</button>
         <hr>
-
-        <div class="price">
-          ${pricing.premiumMonthlyPriceEur}
-          EUR
-          <span>/ Monat</span>
-        </div>
-
-        <p>
-          Alle Lektionen und spaeteren
-          Premium-Inhalte freischalten.
-        </p>
-
-        <a
-          class="primary-button"
-          href="#/premium"
-        >
-          Jetzt auf Premium upgraden
-        </a>
-
-        <p
-          id="purchaseMessage"
-          class="muted"
-        ></p>
-
+        <div class="price">${state.pricing.premiumMonthlyPriceEur} € <span>/ Monat</span></div>
+        <a class="primary-button" href="#/premium">Jetzt auf Premium upgraden</a>
+        <p id="purchaseMessage" class="muted"></p>
       </div>
-
     </section>
   `);
 
-  document
-    .querySelector("#buyLesson")
-    .addEventListener(
-      "click",
-      async () => {
-        const message =
-          document.querySelector(
-            "#purchaseMessage"
-          );
+  document.querySelector("#buyLesson")?.addEventListener("click", async () => {
+    const message = document.querySelector("#purchaseMessage");
+    try {
+      const result = await api("/api/checkout/lesson", {
+        method: "POST",
+        body: JSON.stringify({ lessonId: lesson.id })
+      });
 
-        try {
-          await api(
-            "/api/checkout/lesson",
-            {
-              method: "POST",
-              body: JSON.stringify({
-                lessonId: lesson.id
-              })
-            }
-          );
-        } catch (error) {
-          message.textContent =
-            error.message;
-        }
+      if (result.checkoutUrl) {
+        window.location.href = result.checkoutUrl;
+      } else {
+        message.textContent = result.error || "Checkout konnte nicht gestartet werden.";
       }
-    );
+    } catch (error) {
+      message.textContent = error.message;
+    }
+  });
 }
 
-/* =========================
-   PROJECTS
-========================= */
+function projectCard(project) {
+  return `
+    <article class="project-card">
+      <h3>${escapeHtml(project.title)}</h3>
+      <p>${escapeHtml(project.description || "Keine Beschreibung")}</p>
+      ${
+        project.scratch_url
+          ? `<a class="secondary-button" href="${escapeHtml(project.scratch_url)}" target="_blank" rel="noopener noreferrer">Scratch öffnen</a>`
+          : ""
+      }
+      <span class="pill">${project.is_public ? "Öffentlich" : "Privat"}</span>
+    </article>
+  `;
+}
 
 async function renderProjects() {
   if (!state.user) {
-    location.hash = "#/signup";
+    location.hash = "#/login";
     return;
   }
 
   try {
-    state.projects =
-      await api("/api/projects");
+    state.projects = await api("/api/projects");
   } catch {
-    state.projects = {
-      own: [],
-      public: []
-    };
+    state.projects = { own: [], public: [] };
   }
 
   setView(`
     <section class="screen">
-
       <div class="screen-header">
-
         <div>
-
-          <p class="eyebrow">
-            Deine Werkstatt
-          </p>
-
-          <h2>
-            Scratch-Projekte
-          </h2>
-
-          <p>
-            Speichere Ideen, veroeffentliche
-            spaeter ausgewaehlte Projekte
-            und pruefe .sb3-Dateien.
-          </p>
-
+          <p class="eyebrow">Deine Werkstatt</p>
+          <h2>Scratch-Projekte</h2>
+          <p>Speichere deine Ideen und prüfe deine .sb3-Dateien.</p>
         </div>
-
+        <a class="secondary-button" href="#/feedback">Feedback & Hilfe</a>
       </div>
 
       <div class="grid two">
-
-        <form
-          id="projectForm"
-          class="panel"
-        >
-
+        <form id="projectForm" class="panel">
           <h3>Projekt speichern</h3>
 
-          <label>
-            Titel
-            <input
-              name="title"
-              required
-              minlength="3"
-            >
+          <label>Titel
+            <input name="title" required minlength="3">
           </label>
 
-          <label>
-            Beschreibung
+          <label>Beschreibung
             <textarea name="description"></textarea>
           </label>
 
-          <label>
-            Scratch-Link
-            <input
-              name="scratchUrl"
-              placeholder="https://scratch.mit.edu/projects/..."
-            >
+          <label>Scratch-Link
+            <input name="scratchUrl" placeholder="https://scratch.mit.edu/projects/...">
           </label>
 
           <label class="inline-label">
-            <input
-              name="isPublic"
-              type="checkbox"
-            >
-            Oeffentlich sichtbar machen
+            <input name="isPublic" type="checkbox">
+            Öffentlich sichtbar machen
           </label>
 
-          <button
-            class="primary-button"
-            type="submit"
-          >
-            Speichern
-          </button>
-
-          <p
-            id="projectError"
-            class="error"
-          ></p>
-
+          <button class="primary-button" type="submit">Speichern</button>
+          <p id="projectError" class="error"></p>
         </form>
 
-        <form
-          id="checkForm"
-          class="panel"
-        >
+        <form id="checkForm" class="panel">
+          <h3>.sb3 prüfen</h3>
 
-          <h3>.sb3 pruefen</h3>
-
-          <label>
-            Lektion
-
+          <label>Lektion
             <select name="lessonId">
-
-              ${allLessons()
-                .map(
-                  lesson => `
-                    <option
-                      value="${escapeHtml(
-                        lesson.id
-                      )}"
-                    >
-                      ${escapeHtml(
-                        lesson.title
-                      )}
-                    </option>
-                  `
-                )
-                .join("")}
-
+              ${allLessons().map(lesson =>
+                `<option value="${escapeHtml(lesson.id)}">${escapeHtml(lesson.title)}</option>`
+              ).join("")}
             </select>
-
           </label>
 
-          <label>
-            Scratch-Datei
-
-            <input
-              name="sb3"
-              type="file"
-              accept=".sb3"
-              required
-            >
+          <label>Scratch-Datei
+            <input name="sb3" type="file" accept=".sb3,application/zip" required>
           </label>
 
-          <button
-            class="secondary-button"
-            type="submit"
-          >
-            Projekt pruefen
-          </button>
-
-          <div
-            id="checkResult"
-            class="check-result"
-          ></div>
-
+          <button class="secondary-button" type="submit">Projekt prüfen</button>
+          <div id="checkResult" class="check-result"></div>
         </form>
-
       </div>
 
-      <div
-        class="project-list"
-        style="margin-top:16px"
-      >
-
+      <div class="project-list" style="margin-top:16px">
         ${
-          (state.projects.own || [])
-            .map(projectCard)
-            .join("") ||
-          `
-            <div class="panel">
-              <p class="muted">
-                Dein erstes Projekt wartet.
-              </p>
-            </div>
-          `
+          Array.isArray(state.projects.own) && state.projects.own.length
+            ? state.projects.own.map(projectCard).join("")
+            : `<div class="panel"><p class="muted">Dein erstes Projekt wartet.</p></div>`
         }
-
       </div>
-
     </section>
   `);
 
-  document
-    .querySelector("#projectForm")
-    .addEventListener(
-      "submit",
-      saveProject
-    );
-
-  document
-    .querySelector("#checkForm")
-    .addEventListener(
-      "submit",
-      checkProject
-    );
+  document.querySelector("#projectForm")?.addEventListener("submit", saveProject);
+  document.querySelector("#checkForm")?.addEventListener("submit", checkProject);
 }
 
 async function saveProject(event) {
   event.preventDefault();
 
-  const form =
-    new FormData(
-      event.currentTarget
-    );
+  const form = new FormData(event.currentTarget);
 
   try {
-    await api(
-      "/api/projects",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          title: form.get("title"),
-          description:
-            form.get("description"),
-          scratchUrl:
-            form.get("scratchUrl"),
-          isPublic:
-            form.get("isPublic") === "on"
-        })
-      }
-    );
+    await api("/api/projects", {
+      method: "POST",
+      body: JSON.stringify({
+        title: form.get("title"),
+        description: form.get("description"),
+        scratchUrl: form.get("scratchUrl"),
+        isPublic: form.get("isPublic") === "on"
+      })
+    });
 
     await renderProjects();
-
   } catch (error) {
-    document.querySelector(
-      "#projectError"
-    ).textContent =
-      error.message;
+    document.querySelector("#projectError").textContent = error.message;
   }
 }
 
 async function checkProject(event) {
   event.preventDefault();
 
-  const form =
-    new FormData(
-      event.currentTarget
-    );
+  const form = new FormData(event.currentTarget);
+  const file = form.get("sb3");
+  const resultBox = document.querySelector("#checkResult");
 
-  const file =
-    form.get("sb3");
+  if (!file || !(file instanceof File) || !file.size) {
+    resultBox.innerHTML = `<p class="error">Bitte wähle eine .sb3-Datei aus.</p>`;
+    return;
+  }
 
-  const resultBox =
-    document.querySelector(
-      "#checkResult"
-    );
+  if (!file.name.toLowerCase().endsWith(".sb3")) {
+    resultBox.innerHTML = `<p class="error">Bitte lade eine echte Scratch-.sb3-Datei hoch.</p>`;
+    return;
+  }
 
-  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) {
+    resultBox.innerHTML = `<p class="error">Die Datei darf maximal 10 MB groß sein.</p>`;
+    return;
+  }
 
-  resultBox.textContent =
-    "Pruefung laeuft...";
+  resultBox.innerHTML = `<p class="muted">🔎 Projekt wird geprüft...</p>`;
 
   try {
-    const dataBase64 =
-      await fileToBase64(file);
+    const result = await api("/api/projects/check", {
+      method: "POST",
+      body: JSON.stringify({
+        lessonId: form.get("lessonId"),
+        dataBase64: await fileToBase64(file)
+      })
+    });
 
-    const result =
-      await api(
-        "/api/projects/check",
-        {
-          method: "POST",
-          body: JSON.stringify({
-            lessonId:
-              form.get("lessonId"),
-            dataBase64
-          })
-        }
-      );
-
-    const details =
-      result.result?.details || [];
+    const check = result?.result || {};
 
     resultBox.innerHTML = `
-      <p class="success">
-        ${escapeHtml(
-          result.result?.feedback || ""
-        )}
-      </p>
-
-      ${details
-        .map(
-          item => `
-            <p>
-              ${
-                item.passed
-                  ? "OK"
-                  : "Fehlt"
-              }:
-              ${escapeHtml(
-                item.message
-              )}
-            </p>
-          `
-        )
-        .join("")}
+      <div class="${check.passed ? "success" : "error"}">
+        <strong>${check.passed ? "✅ Aufgabe erfüllt!" : "❌ Noch nicht erfüllt"}</strong>
+        <p>${escapeHtml(check.feedback || "")}</p>
+        ${
+          Array.isArray(check.details)
+            ? check.details.map(item =>
+                `<p>${item.passed ? "✅" : "❌"} ${escapeHtml(item.message || "")}</p>`
+              ).join("")
+            : ""
+        }
+      </div>
     `;
-
   } catch (error) {
-    resultBox.textContent =
-      error.message ||
-      "Dein Projekt konnte noch nicht geprueft werden.";
+    resultBox.innerHTML = `<p class="error">${escapeHtml(error.message)}</p>`;
   }
 }
 
-function fileToBase64(file) {
-  return new Promise(
-    (resolve, reject) => {
-      const reader =
-        new FileReader();
-
-      reader.onload = () =>
-        resolve(
-          String(
-            reader.result
-          ).split(",")[1]
-        );
-
-      reader.onerror =
-        reject;
-
-      reader.readAsDataURL(file);
-    }
-  );
-}
-
-function projectCard(project) {
-  return `
-    <article class="project-card">
-
-      <h3>
-        ${escapeHtml(
-          project.title
-        )}
-      </h3>
-
-      <p>
-        ${escapeHtml(
-          project.description ||
-          "Keine Beschreibung"
-        )}
-      </p>
-
-      ${
-        project.scratch_url
-          ? `
-            <a
-              class="secondary-button"
-              href="${escapeHtml(
-                project.scratch_url
-              )}"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Scratch oeffnen
-            </a>
-          `
-          : ""
-      }
-
-      ${
-        project.is_public
-          ? `
-            <span class="pill">
-              Oeffentlich
-            </span>
-          `
-          : `
-            <span class="pill">
-              Privat
-            </span>
-          `
-      }
-
-    </article>
-  `;
-}
-
-/* =========================
-   ROUTER
-========================= */
-
-async function router() {
+async function renderRouter() {
   await refresh();
 
-  const hash =
-    location.hash
-      .replace(/^#\/?/, "");
+  const hash = location.hash.replace(/^#\/?/, "");
+  const [route, id] = hash.split("/");
 
-  const parts =
-    hash.split("/");
-
-  const route =
-    parts[0] || "";
-
-  const id =
-    parts[1];
-
-  if (!route) {
-    renderLanding();
-  } else if (route === "signup") {
-    renderAuth("signup");
-  } else if (route === "login") {
-    renderAuth("login");
-  } else if (route === "dashboard") {
-    renderDashboard();
-  } else if (route === "learn") {
-    renderLearn();
-  } else if (route === "lesson") {
-    renderLesson(id);
-  } else if (route === "locked") {
-    renderLockedLesson(id);
-  } else if (route === "projects") {
-    await renderProjects();
-  } else if (route === "premium") {
-    renderPremium();
-  } else {
-    renderLanding();
+  switch (route) {
+    case "":
+      renderLanding();
+      break;
+    case "signup":
+      renderAuth("signup");
+      break;
+    case "login":
+      renderAuth("login");
+      break;
+    case "dashboard":
+      renderDashboard();
+      break;
+    case "learn":
+      renderLearn();
+      break;
+    case "lesson":
+      renderLesson(id);
+      break;
+    case "locked":
+      renderLockedLesson(id);
+      break;
+    case "projects":
+      await renderProjects();
+      break;
+    case "premium":
+      renderPremium();
+      break;
+    case "feedback":
+      renderFeedback();
+      break;
+    default:
+      renderLanding();
   }
 }
 
-/* =========================
-   AUTH BUTTON
-========================= */
-
-authAction.addEventListener(
-  "click",
-  async () => {
-    if (state.user) {
-      try {
-        await api(
-          "/api/auth/logout",
-          {
-            method: "POST",
-            body: "{}"
-          }
-        );
-      } catch {
-        // Logout trotzdem lokal ausfuehren
-      }
-
-      state.user = null;
-
-      location.hash = "#/";
-
-      await router();
-
-    } else {
+if (authAction) {
+  authAction.addEventListener("click", async () => {
+    if (!state.user) {
       location.hash = "#/login";
+      return;
     }
-  }
-);
 
-/* =========================
-   START
-========================= */
+    try {
+      await api("/api/auth/logout", {
+        method: "POST",
+        body: "{}"
+      });
+    } catch {
+      // Cookie wird trotzdem lokal gelöscht.
+    }
 
-window.addEventListener(
-  "hashchange",
-  () => {
-    router().catch(error => {
-      setView(`
-        <section class="screen">
+    state.user = null;
+    state.progress = { ...EMPTY_PROGRESS };
+    location.hash = "#/";
+    await renderRouter();
+  });
+}
 
-          <h2>
-            ScratchLab braucht kurz Hilfe
-          </h2>
+window.addEventListener("hashchange", () => {
+  renderRouter().catch(error => {
+    setView(`
+      <section class="screen">
+        <h2>ScratchLab braucht kurz Hilfe</h2>
+        <p class="error">${escapeHtml(error.message)}</p>
+        <a class="secondary-button" href="#/">Zur Startseite</a>
+      </section>
+    `);
+  });
+});
 
-          <p class="error">
-            ${escapeHtml(
-              error.message
-            )}
-          </p>
-
-        </section>
-      `);
-    });
-  }
-);
-
-router().catch(error => {
+renderRouter().catch(error => {
   setView(`
     <section class="screen">
-
-      <h2>
-        ScratchLab braucht kurz Hilfe
-      </h2>
-
-      <p class="error">
-        ${escapeHtml(
-          error.message
-        )}
-      </p>
-
+      <h2>ScratchLab braucht kurz Hilfe</h2>
+      <p class="error">${escapeHtml(error.message)}</p>
+      <a class="secondary-button" href="#/">Zur Startseite</a>
     </section>
   `);
 });

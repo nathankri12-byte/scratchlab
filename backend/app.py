@@ -668,6 +668,57 @@ def call_gemini(
         ) from exc
 
 
+def scratch_project_id_from_url(value: str) -> str:
+    value = str(value or "").strip()
+    if re.fullmatch(r"\d{1,20}", value):
+        return value
+    parsed = urlparse(value)
+    if parsed.netloc.lower() not in {"scratch.mit.edu", "www.scratch.mit.edu"}:
+        raise ValueError("Bitte füge einen gültigen Scratch-Projekt-Link ein.")
+    match = re.search(r"/projects/(\d+)", parsed.path)
+    if not match:
+        raise ValueError("Im Scratch-Link wurde keine Projekt-ID gefunden.")
+    return match.group(1)
+
+
+def fetch_scratch_project_json(project_id: str) -> dict[str, Any]:
+    request = Request(
+        f"https://api.scratch.mit.edu/projects/{quote(project_id)}",
+        headers={"User-Agent": "ScratchLab/0.4"},
+        method="GET",
+    )
+    try:
+        with urlopen(request, timeout=15) as response:
+            metadata = json.loads(response.read().decode("utf-8"))
+    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
+        raise ValueError(
+            "Das Scratch-Projekt konnte nicht abgerufen werden. "
+            "Prüfe den Link und ob das Projekt öffentlich geteilt ist."
+        ) from exc
+
+    token = metadata.get("project_token")
+    if not token:
+        raise ValueError("Das Scratch-Projekt muss öffentlich geteilt sein.")
+
+    request = Request(
+        f"https://projects.scratch.mit.edu/{quote(project_id)}?token={quote(str(token))}",
+        headers={"User-Agent": "ScratchLab/0.4"},
+        method="GET",
+    )
+    try:
+        with urlopen(request, timeout=20) as response:
+            project = json.loads(response.read().decode("utf-8"))
+    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise ValueError(
+            "Die Scratch-Projektdaten konnten nicht geladen werden. "
+            "Prüfe, ob das Projekt öffentlich geteilt ist."
+        ) from exc
+
+    if not isinstance(project, dict) or not isinstance(project.get("targets"), list):
+        raise ValueError("Scratch hat keine gültigen Projektdaten zurückgegeben.")
+    return project
+
+
 class ScratchLabServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
@@ -744,6 +795,9 @@ class Handler(SimpleHTTPRequestHandler):
 
             elif method == "POST" and path == "/api/projects/check":
                 self.check_project()
+
+            elif method == "POST" and path == "/api/projects/check-link":
+                self.check_project_link()
 
             elif method == "POST" and path == "/api/projects":
                 self.create_project()
@@ -1260,6 +1314,50 @@ class Handler(SimpleHTTPRequestHandler):
         self.award_badges(user["id"])
 
         self.json_response({"analysis": analysis, "result": result})
+
+    def check_project_link(self) -> None:
+        user = self.require_user()
+        payload = self.read_json()
+
+        lesson_id = str(payload.get("lessonId", "")).strip() or None
+        scratch_url = str(payload.get("scratchUrl", "")).strip()
+        if not scratch_url:
+            raise ValueError("Bitte füge einen Scratch-Projekt-Link ein.")
+
+        project_id = scratch_project_id_from_url(scratch_url)
+        project = fetch_scratch_project_json(project_id)
+        analysis = analyze_scratch_project_json(project)
+
+        _, lesson = find_lesson(lesson_id) if lesson_id else (None, None)
+        result = evaluate_project_for_lesson(analysis, lesson)
+
+        verification_token = (
+            secrets.token_urlsafe(32) if result.get("passed") else None
+        )
+
+        sb_insert(
+            "project_checks",
+            {
+                "user_id": user["id"],
+                "project_id": None,
+                "lesson_id": lesson_id,
+                "score": result["score"],
+                "total": result["total"],
+                "feedback": result["feedback"],
+                "details": json.dumps(result["details"], ensure_ascii=False),
+                "created_at": now_iso(),
+                "verification_token": verification_token,
+                "used_at": None,
+            },
+            returning=False,
+        )
+
+        self.json_response({
+            "projectId": project_id,
+            "analysis": analysis,
+            "result": result,
+            "verificationToken": verification_token,
+        })
 
     def assistant(self) -> None:
         user = self.current_user()
