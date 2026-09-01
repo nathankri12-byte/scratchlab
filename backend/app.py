@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import base64
 import hashlib
@@ -33,6 +33,7 @@ PREMIUM_MONTHLY_PRICE_EUR = 15
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip().rstrip("/")
 SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "").strip()
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "").strip()
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "").strip().lower()
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "").strip()
 STRIPE_PREMIUM_PRICE_ID = os.environ.get("STRIPE_PREMIUM_PRICE_ID", "").strip()
 STRIPE_LESSON_PRICE_ID = os.environ.get("STRIPE_LESSON_PRICE_ID", "").strip()
@@ -120,6 +121,12 @@ def find_lesson(lesson_id: str) -> tuple[dict[str, Any] | None, dict[str, Any] |
     return None, None
 
 
+def is_admin_user(user: dict[str, Any] | None) -> bool:
+    if not user or not ADMIN_EMAIL:
+        return False
+    return str(user.get("email", "")).strip().lower() == ADMIN_EMAIL
+
+
 def public_user(row: dict[str, Any]) -> dict[str, Any]:
     return {
         "id": row.get("id"),
@@ -130,6 +137,7 @@ def public_user(row: dict[str, Any]) -> dict[str, Any]:
         "premiumStatus": row.get("premium_status") or "free",
         "currentLessonId": row.get("current_lesson_id"),
         "lastLessonId": row.get("last_lesson_id"),
+        "isAdmin": is_admin_user(row),
     }
 
 
@@ -729,6 +737,9 @@ class Handler(SimpleHTTPRequestHandler):
 
             elif method == "POST" and path == "/api/feedback":
                 self.feedback()
+
+            elif method == "GET" and path == "/api/admin/feedback":
+                self.admin_feedback()
 
             elif method == "POST" and path == "/api/checkout/premium":
                 self.checkout_premium()
@@ -1485,6 +1496,26 @@ class Handler(SimpleHTTPRequestHandler):
 
         self.json_response({"ok": True})
 
+    def require_admin(self) -> dict[str, Any]:
+        user = self.require_user()
+        if not is_admin_user(user):
+            raise PermissionError("Kein Betreiberzugriff.")
+        return user
+
+    def admin_feedback(self) -> None:
+        self.require_admin()
+
+        rows = sb_select(
+            "feedback",
+            select="id,type,message,email,rating,user_id,created_at",
+            order="created_at.desc",
+            limit=500,
+        )
+
+        # Do not expose internal user data beyond what the feedback table
+        # already stores. The admin endpoint itself is protected by ADMIN_EMAIL.
+        self.json_response({"feedback": rows})
+
     def pricing(self) -> None:
         self.json_response(
             {
@@ -1552,6 +1583,19 @@ class Handler(SimpleHTTPRequestHandler):
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
+        self.wfile.write(body)
+
+
+def main() -> None:
+    port = int(os.environ.get("PORT", "8080"))
+    server = ScratchLabServer(("0.0.0.0", port), Handler)
+    print(f"ScratchLab läuft auf http://localhost:{port}")
+    server.serve_forever()
+
+
+if __name__ == "__main__":
+    main()
+aders()
         self.wfile.write(body)
 
 
