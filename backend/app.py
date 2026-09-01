@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 
 import base64
@@ -1596,6 +1596,8 @@ class Handler(SimpleHTTPRequestHandler):
                 self.admin_feedback()
 
 
+            elif method == "POST" and path == "/api/premium/cancel":
+                self.cancel_premium()
             elif method == "POST" and path == "/api/checkout/premium":
 
                 self.checkout_premium()
@@ -3420,6 +3422,122 @@ class Handler(SimpleHTTPRequestHandler):
             print("Stripe: Lektion freigeschaltet fÃ¼r", user_id, lesson_id)
 
         self.json_response({"received": True})
+    def _stripe_cancel_request(self, method: str, url: str, data: dict[str, str] | None = None) -> dict[str, Any]:
+        if not STRIPE_SECRET_KEY:
+            raise RuntimeError("STRIPE_SECRET_KEY ist auf Render nicht gesetzt.")
+
+        request_data = urlencode(data or {}).encode("utf-8") if data is not None else None
+        request = Request(
+            url,
+            data=request_data,
+            headers={
+                "Authorization": (
+                    "Basic "
+                    + base64.b64encode(
+                        f"{STRIPE_SECRET_KEY}:".encode("utf-8")
+                    ).decode("ascii")
+                ),
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Accept": "application/json",
+                "User-Agent": "ScratchLab/1.0",
+            },
+            method=method,
+        )
+
+        try:
+            with urlopen(request, timeout=15) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except HTTPError as exc:
+            try:
+                detail = exc.read().decode("utf-8")
+                error_payload = json.loads(detail)
+                message = (
+                    error_payload.get("error", {}).get("message")
+                    or detail[:500]
+                )
+            except Exception:
+                message = "Stripe konnte die Anfrage nicht verarbeiten."
+            raise RuntimeError(f"Stripe-Fehler ({exc.code}): {message}") from exc
+        except (URLError, TimeoutError, json.JSONDecodeError) as exc:
+            raise RuntimeError("Stripe ist momentan nicht erreichbar.") from exc
+
+        if not isinstance(payload, dict):
+            raise RuntimeError("Stripe hat eine ungÃ¼ltige Antwort geliefert.")
+        return payload
+
+    def cancel_premium(self) -> None:
+        user = self.require_user()
+        email = str(user.get("email") or "").strip().lower()
+
+        if not email:
+            raise RuntimeError("FÃ¼r die KÃ¼ndigung fehlt die E-Mail-Adresse.")
+
+        customers = self._stripe_cancel_request(
+            "GET",
+            "https://api.stripe.com/v1/customers?limit=20&email=" + quote(email, safe=""),
+        )
+
+        customer = next(
+            (
+                item for item in (customers.get("data") or [])
+                if str(item.get("email") or "").strip().lower() == email
+            ),
+            None,
+        )
+
+        if not customer:
+            raise ValueError("FÃ¼r dein Konto wurde kein Stripe-Kunde gefunden.")
+
+        customer_id = str(customer.get("id") or "").strip()
+        if not customer_id:
+            raise RuntimeError("Die Stripe-Kunden-ID fehlt.")
+
+        subscriptions = self._stripe_cancel_request(
+            "GET",
+            "https://api.stripe.com/v1/subscriptions?limit=20&customer="
+            + quote(customer_id, safe="")
+            + "&status=all",
+        )
+
+        active_statuses = {"active", "trialing", "past_due", "unpaid"}
+        subscription = next(
+            (
+                item for item in (subscriptions.get("data") or [])
+                if str(item.get("status") or "").lower() in active_statuses
+            ),
+            None,
+        )
+
+        if not subscription:
+            raise ValueError("Es wurde kein aktives Premium-Abo gefunden.")
+
+        if subscription.get("cancel_at_period_end"):
+            self.json_response(
+                {
+                    "ok": True,
+                    "alreadyScheduled": True,
+                    "currentPeriodEnd": subscription.get("current_period_end"),
+                }
+            )
+            return
+
+        subscription_id = str(subscription.get("id") or "").strip()
+        if not subscription_id:
+            raise RuntimeError("Die Stripe-Abo-ID fehlt.")
+
+        result = self._stripe_cancel_request(
+            "POST",
+            "https://api.stripe.com/v1/subscriptions/" + quote(subscription_id, safe=""),
+            {"cancel_at_period_end": "true"},
+        )
+
+        self.json_response(
+            {
+                "ok": True,
+                "scheduled": True,
+                "currentPeriodEnd": result.get("current_period_end"),
+            }
+        )
     def checkout_premium(self) -> None:
 
         user = self.require_user()
