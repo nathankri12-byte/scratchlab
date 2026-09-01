@@ -1,5 +1,3 @@
-Diese Version ersetzt nur die Gemini-Anbindung. Bei HTTP 503/429 wechselt ScratchLab sofort auf ein anderes verfügbares Flash-Modell, statt dass dieselbe überlastete Variante mehrfach gewartet wird.
-
 from __future__ import annotations
 
 
