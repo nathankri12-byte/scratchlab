@@ -2793,6 +2793,6 @@ renderRouter().catch(error => {
 
     </section>
 
-  `);
+   `);
 
-}
+});
