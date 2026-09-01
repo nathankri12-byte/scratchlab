@@ -1595,9 +1595,6 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-aders()
-        self.wfile.write(body)
-
 
 def main() -> None:
     port = int(os.environ.get("PORT", "8080"))
