@@ -1230,7 +1230,7 @@ def call_gemini(
 
         "generationConfig": {
 
-            "maxOutputTokens": 800,
+            "maxOutputTokens": 3000,
 
         },
 
