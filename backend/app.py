@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 
 import base64
@@ -71,6 +71,7 @@ STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "").strip()
 STRIPE_PREMIUM_PRICE_ID = os.environ.get("STRIPE_PREMIUM_PRICE_ID", "").strip()
 
 STRIPE_LESSON_PRICE_ID = os.environ.get("STRIPE_LESSON_PRICE_ID", "").strip()
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "").strip()
 
 
 
@@ -1603,6 +1604,12 @@ class Handler(SimpleHTTPRequestHandler):
             elif method == "POST" and path == "/api/checkout/lesson":
 
                 self.checkout_lesson()
+
+
+            elif method == "POST" and path == "/api/stripe/webhook":
+
+
+                self.stripe_webhook()
 
 
             else:
@@ -3289,6 +3296,130 @@ class Handler(SimpleHTTPRequestHandler):
         }
 
 
+    def _verify_stripe_signature(self, payload: bytes, signature_header: str) -> bool:
+        secret = STRIPE_WEBHOOK_SECRET
+        if not secret or not signature_header:
+            return False
+
+        timestamp = None
+        signatures = []
+
+        for item in signature_header.split(","):
+            if "=" not in item:
+                continue
+            key, value = item.split("=", 1)
+            if key == "t":
+                timestamp = value
+            elif key == "v1":
+                signatures.append(value)
+
+        if not timestamp or not signatures:
+            return False
+
+        try:
+            timestamp_int = int(timestamp)
+        except ValueError:
+            return False
+
+        if abs(datetime.now(timezone.utc).timestamp() - timestamp_int) > 300:
+            return False
+
+        signed = f"{timestamp}.".encode("utf-8") + payload
+        expected = hmac.new(
+            secret.encode("utf-8"),
+            signed,
+            hashlib.sha256,
+        ).hexdigest()
+
+        return any(
+            hmac.compare_digest(expected, candidate)
+            for candidate in signatures
+        )
+
+    def stripe_webhook(self) -> None:
+        signature = self.headers.get("Stripe-Signature", "")
+        try:
+            length = int(self.headers.get("Content-Length", "0"))
+        except (TypeError, ValueError):
+            length = 0
+
+        if length <= 0 or length > 2_000_000:
+            self.send_response(HTTPStatus.BAD_REQUEST)
+            self.end_headers()
+            return
+
+        raw_body = self.rfile.read(length)
+
+        if not self._verify_stripe_signature(raw_body, signature):
+            self.send_response(HTTPStatus.BAD_REQUEST)
+            self.end_headers()
+            return
+
+        try:
+            event = json.loads(raw_body.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            self.send_response(HTTPStatus.BAD_REQUEST)
+            self.end_headers()
+            return
+
+        if event.get("type") != "checkout.session.completed":
+            self.json_response({"received": True})
+            return
+
+        session = ((event.get("data") or {}).get("object") or {})
+        payment_status = str(session.get("payment_status") or "").lower()
+        metadata = session.get("metadata") or {}
+
+        user_id = str(metadata.get("user_id") or "").strip()
+        purchase_type = str(metadata.get("purchase_type") or "").strip().lower()
+        lesson_id = str(metadata.get("lesson_id") or "").strip()
+
+        if not user_id:
+            raise ValueError("Stripe-Webhook: user_id fehlt.")
+
+        if purchase_type == "premium":
+            if payment_status not in {"paid", "no_payment_required"}:
+                self.json_response({"received": True})
+                return
+
+            sb_update(
+                "users",
+                {"premium_status": "premium"},
+                filters=[("id", f"eq.{user_id}")],
+            )
+
+            print("Stripe: Premium freigeschaltet fÃ¼r", user_id)
+
+        elif purchase_type == "lesson":
+            if payment_status != "paid" or not lesson_id:
+                self.json_response({"received": True})
+                return
+
+            existing = sb_select(
+                "lesson_purchases",
+                filters=[
+                    ("user_id", f"eq.{user_id}"),
+                    ("lesson_id", f"eq.{lesson_id}"),
+                    ("status", "eq.paid"),
+                ],
+                limit=1,
+            )
+
+            if not existing:
+                sb_insert(
+                    "lesson_purchases",
+                    {
+                        "user_id": user_id,
+                        "lesson_id": lesson_id,
+                        "status": "paid",
+                        "created_at": now_iso(),
+                    },
+                    returning=False,
+                )
+
+            print("Stripe: Lektion freigeschaltet fÃ¼r", user_id, lesson_id)
+
+        self.json_response({"received": True})
     def checkout_premium(self) -> None:
 
         user = self.require_user()
