@@ -1,4 +1,4 @@
-﻿const app = document.querySelector("#app");
+const app = document.querySelector("#app");
 
 const authAction = document.querySelector("#authAction");
 
@@ -2335,7 +2335,36 @@ function renderPremium() {
 
   });
 
-}
+
+  const cancelButton = document.querySelector("#cancelPremium");
+  if (cancelButton) {
+    cancelButton.addEventListener("click", async () => {
+      const message = document.querySelector("#cancelPremiumMessage");
+      const confirmed = window.confirm(
+        "MÃ¶chtest du Premium wirklich kÃ¼ndigen? Dein Premium bleibt bis zum Ende des bereits bezahlten Zeitraums aktiv."
+      );
+      if (!confirmed) return;
+
+      cancelButton.disabled = true;
+      cancelButton.textContent = "Wird gekÃ¼ndigt...";
+
+      try {
+        const result = await api("/api/premium/cancel", {
+          method: "POST",
+          body: "{}",
+        });
+
+        message.textContent = result?.alreadyScheduled
+          ? "Premium ist bereits zum Ende des Zeitraums gekÃ¼ndigt."
+          : "Premium wurde gekÃ¼ndigt. Es bleibt bis zum Ende des bereits bezahlten Zeitraums aktiv.";
+        cancelButton.textContent = "Premium gekÃ¼ndigt";
+      } catch (error) {
+        cancelButton.disabled = false;
+        cancelButton.textContent = "Premium kÃ¼ndigen";
+        message.textContent = error?.message || "Die KÃ¼ndigung konnte nicht durchgefÃ¼hrt werden.";
+      }
+    });
+  }}
 
 
 function renderLockedLesson(id) {
