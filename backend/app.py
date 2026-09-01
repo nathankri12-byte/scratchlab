@@ -33,7 +33,7 @@ from typing import Any
 
 from urllib.error import HTTPError, URLError
 
-from urllib.parse import quote, urlparse
+from urllib.parse import quote, urlencode, urlparse
 
 from urllib.request import Request, urlopen
 
@@ -1230,7 +1230,7 @@ def call_gemini(
 
         "generationConfig": {
 
-            "maxOutputTokens": 3000,
+            "maxOutputTokens": 450,
 
         },
 
@@ -3107,88 +3107,234 @@ class Handler(SimpleHTTPRequestHandler):
         )
 
 
-    def checkout_premium(self) -> None:
+    def create_stripe_checkout(
 
-        self.require_user()
+        self,
 
-        if not STRIPE_SECRET_KEY or not STRIPE_PREMIUM_PRICE_ID:
+        user: dict[str, Any],
 
-            self.json_response(
+        price_id: str,
 
-                {
+        mode: str,
 
-                    "error": "Stripe ist noch nicht konfiguriert.",
+        lesson_id: str | None = None,
 
-                    "checkoutReady": False,
+    ) -> dict[str, Any]:
 
-                },
+        if not STRIPE_SECRET_KEY:
 
-                HTTPStatus.SERVICE_UNAVAILABLE,
+            raise RuntimeError(
+
+                "STRIPE_SECRET_KEY ist auf Render nicht gesetzt."
 
             )
 
-            return
+        if not price_id:
 
-        self.json_response(
+            raise RuntimeError(
 
-            {
+                "Der Stripe-Preis ist noch nicht konfiguriert."
 
-                "error": (
+            )
 
-                    "Stripe ist noch nicht vollständig angebunden. "
+        if mode not in {"payment", "subscription"}:
 
-                    "Zahlungen werden erst nach Einrichtung von Checkout und Webhooks aktiviert."
+            raise ValueError("Ungültiger Stripe-Checkout-Modus.")
+
+
+        base_url = os.environ.get(
+
+            "PUBLIC_BASE_URL",
+
+            "https://scratchlab.onrender.com",
+
+        ).strip().rstrip("/")
+
+
+        data = {
+
+            "mode": mode,
+
+            "line_items[0][price]": price_id,
+
+            "line_items[0][quantity]": "1",
+
+            "success_url": (
+
+                f"{base_url}/#/payment-success"
+
+                f"?session_id={{CHECKOUT_SESSION_ID}}"
+
+            ),
+
+            "cancel_url": f"{base_url}/#/premium",
+
+            "customer_email": str(user.get("email") or "").strip(),
+
+            "client_reference_id": str(user["id"]),
+
+            "metadata[user_id]": str(user["id"]),
+
+            "metadata[purchase_type]": (
+
+                "premium" if mode == "subscription" else "lesson"
+
+            ),
+
+        }
+
+
+        if lesson_id:
+
+            data["metadata[lesson_id]"] = str(lesson_id)
+
+            data["cancel_url"] = f"{base_url}/#/lesson/{quote(lesson_id)}"
+
+
+        request = Request(
+
+            "https://api.stripe.com/v1/checkout/sessions",
+
+            data=urlencode(data).encode("utf-8"),
+
+            headers={
+
+                "Authorization": (
+
+                    "Basic "
+
+                    + base64.b64encode(
+
+                        f"{STRIPE_SECRET_KEY}:".encode("utf-8")
+
+                    ).decode("ascii")
 
                 ),
 
-                "checkoutReady": False,
+                "Content-Type": "application/x-www-form-urlencoded",
+
+                "Accept": "application/json",
+
+                "User-Agent": "ScratchLab/1.0",
 
             },
 
-            HTTPStatus.SERVICE_UNAVAILABLE,
+            method="POST",
+
+        )
+
+
+        try:
+
+            with urlopen(request, timeout=15) as response:
+
+                payload = json.loads(
+
+                    response.read().decode("utf-8")
+
+                )
+
+        except HTTPError as exc:
+
+            try:
+
+                detail = exc.read().decode("utf-8")
+
+                error_payload = json.loads(detail)
+
+                message = (
+
+                    error_payload.get("error", {}).get("message")
+
+                    or detail[:500]
+
+                )
+
+            except Exception:
+
+                message = "Stripe konnte die Checkout-Session nicht erstellen."
+
+            raise RuntimeError(
+
+                f"Stripe-Fehler ({exc.code}): {message}"
+
+            ) from exc
+
+        except (URLError, TimeoutError, json.JSONDecodeError) as exc:
+
+            raise RuntimeError(
+
+                "Stripe ist momentan nicht erreichbar."
+
+            ) from exc
+
+
+        checkout_url = payload.get("url")
+
+        if not checkout_url:
+
+            raise RuntimeError(
+
+                "Stripe hat keine Checkout-URL zurückgegeben."
+
+            )
+
+
+        return {
+
+            "checkoutUrl": checkout_url,
+
+            "sessionId": payload.get("id"),
+
+        }
+
+
+    def checkout_premium(self) -> None:
+
+        user = self.require_user()
+
+        self.json_response(
+
+            self.create_stripe_checkout(
+
+                user=user,
+
+                price_id=STRIPE_PREMIUM_PRICE_ID,
+
+                mode="subscription",
+
+            )
 
         )
 
 
     def checkout_lesson(self) -> None:
 
-        self.require_user()
+        user = self.require_user()
 
-        if not STRIPE_SECRET_KEY or not STRIPE_LESSON_PRICE_ID:
+        payload = self.read_json()
 
-            self.json_response(
+        lesson_id = str(payload.get("lessonId") or "").strip()
 
-                {
 
-                    "error": "Stripe ist noch nicht konfiguriert.",
+        if not lesson_id:
 
-                    "checkoutReady": False,
+            raise ValueError("Keine Lektion angegeben.")
 
-                },
-
-                HTTPStatus.SERVICE_UNAVAILABLE,
-
-            )
-
-            return
 
         self.json_response(
 
-            {
+            self.create_stripe_checkout(
 
-                "error": (
+                user=user,
 
-                    "Stripe ist noch nicht vollständig angebunden. "
+                price_id=STRIPE_LESSON_PRICE_ID,
 
-                    "Zahlungen werden erst nach Einrichtung von Checkout und Webhooks aktiviert."
+                mode="payment",
 
-                ),
+                lesson_id=lesson_id,
 
-                "checkoutReady": False,
-
-            },
-
-            HTTPStatus.SERVICE_UNAVAILABLE,
+            )
 
         )
 
