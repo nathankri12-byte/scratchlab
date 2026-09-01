@@ -26,6 +26,8 @@ const state = {
 
   progress: { ...EMPTY_PROGRESS },
 
+  projectVerificationTokens: {},
+
   projects: { own: [], public: [] },
 
   pricing: {
@@ -181,65 +183,171 @@ async function api(path, options = {}) {
 
 }
 
-async function refresh() {
+let refreshInFlight = null;
 
-  const [me, courses, pricing] = await Promise.all([
+let refreshAt = 0;
 
-    api("/api/me"),
+let publicDataAt = 0;
 
-    api("/api/courses"),
+let progressAt = 0;
 
-    api("/api/pricing")
+const ME_CACHE_MS = 15000;
 
-  ]);
+const PUBLIC_CACHE_MS = 300000;
 
-
-  state.user = me?.user || null;
-
-  state.courses = Array.isArray(courses?.courses) ? courses.courses : [];
-
-  state.pricing = {
-
-    ...state.pricing,
-
-    ...(pricing || {})
-
-  };
+const PROGRESS_CACHE_MS = 10000;
 
 
-  if (state.user) {
+async function refresh(force = false) {
 
-    try {
+  const now = Date.now();
 
-      state.progress = {
 
-        ...EMPTY_PROGRESS,
+  if (!force && refreshInFlight) {
 
-        ...(await api("/api/progress"))
+    return refreshInFlight;
 
-      };
+  }
 
-    } catch {
+
+  refreshInFlight = (async () => {
+
+    const requests = [];
+
+
+    if (
+
+      force ||
+
+      now - refreshAt >= ME_CACHE_MS
+
+    ) {
+
+      requests.push(
+
+        api("/api/me").then(data => {
+
+          state.user = data?.user || null;
+
+          refreshAt = Date.now();
+
+        })
+
+      );
+
+    }
+
+
+    if (
+
+      force ||
+
+      now - publicDataAt >= PUBLIC_CACHE_MS
+
+    ) {
+
+      requests.push(
+
+        Promise.all([
+
+          api("/api/courses"),
+
+          api("/api/pricing"),
+
+        ]).then(([courses, pricing]) => {
+
+          state.courses = Array.isArray(courses?.courses)
+
+            ? courses.courses
+
+            : [];
+
+
+          state.pricing = {
+
+            ...state.pricing,
+
+            ...(pricing || {}),
+
+          };
+
+
+          publicDataAt = Date.now();
+
+        })
+
+      );
+
+    }
+
+
+    if (requests.length) {
+
+      await Promise.all(requests);
+
+    }
+
+
+    if (state.user) {
+
+      if (
+
+        force ||
+
+        now - progressAt >= PROGRESS_CACHE_MS
+
+      ) {
+
+        try {
+
+          state.progress = {
+
+            ...EMPTY_PROGRESS,
+
+            ...(await api("/api/progress")),
+
+          };
+
+          progressAt = Date.now();
+
+        } catch {
+
+          // Keep last known progress instead of wiping the dashboard.
+
+        }
+
+      }
+
+    } else {
 
       state.progress = { ...EMPTY_PROGRESS };
 
     }
 
-  } else {
 
-    state.progress = { ...EMPTY_PROGRESS };
+    if (authAction) {
+
+      authAction.textContent =
+
+        state.user ? "Logout" : "Einloggen";
+
+    }
+
+
+    updateAdminNavigation();
+
+  })();
+
+
+  try {
+
+    await refreshInFlight;
+
+  } finally {
+
+    refreshInFlight = null;
 
   }
-
-
-  if (authAction) {
-
-    authAction.textContent = state.user ? "Logout" : "Einloggen";
-
-  }
-
-
-  updateAdminNavigation();
 
 }
 
@@ -391,16 +499,6 @@ function renderLanding() {
 
       </div>
 
-      <div class="panel">
-
-        <h3>Feedback & Hilfe</h3>
-
-        <p>Hilf uns, ScratchLab besser zu machen.</p>
-
-        <a class="secondary-button" href="#/feedback">Feedback geben</a>
-
-      </div>
-
     </section>
 
   `);
@@ -542,7 +640,7 @@ function renderAuth(mode = "signup") {
 
       state.user = result.user || null;
 
-      await refresh();
+      await refresh(true);
 
 
       if (!state.user) {
@@ -1438,6 +1536,25 @@ async function checkLessonProject(lesson) {
 
 
     const check = result?.result || {};
+
+
+    if (
+
+      check.passed &&
+
+      result?.verificationToken
+
+    ) {
+
+      state.projectVerificationTokens[lesson.id] =
+
+        result.verificationToken;
+
+    } else {
+
+      delete state.projectVerificationTokens[lesson.id];
+
+    }
 
 
     resultBox.innerHTML = `
@@ -2793,6 +2910,6 @@ renderRouter().catch(error => {
 
     </section>
 
-   `);
+  `);
 
 });
