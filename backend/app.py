@@ -1,3 +1,5 @@
+Diese Version ersetzt nur die Gemini-Anbindung. Bei HTTP 503/429 wechselt ScratchLab sofort auf ein anderes verfügbares Flash-Modell, statt dass dieselbe überlastete Variante mehrfach gewartet wird.
+
 from __future__ import annotations
 
 
@@ -969,12 +971,15 @@ _GEMINI_MODEL_CACHE = None
 
 
 
-def discover_gemini_model(api_key: str) -> str:
+def discover_gemini_models(api_key: str) -> list[str]:
+
+    """Return usable text-generation Flash models for this API key."""
 
     global _GEMINI_MODEL_CACHE
 
 
     now = datetime.now(timezone.utc).timestamp()
+
 
     if _GEMINI_MODEL_CACHE and now - _GEMINI_MODEL_CACHE[0] < 600:
 
@@ -1000,23 +1005,15 @@ def discover_gemini_model(api_key: str) -> str:
 
     try:
 
-        with urlopen(request, timeout=12) as response:
+        with urlopen(request, timeout=10) as response:
 
             payload = json.loads(response.read().decode("utf-8"))
 
     except HTTPError as exc:
 
-        try:
-
-            detail = exc.read().decode("utf-8")
-
-        except Exception:
-
-            detail = ""
-
         raise RuntimeError(
 
-            f"Gemini-Modellliste Fehler ({exc.code}). {detail[:500]}"
+            f"Gemini-Modellliste Fehler ({exc.code})."
 
         ) from exc
 
@@ -1031,11 +1028,13 @@ def discover_gemini_model(api_key: str) -> str:
 
     available = []
 
+
     for item in payload.get("models", []):
 
         if not isinstance(item, dict):
 
             continue
+
 
         name = str(item.get("name", "")).strip()
 
@@ -1043,7 +1042,9 @@ def discover_gemini_model(api_key: str) -> str:
 
             name = name[7:]
 
+
         methods = item.get("supportedGenerationMethods") or []
+
 
         if name and "generateContent" in methods:
 
@@ -1059,15 +1060,17 @@ def discover_gemini_model(api_key: str) -> str:
         )
 
 
+    # Prefer fast stable Flash models over the currently overloaded
+
+    # 3.7 Flash endpoint. The API key still determines what is available.
+
     preferred = [
-
-        os.environ.get("GEMINI_MODEL", "").strip(),
-
-        "gemini-3.7-flash",
 
         "gemini-3.6-flash",
 
         "gemini-3.5-flash",
+
+        "gemini-3.7-flash",
 
         "gemini-3.5-flash-lite",
 
@@ -1078,41 +1081,46 @@ def discover_gemini_model(api_key: str) -> str:
     ]
 
 
-    for wanted in preferred:
+    models = [
 
-        if wanted and wanted in available:
+        name for name in preferred
 
-            _GEMINI_MODEL_CACHE = (now, wanted)
-
-            print("ScratchLab Gemini-Modell:", wanted)
-
-            return wanted
-
-
-    flash = [
-
-        name for name in available
-
-        if "flash" in name.lower()
-
-        and "image" not in name.lower()
-
-        and "tts" not in name.lower()
-
-        and "live" not in name.lower()
-
-        and "transcribe" not in name.lower()
+        if name in available
 
     ]
 
 
-    chosen = sorted(flash or available)[-1]
+    for name in sorted(available):
 
-    _GEMINI_MODEL_CACHE = (now, chosen)
+        lower = name.lower()
 
-    print("ScratchLab Gemini-Modell automatisch gewählt:", chosen)
+        if (
 
-    return chosen
+            "flash" in lower
+
+            and "image" not in lower
+
+            and "tts" not in lower
+
+            and "live" not in lower
+
+            and name not in models
+
+        ):
+
+            models.append(name)
+
+
+    if not models:
+
+        models = sorted(available)
+
+
+    _GEMINI_MODEL_CACHE = (now, models)
+
+    print("ScratchLab Gemini-Modelle:", ", ".join(models))
+
+    return models
 
 
 
@@ -1134,6 +1142,7 @@ def call_gemini(
 
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
 
+
     if not api_key:
 
         raise RuntimeError(
@@ -1143,7 +1152,7 @@ def call_gemini(
         )
 
 
-    model = discover_gemini_model(api_key)
+    models = discover_gemini_models(api_key)
 
 
     contents = []
@@ -1223,34 +1232,38 @@ def call_gemini(
 
         "generationConfig": {
 
-            "maxOutputTokens": 500,
+            "maxOutputTokens": 450,
 
         },
 
     }
 
 
-    url = (
-
-        "https://generativelanguage.googleapis.com/v1beta/models/"
-
-        f"{quote(model)}:generateContent"
-
-    )
-
-
     last_error = None
 
 
-    # 503 = temporary service unavailability. Retry briefly with backoff.
+    for model in models[:6]:
 
-    for attempt in range(3):
+        url = (
+
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+
+            f"{quote(model)}:generateContent"
+
+        )
+
 
         request = Request(
 
             url,
 
-            data=json.dumps(body, ensure_ascii=False).encode("utf-8"),
+            data=json.dumps(
+
+                body,
+
+                ensure_ascii=False,
+
+            ).encode("utf-8"),
 
             headers={
 
@@ -1269,7 +1282,11 @@ def call_gemini(
 
         try:
 
-            with urlopen(request, timeout=20) as response:
+            # Keep each model attempt short so a bad/overloaded endpoint
+
+            # does not make the whole ScratchLab UI feel frozen.
+
+            with urlopen(request, timeout=14) as response:
 
                 payload = json.loads(
 
@@ -1351,16 +1368,26 @@ def call_gemini(
 
                 f"Gemini API Fehler ({exc.code}) mit Modell {model}. "
 
-                f"{detail[:500]}"
+                f"{detail[:350]}"
 
             )
 
 
-            if exc.code == 503 and attempt < 2:
+            # 503/429 means this model endpoint is unavailable or busy.
 
-                import time
+            # Immediately move to the next available model instead of
 
-                time.sleep(0.8 * (2 ** attempt))
+            # waiting several seconds and then retrying the same model.
+
+            if exc.code in (429, 503):
+
+                print(
+
+                    f"Gemini {model} -> HTTP {exc.code}; "
+
+                    "wechsle sofort zum Fallback."
+
+                )
 
                 continue
 
@@ -1372,22 +1399,35 @@ def call_gemini(
 
             last_error = RuntimeError(
 
-                "Gemini ist momentan nicht erreichbar."
+                f"Gemini {model} ist nicht erreichbar."
 
             )
 
-            if attempt < 2:
+            print(
 
-                import time
+                f"Gemini {model} nicht erreichbar; "
 
-                time.sleep(0.8 * (2 ** attempt))
+                "wechsle sofort zum Fallback."
 
-                continue
+            )
 
-            raise last_error from exc
+            continue
 
 
-    raise last_error or RuntimeError("Gemini konnte nicht antworten.")
+        except RuntimeError as exc:
+
+            last_error = exc
+
+            # A model-specific failure should not kill the whole AI.
+
+            continue
+
+
+    raise last_error or RuntimeError(
+
+        "Kein verfügbares Gemini-Modell konnte antworten."
+
+    )
 
 
 
