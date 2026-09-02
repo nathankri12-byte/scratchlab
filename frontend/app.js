@@ -2258,67 +2258,98 @@ async function renderAdminFeedback() {
 
 
 function renderPremium() {
+  const isPremium = Boolean(
+    state.user && state.user.premiumStatus === "premium"
+  );
+
   setView(`
     <section class="screen grid two">
       <div>
-        <p class="eyebrow">Weiterlernen</p>
-        <h2>Alle Lektionen freischalten.</h2>
-        <p>Eine Premium-Lektion fuer ${state.pricing.singleLessonPriceEur} EUR oder Premium fuer ${state.pricing.premiumMonthlyPriceEur} EUR im Monat.</p>
-        <a class="secondary-button" href="#/learn">Zurueck zu den Kursen</a>
+        <p class="eyebrow">Dein Abo</p>
+        <h2>${isPremium ? "Dein Premium-Abo" : "Alle Lektionen freischalten."}</h2>
+        <p>
+          ${isPremium
+            ? "Du hast aktuell Premium. Du kannst dein Abo zum Ende des bereits bezahlten Zeitraums kÃ¼ndigen."
+            : `Eine Premium-Lektion kostet ${state.pricing.singleLessonPriceEur} EUR oder Premium kostet ${state.pricing.premiumMonthlyPriceEur} EUR im Monat.`
+          }
+        </p>
+        <a class="secondary-button" href="#/learn">ZurÃ¼ck zu den Kursen</a>
       </div>
+
       <div class="panel premium-panel">
         <h3>Premium</h3>
-        <div class="price">${state.pricing.premiumMonthlyPriceEur} EUR <span>/ Monat</span></div>
-        <p>Alle aktuellen und spaeteren Scratch-Lektionen freischalten.</p>
-        <button id="upgradePremium" class="primary-button" type="button">Jetzt auf Premium upgraden</button>
-        <button id="cancelPremium" class="secondary-button" type="button">Premium kÃ¼ndigen</button>
-        <p id="premiumMessage" class="muted">${state.pricing.checkoutReady ? "Stripe ist konfiguriert." : "Stripe Checkout ist noch nicht vollstaendig konfiguriert."}</p>
-        <p id="cancelPremiumMessage" class="muted">${state.user && state.user.premiumStatus === "premium" ? "Dein Premium bleibt nach der KÃ¼ndigung bis zum Ende des bereits bezahlten Zeitraums aktiv." : "Die KÃ¼ndigung funktioniert nur bei einem aktiven Premium-Abo."}</p>
+        <div class="price">
+          ${state.pricing.premiumMonthlyPriceEur} EUR <span>/ Monat</span>
+        </div>
+        <p>Alle aktuellen und spÃ¤teren Scratch-Lektionen freischalten.</p>
+
+        <div id="premiumAction">
+          ${isPremium
+            ? `<button id="cancelPremium" class="primary-button" type="button">Premium kÃ¼ndigen</button>`
+            : `<button id="upgradePremium" class="primary-button" type="button">Jetzt auf Premium upgraden</button>`
+          }
+        </div>
+
+        <p id="premiumMessage" class="muted">
+          ${state.pricing.checkoutReady ? "Stripe ist konfiguriert." : "Stripe Checkout ist noch nicht vollstÃ¤ndig konfiguriert."}
+        </p>
+        <p id="cancelPremiumMessage" class="muted"></p>
       </div>
     </section>
   `);
 
-  document.querySelector("#upgradePremium").addEventListener("click", async () => {
-    const message = document.querySelector("#premiumMessage");
-    try {
-      await api("/api/checkout/premium", { method: "POST", body: "{}" });
-    } catch (error) {
-      message.textContent = error.message;
-    }
-  });
+  const upgradeButton = document.querySelector("#upgradePremium");
+  if (upgradeButton) {
+    upgradeButton.addEventListener("click", async () => {
+      const message = document.querySelector("#premiumMessage");
+      upgradeButton.disabled = true;
+      upgradeButton.textContent = "Weiter zu Stripe...";
 
-  document.querySelector("#cancelPremium").addEventListener("click", async () => {
-    const message = document.querySelector("#cancelPremiumMessage");
-    if (!state.user) {
-      message.textContent = "Bitte melde dich zuerst an.";
-      return;
-    }
+      try {
+        await api("/api/checkout/premium", {
+          method: "POST",
+          body: "{}"
+        });
+      } catch (error) {
+        upgradeButton.disabled = false;
+        upgradeButton.textContent = "Jetzt auf Premium upgraden";
+        message.textContent = error?.message || "Der Premium-Kauf konnte nicht gestartet werden.";
+      }
+    });
+  }
 
-    const confirmed = window.confirm(
-      "MÃ¶chtest du Premium wirklich kÃ¼ndigen? Dein Premium bleibt bis zum Ende des bereits bezahlten Zeitraums aktiv."
-    );
-    if (!confirmed) return;
+  const cancelButton = document.querySelector("#cancelPremium");
+  if (cancelButton) {
+    cancelButton.addEventListener("click", async () => {
+      const message = document.querySelector("#cancelPremiumMessage");
 
-    const button = document.querySelector("#cancelPremium");
-    button.disabled = true;
-    button.textContent = "Wird gekÃ¼ndigt...";
+      const confirmed = window.confirm(
+        "MÃ¶chtest du Premium wirklich kÃ¼ndigen? Dein Premium bleibt bis zum Ende des bereits bezahlten Zeitraums aktiv."
+      );
+      if (!confirmed) return;
 
-    try {
-      const result = await api("/api/premium/cancel", {
-        method: "POST",
-        body: "{}",
-      });
+      cancelButton.disabled = true;
+      cancelButton.textContent = "Wird gekÃ¼ndigt...";
 
-      message.textContent = result?.alreadyScheduled
-        ? "Premium ist bereits zum Ende des Zahlungszeitraums gekÃ¼ndigt."
-        : "Premium wurde erfolgreich gekÃ¼ndigt und bleibt bis zum Ende des Zahlungszeitraums aktiv.";
-      button.textContent = "Premium gekÃ¼ndigt";
-    } catch (error) {
-      button.disabled = false;
-      button.textContent = "Premium kÃ¼ndigen";
-      message.textContent = error?.message || "Die KÃ¼ndigung konnte nicht durchgefÃ¼hrt werden.";
-    }
-  });
+      try {
+        const result = await api("/api/premium/cancel", {
+          method: "POST",
+          body: "{}"
+        });
+
+        message.textContent = result?.alreadyScheduled
+          ? "Premium ist bereits zum Ende des Zahlungszeitraums gekÃ¼ndigt."
+          : "Premium wurde erfolgreich gekÃ¼ndigt und bleibt bis zum Ende des Zahlungszeitraums aktiv.";
+
+        cancelButton.textContent = "Premium gekÃ¼ndigt";
+      } catch (error) {
+        cancelButton.disabled = false;
+        cancelButton.textContent = "Premium kÃ¼ndigen";
+        message.textContent =
+          error?.message || "Die KÃ¼ndigung konnte nicht durchgefÃ¼hrt werden.";
+      }
+    });
+  }
 }
 function renderLockedLesson(id) {
 
