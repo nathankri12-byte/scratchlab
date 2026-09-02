@@ -2258,115 +2258,68 @@ async function renderAdminFeedback() {
 
 
 function renderPremium() {
-
-  const pricing = state.pricing;
-
-
   setView(`
-
     <section class="screen grid two">
-
       <div>
-
         <p class="eyebrow">Weiterlernen</p>
-
         <h2>Alle Lektionen freischalten.</h2>
-
-        <p>Eine Premium-Lektion kostet ${pricing.singleLessonPriceEur} € oder Premium kostet ${pricing.premiumMonthlyPriceEur} € im Monat.</p>
-
-        <a class="secondary-button" href="#/learn">Zurück zu den Kursen</a>
-
+        <p>Eine Premium-Lektion fuer ${state.pricing.singleLessonPriceEur} EUR oder Premium fuer ${state.pricing.premiumMonthlyPriceEur} EUR im Monat.</p>
+        <a class="secondary-button" href="#/learn">Zurueck zu den Kursen</a>
       </div>
-
-
       <div class="panel premium-panel">
-
         <h3>Premium</h3>
-
-        <div class="price">${pricing.premiumMonthlyPriceEur} € <span>/ Monat</span></div>
-
-        <p>Alle aktuellen und späteren Scratch-Lektionen freischalten.</p>
-
+        <div class="price">${state.pricing.premiumMonthlyPriceEur} EUR <span>/ Monat</span></div>
+        <p>Alle aktuellen und spaeteren Scratch-Lektionen freischalten.</p>
         <button id="upgradePremium" class="primary-button" type="button">Jetzt auf Premium upgraden</button>
-
-        <p id="premiumMessage" class="muted">
-
-          ${pricing.checkoutReady ? "Stripe ist konfiguriert." : "Stripe ist noch nicht vollständig konfiguriert."}
-
-        </p>
-
+        <button id="cancelPremium" class="secondary-button" type="button">Premium kÃ¼ndigen</button>
+        <p id="premiumMessage" class="muted">${state.pricing.checkoutReady ? "Stripe ist konfiguriert." : "Stripe Checkout ist noch nicht vollstaendig konfiguriert."}</p>
+        <p id="cancelPremiumMessage" class="muted">${state.user && state.user.premiumStatus === "premium" ? "Dein Premium bleibt nach der KÃ¼ndigung bis zum Ende des bereits bezahlten Zeitraums aktiv." : "Die KÃ¼ndigung funktioniert nur bei einem aktiven Premium-Abo."}</p>
       </div>
-
     </section>
-
   `);
 
-
-  document.querySelector("#upgradePremium")?.addEventListener("click", async () => {
-
+  document.querySelector("#upgradePremium").addEventListener("click", async () => {
     const message = document.querySelector("#premiumMessage");
-
     try {
-
-      const result = await api("/api/checkout/premium", {
-
-        method: "POST",
-
-        body: "{}"
-
-      });
-
-
-      if (result.checkoutUrl) {
-
-        window.location.href = result.checkoutUrl;
-
-      } else {
-
-        message.textContent = result.error || "Checkout konnte nicht gestartet werden.";
-
-      }
-
+      await api("/api/checkout/premium", { method: "POST", body: "{}" });
     } catch (error) {
-
       message.textContent = error.message;
-
     }
-
   });
 
+  document.querySelector("#cancelPremium").addEventListener("click", async () => {
+    const message = document.querySelector("#cancelPremiumMessage");
+    if (!state.user) {
+      message.textContent = "Bitte melde dich zuerst an.";
+      return;
+    }
 
-  const cancelButton = document.querySelector("#cancelPremium");
-  if (cancelButton) {
-    cancelButton.addEventListener("click", async () => {
-      const message = document.querySelector("#cancelPremiumMessage");
-      const confirmed = window.confirm(
-        "MÃ¶chtest du Premium wirklich kÃ¼ndigen? Dein Premium bleibt bis zum Ende des bereits bezahlten Zeitraums aktiv."
-      );
-      if (!confirmed) return;
+    const confirmed = window.confirm(
+      "MÃ¶chtest du Premium wirklich kÃ¼ndigen? Dein Premium bleibt bis zum Ende des bereits bezahlten Zeitraums aktiv."
+    );
+    if (!confirmed) return;
 
-      cancelButton.disabled = true;
-      cancelButton.textContent = "Wird gekÃ¼ndigt...";
+    const button = document.querySelector("#cancelPremium");
+    button.disabled = true;
+    button.textContent = "Wird gekÃ¼ndigt...";
 
-      try {
-        const result = await api("/api/premium/cancel", {
-          method: "POST",
-          body: "{}",
-        });
+    try {
+      const result = await api("/api/premium/cancel", {
+        method: "POST",
+        body: "{}",
+      });
 
-        message.textContent = result?.alreadyScheduled
-          ? "Premium ist bereits zum Ende des Zeitraums gekÃ¼ndigt."
-          : "Premium wurde gekÃ¼ndigt. Es bleibt bis zum Ende des bereits bezahlten Zeitraums aktiv.";
-        cancelButton.textContent = "Premium gekÃ¼ndigt";
-      } catch (error) {
-        cancelButton.disabled = false;
-        cancelButton.textContent = "Premium kÃ¼ndigen";
-        message.textContent = error?.message || "Die KÃ¼ndigung konnte nicht durchgefÃ¼hrt werden.";
-      }
-    });
-  }}
-
-
+      message.textContent = result?.alreadyScheduled
+        ? "Premium ist bereits zum Ende des Zahlungszeitraums gekÃ¼ndigt."
+        : "Premium wurde erfolgreich gekÃ¼ndigt und bleibt bis zum Ende des Zahlungszeitraums aktiv.";
+      button.textContent = "Premium gekÃ¼ndigt";
+    } catch (error) {
+      button.disabled = false;
+      button.textContent = "Premium kÃ¼ndigen";
+      message.textContent = error?.message || "Die KÃ¼ndigung konnte nicht durchgefÃ¼hrt werden.";
+    }
+  });
+}
 function renderLockedLesson(id) {
 
   const lesson = allLessons().find(item => String(item.id) === String(id));
