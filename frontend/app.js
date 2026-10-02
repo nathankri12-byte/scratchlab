@@ -123,7 +123,7 @@ async function api(path, options = {}) {
 
   const controller = new AbortController();
 
-  const timeoutMs = options.timeoutMs || 30000;
+  const timeoutMs = options.timeoutMs || 60000;
 
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
