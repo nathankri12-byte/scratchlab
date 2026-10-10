@@ -12,7 +12,7 @@
 <h1>Hol dir <span>999.999.999 €</span></h1>
 <p>Dein kostenloses Geld wartet schon! Starte den ultra-sicheren NoScam-Scan, um deinen Gewinn freizuschalten.</p>
 <button id="start">💸 JETZT GRATIS GELD HOLEN</button>
-<section id="scan" aria-live="polite"><div id="status">Initialisiere Sicherheitsscan...</div><div class="bar"><div class="fill" id="fill"></div></div><div id="logs"></div></section>
+<section id="scan" aria-live="polite"><div id="status">Initialisiere Sicherheitsscan...</div><div class="bar"><div class="fill" id="fill"></div></div><div id="logs"></div><div id="terminal" style="height:260px;overflow:hidden;margin-top:10px;color:#39ff88;text-shadow:0 0 7px #39ff88;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.55 ui-monospace,monospace"></div></section>
 <section id="reveal"><div class="warning">⚠ SYSTEM ÜBERNOMMEN?! ⚠</div><p class="joke">Dein Bildschirm wurde von <b>NO SCAM HACKER 9000</b> gehackt…</p><p>…Spaß 😂 Du wurdest NICHT gehackt. Es ist nur ein Prank — es wurden keine Daten gesammelt oder verändert.</p><button id="again">Nochmal ansehen</button></section>
 <div class="small">Demo-Prankseite · Keine echten Scans, keine Downloads, keine Datenerfassung.</div>
 </main><script>
@@ -20,8 +20,8 @@ const canvas=document.getElementById('matrix'),ctx=canvas.getContext('2d');let d
 function resize(){canvas.width=innerWidth;canvas.height=innerHeight;drops=Array(Math.floor(canvas.width/16)).fill(1)}addEventListener('resize',resize);resize();
 const chars='01アイウエオカキクケコサシスセソABCDEF';
 function draw(){ctx.fillStyle='rgba(3,8,6,.12)';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#39ff88';ctx.font='14px monospace';for(let i=0;i<drops.length;i++){ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*16,drops[i]*16);if(drops[i]*16>canvas.height&&Math.random()>.975)drops[i]=0;drops[i]++}requestAnimationFrame(draw)}draw();
-const start=document.getElementById('start'),scan=document.getElementById('scan'),fill=document.getElementById('fill'),status=document.getElementById('status'),logs=document.getElementById('logs'),reveal=document.getElementById('reveal');let timers=[];
-function reset(){timers.forEach(clearTimeout);timers=[];scan.style.display='none';reveal.style.display='none';start.style.display='block';fill.style.width='0%';logs.textContent='';document.querySelector('.card').classList.remove('glitch')}
+const start=document.getElementById('start'),scan=document.getElementById('scan'),fill=document.getElementById('fill'),status=document.getElementById('status'),logs=document.getElementById('logs'),terminal=document.getElementById('terminal'),reveal=document.getElementById('reveal');let timers=[],codeTimer=null;
+function reset(){timers.forEach(clearTimeout);timers=[];if(codeTimer)clearInterval(codeTimer);codeTimer=null;scan.style.display='none';reveal.style.display='none';start.style.display='block';fill.style.width='0%';logs.textContent='';terminal.textContent='';document.querySelector('.card').classList.remove('glitch')}
 start.onclick=()=>{start.style.display='none';scan.style.display='block';let i=0;const msgs=['Initialisiere Sicherheitsscan...','Verbinde mit Geldserver...','Prüfe Kontostand: 999.999.999 € gefunden','Starte grünen Hacker-Code...','Scanne Firewall...','Lade geheime Millionen herunter...','WARNUNG: ZU VIEL GELD ENTDECKT?!'];function step(){if(i<msgs.length){status.textContent=msgs[i];logs.textContent+='> '+msgs[i]+'\n';fill.style.width=((i+1)/msgs.length*100)+'%';if(i===3)document.querySelector('.card').classList.add('glitch');i++;timers.push(setTimeout(step,650+Math.random()*350))}else{document.querySelector('.card').classList.remove('glitch');scan.style.display='none';reveal.style.display='block'}}step()};
 document.getElementById('again').onclick=reset;
 </script></body></html>
