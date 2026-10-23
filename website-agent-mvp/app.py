@@ -47,12 +47,12 @@ def gemini(prompt,tokens=2400):
  except Exception as x:log("gemini","error",str(x));return None
 def discover():
  c=db();n=c.execute("SELECT COUNT(*) n FROM runs WHERE kind='discovery'").fetchone()["n"];city,lat,lon=CITIES[n%len(CITIES)]
- q=f'''[out:json][timeout:8];(nwr(around:4000,{lat},{lon})["name"]["shop"];nwr(around:4000,{lat},{lon})["name"]["craft"];nwr(around:4000,{lat},{lon})["name"]["office"];nwr(around:4000,{lat},{lon})["name"]["amenity"~"restaurant|cafe|dentist|doctors|car_repair|beauty_salon|school|kindergarten"];);out center tags 60;'''
+ q=f'''[out:json][timeout:18];(nwr(around:2200,{lat},{lon})["name"]["shop"];nwr(around:4000,{lat},{lon})["name"]["craft"];nwr(around:4000,{lat},{lon})["name"]["office"];nwr(around:4000,{lat},{lon})["name"]["amenity"~"restaurant|cafe|dentist|doctors|car_repair|beauty_salon|school|kindergarten"];);out center tags 60;'''
  try:
   r=None;last_error=None
   for endpoint in ["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://overpass.private.coffee/api/interpreter"]:
    try:
-    candidate=requests.post(endpoint,data={"data":q},headers={"User-Agent":"WebsiteAgentMVP/0.2 (website-agent-mvp)"},timeout=(2,5));candidate.raise_for_status();r=candidate;break
+    candidate=requests.post(endpoint,data={"data":q},headers={"User-Agent":"WebsiteAgentMVP/0.2 (website-agent-mvp)"},timeout=(4,20));candidate.raise_for_status();r=candidate;break
    except requests.RequestException as err:last_error=err
   if r is None:raise RuntimeError("Alle Overpass-Suchserver nicht erreichbar. Letzter Fehler: "+str(last_error)[:180])
   added=0;seen=0
@@ -66,7 +66,7 @@ def discover():
    cur=c.execute("INSERT OR IGNORE INTO firms(name,city,kind,source,website,address,phone,email,status,updated) VALUES(?,?,?,?,?,?,?,?,?,?)",(name,city,kind,src,site,addr,t.get("phone") or t.get("contact:phone"),t.get("email") or t.get("contact:email"),"new",now()))
    if cur.rowcount>0:added+=1
    seen+=1
-   if seen>=200 or added>=max(1,min(int(os.environ.get("MAX_CANDIDATES_PER_RUN","8")),20)):break
+   if seen>=200 or added>=max(1,min(int(os.environ.get("MAX_CANDIDATES_PER_RUN","8")),12)):break
   msg=f"{city}: {seen} Karteneinträge geprüft, {added} neue Kandidaten."
   c.execute("INSERT INTO runs(kind,status,msg,created) VALUES('discovery','ok',?,?)",(msg,now()));c.commit();return msg
  except Exception as x:
