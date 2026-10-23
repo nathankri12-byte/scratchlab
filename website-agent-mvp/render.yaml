@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: website-agent-mvp
+    runtime: python
+    plan: free
+    region: frankfurt
+    buildCommand: pip install -r website-agent-mvp/requirements.txt
+    startCommand: gunicorn --chdir website-agent-mvp app:app
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: DASHBOARD_PASSWORD
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash
+      - key: MAX_CANDIDATES_PER_RUN
+        value: "8"
