@@ -47,12 +47,12 @@ def gemini(prompt,tokens=2400):
  except Exception as x:log("gemini","error",str(x));return None
 def discover():
  c=db();n=c.execute("SELECT COUNT(*) n FROM runs WHERE kind='discovery'").fetchone()["n"];city,lat,lon=CITIES[n%len(CITIES)]
- q=f'''[out:json][timeout:20];(nwr(around:4000,{lat},{lon})["name"]["shop"];nwr(around:4000,{lat},{lon})["name"]["craft"];nwr(around:4000,{lat},{lon})["name"]["office"];nwr(around:4000,{lat},{lon})["name"]["amenity"~"restaurant|cafe|dentist|doctors|car_repair|beauty_salon|school|kindergarten"];);out center tags 60;'''
+ q=f'''[out:json][timeout:8];(nwr(around:4000,{lat},{lon})["name"]["shop"];nwr(around:4000,{lat},{lon})["name"]["craft"];nwr(around:4000,{lat},{lon})["name"]["office"];nwr(around:4000,{lat},{lon})["name"]["amenity"~"restaurant|cafe|dentist|doctors|car_repair|beauty_salon|school|kindergarten"];);out center tags 60;'''
  try:
   r=None;last_error=None
   for endpoint in ["https://overpass-api.de/api/interpreter","https://overpass.kumi.systems/api/interpreter","https://overpass.private.coffee/api/interpreter"]:
    try:
-    candidate=requests.post(endpoint,data={"data":q},headers={"User-Agent":"WebsiteAgentMVP/0.2 (website-agent-mvp)"},timeout=22);candidate.raise_for_status();r=candidate;break
+    candidate=requests.post(endpoint,data={"data":q},headers={"User-Agent":"WebsiteAgentMVP/0.2 (website-agent-mvp)"},timeout=(2,5));candidate.raise_for_status();r=candidate;break
    except requests.RequestException as err:last_error=err
   if r is None:raise RuntimeError("Alle Overpass-Suchserver nicht erreichbar. Letzter Fehler: "+str(last_error)[:180])
   added=0;seen=0
