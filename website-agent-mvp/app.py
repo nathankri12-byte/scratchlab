@@ -54,7 +54,31 @@ def discover():
    try:
     candidate=requests.post(endpoint,data={"data":q},headers={"User-Agent":"WebsiteAgentMVP/0.2 (website-agent-mvp)"},timeout=(2,6));candidate.raise_for_status();r=candidate;break
    except requests.RequestException as err:last_error=err
-  if r is None:raise RuntimeError("Alle Overpass-Suchserver nicht erreichbar. Letzter Fehler: "+str(last_error)[:180])
+  if r is None:
+   # Fallback: Photon search over OpenStreetMap data when Overpass is overloaded.
+   # This fallback often has no website/contact tags.
+   added=0;seen=0;photon_errors=[]
+   for term in ["restaurant","cafe","dentist","hairdresser","car repair","shop","craft"]:
+    try:
+     pr=requests.get("https://photon.komoot.io/api/",params={"q":term,"lat":lat,"lon":lon,"limit":8,"lang":"de"},headers={"User-Agent":"WebsiteAgentMVP/0.3 (website-agent-mvp)"},timeout=(2,5))
+     pr.raise_for_status()
+     for feature in pr.json().get("features",[]):
+      p=feature.get("properties",{});name=(p.get("name") or "").strip()
+      if not name:continue
+      osm_type=p.get("osm_type") or "node";osm_id=p.get("osm_id")
+      if not osm_id:continue
+      src="https://www.openstreetmap.org/"+str(osm_type)+"/"+str(osm_id)
+      kind=p.get("type") or p.get("osm_value") or term
+      addr=" ".join(filter(None,[p.get("street"),p.get("housenumber"),p.get("postcode"),p.get("city")]))
+      cur=c.execute("INSERT OR IGNORE INTO firms(name,city,kind,source,website,address,phone,email,status,updated) VALUES(?,?,?,?,?,?,?,?,?,?)",(name,city,kind,src,"",addr,"","","new",now()))
+      if cur.rowcount>0:added+=1
+      seen+=1
+    except requests.RequestException as err:photon_errors.append(str(err)[:90])
+   if seen==0:
+    detail=("; Photon-Fallback ebenfalls fehlgeschlagen: "+photon_errors[-1]) if photon_errors else ""
+    raise RuntimeError("Overpass-Suchserver nicht erreichbar; auch die Ersatzsuche lieferte keine Treffer."+detail)
+   msg=f"{city}: Ersatzsuche über Photon genutzt; {seen} Kartentreffer geprüft, {added} neue Kandidaten. Website- und Kontaktdaten fehlen in dieser Ersatzsuche häufig."
+   c.execute("INSERT INTO runs(kind,status,msg,created) VALUES('discovery','ok',?,?)",(msg,now()));c.commit();return msg
   added=0;seen=0
   for x in r.json().get("elements",[]):
    t=x.get("tags",{});name=(t.get("name") or "").strip()
