@@ -166,7 +166,7 @@ def scheduled_run():
   return {"error":"unauthorized"},401
  result={"discovery":discover(),"processed":[]}
  c=db()
- ids=[x["id"] for x in c.execute("SELECT id FROM firms WHERE status='new' ORDER BY id ASC LIMIT 3").fetchall()]
+ ids=[x["id"] for x in c.execute("SELECT id FROM firms WHERE status='new' ORDER BY id ASC LIMIT 1").fetchall()]
  c.close()
  for cid in ids:
   evaluation=inspect(cid)
