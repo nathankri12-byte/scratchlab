@@ -128,7 +128,7 @@ def inspect(cid):
 def demo(cid):
  c=db();r=c.execute("SELECT * FROM firms WHERE id=?",(cid,)).fetchone()
  if not r:c.close();return "Firma nicht gefunden."
- prompt=f"""Erstelle vollständiges responsives deutsches HTML mit inline CSS, keine Markdown-Codefences, keine Emojis, keine externen Tracker oder Fonts. Modernes eigenständiges Design, gute Kontraste, sinnvolle Ankerlinks. Erfinde keine Bewertungen, Referenzen, Geschichte, Auszeichnungen oder Kontaktdaten. Fehlende Daten als [bitte bestätigen] kennzeichnen. Deutlich als unverbindlicher, nicht offizieller Konzeptentwurf markieren. Unternehmen: {r['name']}; Branche: {r['kind']}; Stadt: {r['city']}; bekannte URL: {r['website'] or 'nicht in Kartendaten vorhanden, Existenz nicht widerlegt'}. Keine bestehende Website kopieren."""
+ prompt=f"""Du bist ein erfahrener Webdesigner und entwickelst einen hochwertigen, individuell gestalteten Website-Konzeptentwurf für ein echtes Unternehmen. Antworte ausschließlich mit vollständigem HTML-Dokument, ohne Markdown-Codefences. Sprache Deutsch. Inline-CSS, responsive Mobile-first, semantisches HTML, barrierearme Kontraste, klare Typografie, großzügige Abstände, hochwertige visuelle Hierarchie und ein eigenes, zur Branche passendes Farbsystem. Keine Emojis, keine externen Fonts, keine Tracker, keine fremden Bilder oder Bibliotheken. Erstelle mehr als eine generische Landingpage: Kopfzeile mit Wortmarke und Navigation, starke Hero-Sektion mit prägnanter Headline, klarer Beschreibung und CTA, Leistungen als individuell gestaltete Karten, Abschnitt über Arbeitsweise/Vertrauen ohne erfundene Fakten, sinnvoller Ablauf oder FAQ, Kontaktsektion mit nur bestätigten Kontaktdaten und Footer. Alle internen Links müssen auf vorhandene IDs zeigen; Buttons müssen sinnvolle Ziele haben. Keine Formulare, die scheinbar Daten versenden. Keine erfundenen Bewertungen, Kunden, Referenzen, Zertifikate, Auszeichnungen, Teammitglieder, Öffnungszeiten oder Kontaktdaten. Unbekannte Angaben neutral formulieren oder als [bitte bestätigen] kennzeichnen. Sichtbarer Hinweis: „Unverbindlicher Konzeptentwurf – nicht die offizielle Website des Unternehmens“. Das Design soll erkennbar zur Branche passen und nicht nach einer Standardvorlage aussehen. Unternehmen: {r['name']}; Branche: {r['kind']}; Stadt: {r['city']}; bekannte URL: {r['website'] or 'nicht in Kartendaten vorhanden; daraus folgt nicht, dass keine Website existiert'}. Keine bestehende Website kopieren."""
  out=gemini(prompt,3000)
  if out:
   out=out.replace(chr(96)*3+"html","").replace(chr(96)*3,"").strip()
@@ -158,6 +158,22 @@ def index():
  rh="".join("<li>"+e(x["kind"])+" · "+e(x["status"])+" — "+e(x["msg"])+"</li>" for x in runs) or "<li>Noch keine Läufe.</li>"
  body=f"""<p class="small">AUTOMATISIERTER WORKFLOW · MVP</p><h1>Von der Firma zur Website-Demo.</h1><p>Öffentliche Unternehmensdaten finden, Websites grob prüfen und Demoentwürfe erzeugen.</p><p class="notice">OpenStreetMap deckt nicht alle Unternehmen ab. Fehlende URL beweist nicht, dass es keine Website gibt. Keine E-Mails werden versendet.</p><div class="grid"><div class="stat">Kandidaten<strong>{s['n'] or 0}</strong></div><div class="stat">Mit URL<strong>{s['w'] or 0}</strong></div><div class="stat">Demoentwürfe<strong>{s['d'] or 0}</strong></div></div><div class="panel"><h2>Aktionen</h2><div class="actions"><form method="post" action="/discover"><button>Unternehmen suchen</button></form><a class="btn secondary" href="/export.csv">CSV exportieren</a></div><p class="small">Ein Lauf durchsucht nur eine Stadt, um öffentliche Dienste nicht zu überlasten.</p></div><div class="panel"><h2>Unternehmen</h2><table><tr><th>Firma</th><th>Website</th><th>Score</th><th>Status</th><th>Aktionen</th></tr>{trs}</table></div><div class="panel"><h2>Letzte Aktivitäten</h2><ul>{rh}</ul><p>{'Gemini ist konfiguriert.' if KEY else 'Gemini-Key fehlt: Basisprüfung und Vorlagen funktionieren trotzdem.'}</p><p class="small">Kostenloses Hosting kann lokale Daten bei Neustarts verlieren. CSV exportieren.</p></div>"""
  return render_template_string(PAGE,title="Übersicht",css=CSS,body=body)
+@app.route("/scheduled-run",methods=["POST"])
+def scheduled_run():
+ token=os.environ.get("WORKER_TOKEN","")
+ supplied=request.headers.get("X-Worker-Token","")
+ if not token or not secrets.compare_digest(supplied,token):
+  return {"error":"unauthorized"},401
+ result={"discovery":discover(),"processed":[]}
+ c=db()
+ ids=[x["id"] for x in c.execute("SELECT id FROM firms WHERE status='new' ORDER BY id ASC LIMIT 3").fetchall()]
+ c.close()
+ for cid in ids:
+  evaluation=inspect(cid)
+  demo_result=demo(cid)
+  result["processed"].append({"firm_id":cid,"inspection":evaluation,"demo":demo_result})
+ return result,200
+
 @app.route("/discover",methods=["POST"])
 @protected
 def discover_route():flash(discover());return redirect("/")
