@@ -1,0 +1,26 @@
+name: Website Agent Background Run
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Trigger Website Agent pipeline
+        env:
+          WORKER_TOKEN: ${{ secrets.WEBSITE_AGENT_WORKER_TOKEN }}
+        run: |
+          if [ -z "$WORKER_TOKEN" ]; then
+            echo "Missing repository secret WEBSITE_AGENT_WORKER_TOKEN"
+            exit 1
+          fi
+          curl --fail-with-body --show-error --silent \
+            --max-time 540 \
+            --retry 2 --retry-delay 10 \
+            -X POST \
+            -H "X-Worker-Token: $WORKER_TOKEN" \
+            "https://website-agent-mvp.onrender.com/scheduled-run"
