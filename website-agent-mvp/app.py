@@ -1,4 +1,4 @@
-import os, sqlite3, json, html, secrets, re, io, csv
+import os, sqlite3, json, html, secrets, re, io, csv, threading
 from datetime import datetime, timezone
 from functools import wraps
 from urllib.parse import urlparse
@@ -10,6 +10,8 @@ DB=os.environ.get("AGENT_DB_PATH",os.path.join(ROOT,"agent.db"))
 PASS=os.environ.get("DASHBOARD_PASSWORD","")
 KEY=os.environ.get("GEMINI_API_KEY","")
 MODEL=os.environ.get("GEMINI_MODEL","gemini-2.5-flash")
+RUN_STATE={"running":False,"message":"Bereit für den nächsten Durchlauf."}
+RUN_LOCK=threading.Lock()
 app=Flask(__name__); app.secret_key=os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 app.config.update(SESSION_COOKIE_HTTPONLY=True,SESSION_COOKIE_SAMESITE="Lax")
 CITIES=[("Berlin",52.52,13.405),("Hamburg",53.5511,9.9937),("München",48.1372,11.5756),("Köln",50.9375,6.9603),("Frankfurt",50.1109,8.6821),("Stuttgart",48.7758,9.1829),("Düsseldorf",51.2277,6.7735),("Leipzig",51.3397,12.3731),("Dortmund",51.5136,7.4653),("Bremen",53.0793,8.8017),("Dresden",51.0504,13.7373),("Hannover",52.3759,9.732),("Nürnberg",49.4521,11.0767),("Bonn",50.7374,7.0982),("Mannheim",49.4875,8.466)]
@@ -156,8 +158,29 @@ def index():
   trs+=f"""<tr><td><b>{e(r['name'])}</b><div class="small">{e(r['kind'])} · {e(r['city'])}</div></td><td>{site}</td><td>{r['score'] if r['score'] is not None else '–'}</td><td>{e(r['status'])}</td><td><div class="actions"><form method="post" action="/firm/{r['id']}/inspect"><button class="secondary">Prüfen</button></form><form method="post" action="/firm/{r['id']}/demo"><button>Demo</button></form><a class="btn secondary" href="/firm/{r['id']}">Details</a></div></td></tr>"""
  if not trs:trs="<tr><td colspan='5'>Noch keine Kandidaten.</td></tr>"
  rh="".join("<li>"+e(x["kind"])+" · "+e(x["status"])+" — "+e(x["msg"])+"</li>" for x in runs) or "<li>Noch keine Läufe.</li>"
- body=f"""<p class="small">AUTOMATISIERTER WORKFLOW · MVP</p><h1>Von der Firma zur Website-Demo.</h1><p>Öffentliche Unternehmensdaten finden, Websites grob prüfen und Demoentwürfe erzeugen.</p><p class="notice">OpenStreetMap deckt nicht alle Unternehmen ab. Fehlende URL beweist nicht, dass es keine Website gibt. Keine E-Mails werden versendet.</p><div class="grid"><div class="stat">Kandidaten<strong>{s['n'] or 0}</strong></div><div class="stat">Mit URL<strong>{s['w'] or 0}</strong></div><div class="stat">Demoentwürfe<strong>{s['d'] or 0}</strong></div></div><div class="panel"><h2>Aktionen</h2><div class="actions"><form method="post" action="/discover"><button>Unternehmen suchen</button></form><a class="btn secondary" href="/export.csv">CSV exportieren</a></div><p class="small">Ein Lauf durchsucht nur eine Stadt, um öffentliche Dienste nicht zu überlasten.</p></div><div class="panel"><h2>Unternehmen</h2><table><tr><th>Firma</th><th>Website</th><th>Score</th><th>Status</th><th>Aktionen</th></tr>{trs}</table></div><div class="panel"><h2>Letzte Aktivitäten</h2><ul>{rh}</ul><p>{'Gemini ist konfiguriert.' if KEY else 'Gemini-Key fehlt: Basisprüfung und Vorlagen funktionieren trotzdem.'}</p><p class="small">Kostenloses Hosting kann lokale Daten bei Neustarts verlieren. CSV exportieren.</p></div>"""
+ body=f"""<p class="small">AUTOMATISIERTER WORKFLOW · MVP</p><h1>Von der Firma zur Website-Demo.</h1><p>Öffentliche Unternehmensdaten finden, Websites grob prüfen und Demoentwürfe erzeugen.</p><p class="notice">OpenStreetMap deckt nicht alle Unternehmen ab. Fehlende URL beweist nicht, dass es keine Website gibt. Keine E-Mails werden versendet.</p><div class="grid"><div class="stat">Kandidaten<strong>{s['n'] or 0}</strong></div><div class="stat">Mit URL<strong>{s['w'] or 0}</strong></div><div class="stat">Demoentwürfe<strong>{s['d'] or 0}</strong></div></div><div class="panel"><h2>Agent steuern</h2><p>Ein Durchlauf arbeitet Schritt für Schritt: erst suchen, dann einen Kandidaten prüfen und eine Demo erstellen.</p><div class="actions"><form method="post" action="/run-now"><button>Automatischen Durchlauf starten</button></form><form method="post" action="/discover"><button class="secondary">Nur Unternehmen suchen</button></form><a class="btn secondary" href="/export.csv">CSV exportieren</a></div><p class="small">Es wird immer nur ein Kandidat pro Durchlauf bearbeitet. Keine E-Mails werden versendet.</p></div><div class="panel"><h2>Unternehmen</h2><table><tr><th>Firma</th><th>Website</th><th>Score</th><th>Status</th><th>Aktionen</th></tr>{trs}</table></div><div class="panel"><h2>Letzte Aktivitäten</h2><ul>{rh}</ul><p>{'Gemini ist konfiguriert.' if KEY else 'Gemini-Key fehlt: Basisprüfung und Vorlagen funktionieren trotzdem.'}</p><p class="small">Kostenloses Hosting kann lokale Daten bei Neustarts verlieren. CSV exportieren.</p></div>"""
  return render_template_string(PAGE,title="Übersicht",css=CSS,body=body)
+def background_pipeline():
+ try:
+  with RUN_LOCK: RUN_STATE.update({"running":True,"message":"Suche nach Unternehmen läuft …"})
+  discovery_msg=discover()
+  c=db(); row=c.execute("SELECT id,name FROM firms WHERE status='new' ORDER BY id ASC LIMIT 1").fetchone(); c.close()
+  if row:
+   RUN_STATE["message"]="Prüfe und erstelle Demo für: "+row["name"]
+   inspect(row["id"]); demo(row["id"])
+   RUN_STATE["message"]="Fertig: "+row["name"]+". "+discovery_msg
+  else: RUN_STATE["message"]="Kein neuer Kandidat gefunden. "+discovery_msg
+ except Exception as err: RUN_STATE["message"]="Fehler: "+str(err)[:180]
+ finally: RUN_STATE["running"]=False
+@app.route("/run-now",methods=["POST"])
+@protected
+def run_now():
+ if RUN_STATE["running"]: flash("Der Agent arbeitet bereits. Bitte warte.")
+ else:
+  threading.Thread(target=background_pipeline,daemon=True).start()
+  flash("Agent gestartet. Er arbeitet jetzt im Hintergrund an einem Kandidaten.")
+ return redirect("/")
+
 @app.route("/scheduled-run",methods=["POST"])
 def scheduled_run():
  token=os.environ.get("WORKER_TOKEN","")
