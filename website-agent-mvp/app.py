@@ -155,19 +155,33 @@ def logout():session.clear();return redirect("/login")
 @app.route("/")
 @protected
 def index():
- c=db();rows=c.execute("SELECT * FROM firms ORDER BY id DESC LIMIT 100").fetchall();s=c.execute("SELECT COUNT(*) n,SUM(CASE WHEN website<>'' THEN 1 ELSE 0 END) w,SUM(CASE WHEN status='demo_draft' THEN 1 ELSE 0 END) d FROM firms").fetchone();runs=c.execute("SELECT * FROM runs ORDER BY id DESC LIMIT 6").fetchall();c.close()
- trs=""
- for r in rows:
-  site='<a href="'+e(r["website"])+'" target="_blank" rel="noopener">Website</a>' if r["website"] else "URL fehlt"
-  trs+=f"""<tr><td><b>{e(r['name'])}</b><div class="small">{e(r['kind'])} · {e(r['city'])}</div></td><td>{site}</td><td>{r['score'] if r['score'] is not None else '–'}</td><td>{e(r['status'])}</td><td><div class="actions"><form method="post" action="/firm/{r['id']}/inspect"><button class="secondary">Prüfen</button></form><form method="post" action="/firm/{r['id']}/demo"><button>Demo</button></form><a class="btn secondary" href="/firm/{r['id']}">Details</a></div></td></tr>"""
- if not trs:trs="<tr><td colspan='5'>Noch keine Kandidaten.</td></tr>"
- rh="".join("<li>"+e(x["kind"])+" · "+e(x["status"])+" — "+e(x["msg"])+"</li>" for x in runs) or "<li>Noch keine Läufe.</li>"
- body=f"""<p class="small">AUTOMATISIERTER WORKFLOW · MVP</p><h1>Von der Firma zur Website-Demo.</h1><p>Öffentliche Unternehmensdaten finden, Websites grob prüfen und Demoentwürfe erzeugen.</p><p class="notice">OpenStreetMap deckt nicht alle Unternehmen ab. Fehlende URL beweist nicht, dass es keine Website gibt. Keine E-Mails werden versendet.</p><div class="grid"><div class="stat">Kandidaten<strong>{s['n'] or 0}</strong></div><div class="stat">Mit URL<strong>{s['w'] or 0}</strong></div><div class="stat">Demoentwürfe<strong>{s['d'] or 0}</strong></div></div><div class="panel"><h2>Agent steuern</h2><p>Ein Durchlauf arbeitet Schritt für Schritt: erst suchen, dann einen Kandidaten prüfen und eine Demo erstellen.</p><div class="actions"><form method="post" action="/run-now"><button>Automatischen Durchlauf starten</button></form><form method="post" action="/discover"><button class="secondary">Nur Unternehmen suchen</button></form><a class="btn secondary" href="/export.csv">CSV exportieren</a></div><p class="small">Es wird immer nur ein Kandidat pro Durchlauf bearbeitet. Keine E-Mails werden versendet.</p></div><div class="panel"><h2>Unternehmen</h2><table><tr><th>Firma</th><th>Website</th><th>Score</th><th>Status</th><th>Aktionen</th></tr>{trs}</table></div><div class="panel"><h2>Live-Aktivität</h2><p id="live-status">Status wird geladen …</p><ol id="live-steps"><li>Warte auf den nächsten Durchlauf.</li></ol><p class="small">Aktualisiert sich automatisch alle 2,5 Sekunden.</p></div><div class="panel"><h2>Letzte Aktivitäten</h2><ul>{rh}</ul><p>{'Gemini ist konfiguriert.' if KEY else 'Gemini-Key fehlt: Basisprüfung und Vorlagen funktionieren trotzdem.'}</p><p class="small">Kostenloses Hosting kann lokale Daten bei Neustarts verlieren. CSV exportieren.</p></div>"""
- body += """<script>
-async function refreshAgentActivity(){try{const r=await fetch('/activity',{cache:'no-store'});if(!r.ok)return;const d=await r.json();const status=document.getElementById('live-status');const steps=document.getElementById('live-steps');if(status)status.textContent=(d.running?'Läuft gerade: ':'Status: ')+d.message;if(steps)steps.innerHTML=d.events.map(x=>'<li><b>'+x.kind+'</b> · '+x.msg+' <span class="small">('+x.created+')</span></li>').join('')||'<li>Noch keine Aktivitäten.</li>';}catch(e){}}
-refreshAgentActivity();setInterval(refreshAgentActivity,2500);
-</script>"""
- return render_template_string(PAGE,title="Übersicht",css=CSS,body=body)
+ c=db()
+ row=c.execute("SELECT id,name,city,kind,status,score,demo,email_draft,qa_report,updated FROM firms WHERE demo IS NOT NULL AND demo<>'' ORDER BY id DESC LIMIT 1").fetchone()
+ c.close()
+ if row:
+  qa={}
+  try:qa=json.loads(row["qa_report"] or "{}")
+  except Exception:pass
+  demo_link=f'<a class="btn" href="/firm/{row["id"]}/preview" target="_blank" rel="noopener">Demo ansehen</a>'
+  details=f'<a class="btn secondary" href="/firm/{row["id"]}">Ergebnis &amp; E-Mail öffnen</a>'
+  latest=f"""<div class="result"><div class="eyebrow">LETZTES ERGEBNIS</div><h2>{e(row["name"])}</h2><p>{e(row["kind"])} · {e(row["city"])}</p><p class="notice">{("Technischer Demo-Check bestanden." if qa.get("passed") else "Demo erstellt; bitte die technischen Prüfpunkte im Ergebnis ansehen.")}</p><div class="actions">{demo_link}{details}</div></div>"""
+ else:latest='<div class="result"><div class="eyebrow">LETZTES ERGEBNIS</div><h2>Noch kein Durchgang abgeschlossen</h2><p>Starte einen Durchgang. Hier erscheinen danach die Demo und der E-Mail-Entwurf.</p></div>'
+ body=f"""<div class="agent-shell">
+ <div class="eyebrow">WEBSITE AGENT · MVP</div>
+ <h1>Ein Durchgang.<br><span class="accent">Ein fertiger Entwurf.</span></h1>
+ <p class="lead">Der Agent sucht ein Unternehmen, prüft dessen Website, erstellt eine individuelle Demo und kontrolliert sie mit technischen Regeln. Danach bereitet er eine E-Mail vor – versendet wird nichts automatisch.</p>
+ <div class="panel main-action"><form method="post" action="/run-now"><button class="start-button" {"disabled" if RUN_STATE["running"] else ""}>{"Durchgang läuft …" if RUN_STATE["running"] else "Durchgang starten"}</button></form><p id="live-status" class="live-status">{e(RUN_STATE["message"])}</p><div class="steps"><div>01 <span>Unternehmen finden</span></div><div>02 <span>Website prüfen</span></div><div>03 <span>Demo erstellen</span></div><div>04 <span>Technischen Check durchführen</span></div><div>05 <span>E-Mail-Entwurf vorbereiten</span></div></div></div>
+ {latest}
+ <p class="footnote">Der technische Check erkennt häufige HTML-Probleme, aber ersetzt keine vollständige manuelle Prüfung. Bitte Demo und E-Mail immer selbst kontrollieren. Bei geschäftlichen Kontaktaufnahmen gelten rechtliche Regeln.</p>
+ </div>
+ <style>
+ body{{background:#080b10!important}} .agent-shell{{max-width:780px;margin:28px auto;padding:18px 14px;color:#eef2f7}} .eyebrow{{font-size:11px;letter-spacing:2px;color:#9da9b9;font-weight:700}} .agent-shell h1{{font-size:clamp(34px,7vw,54px);line-height:1.05;letter-spacing:-1.8px;margin:18px 0}} .accent{{color:#d9ff3f}} .lead{{color:#aab5c4;font-size:16px;line-height:1.7;max-width:680px}} .agent-shell .panel,.result{{background:#121820;border:1px solid #26313d;border-radius:22px;padding:22px;margin-top:24px;box-shadow:0 18px 55px #0003}} .main-action{{text-align:center}} .start-button{{width:100%;min-height:62px;background:#d9ff3f!important;color:#10140a!important;border:0!important;border-radius:14px;font-size:18px;font-weight:800;cursor:pointer}} .start-button:disabled{{opacity:.65}} .live-status{{color:#d9ff3f;font-weight:600;line-height:1.5;min-height:24px}} .steps{{display:grid;grid-template-columns:1fr;gap:10px;text-align:left;margin-top:24px}} .steps div{{border:1px solid #29333e;background:#0d1218;border-radius:11px;padding:13px;color:#d9ff3f;font-weight:700}} .steps span{{color:#dce2ea;font-weight:500;margin-left:10px}} .result h2{{margin:10px 0 4px}} .result p{{color:#aab5c4}} .actions{{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}} .btn{{display:inline-block;text-decoration:none;padding:12px 16px;border-radius:10px;background:#d9ff3f;color:#10140a;font-weight:700}} .btn.secondary{{background:#202a35;color:#eef2f7}} .notice{{font-size:14px}} .footnote{{font-size:12px;color:#7f8b9a;line-height:1.6;margin:22px 4px}} @media(min-width:600px){{.steps{{grid-template-columns:1fr 1fr}}}}
+ </style>
+ <script>
+ async function refreshAgentActivity(){{try{{const r=await fetch('/activity',{{cache:'no-store'}});if(!r.ok)return;const d=await r.json();const status=document.getElementById('live-status');if(status)status.textContent=(d.running?'Läuft gerade: ':'Status: ')+d.message;}}catch(e){{}}}}
+ refreshAgentActivity();setInterval(refreshAgentActivity,2000);
+ </script>"""
+ return render_template_string(PAGE,title="Website Agent",css=CSS,body=body)
 @app.route("/activity")
 @protected
 def activity():
