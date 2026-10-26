@@ -257,7 +257,7 @@ def background_pipeline():
   if not row:
    RUN_STATE["message"]="Suche nach genau einem neuen Kandidaten …"
    discover()
-   c=db();row=c.execute("SELECT id,name FROM firms WHERE status='new' ORDER BY id ASC LIMIT 1").fetchone();c.close()
+   c=db();row=c.execute("SELECT id,name,kind FROM firms WHERE status='new' ORDER BY id ASC LIMIT 1").fetchone();c.close()
   if not row:
    RUN_STATE["message"]="Kein neuer Kandidat gefunden. Starte später erneut."
    return
