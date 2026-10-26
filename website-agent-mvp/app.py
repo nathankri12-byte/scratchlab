@@ -145,7 +145,7 @@ def demo(cid):
  # Ensure every generated demo has a visible, consistent disclaimer.
  if "unverbindlicher konzeptentwurf" not in out.lower():
   notice='<div role="note" style="position:relative;z-index:9999;background:#111827;color:#fff;padding:12px 16px;text-align:center;font:600 13px/1.5 Arial,sans-serif;border-bottom:3px solid #d9ff3f">Unverbindlicher Konzeptentwurf – nicht die offizielle Website des Unternehmens.</div>'
-  body_match=re.search(r"<body\\b[^>]*>",out,re.I)
+  body_match=re.search(r"<body\b[^>]*>",out,re.I)
   if body_match:out=out[:body_match.end()]+notice+out[body_match.end():]
  c.execute("UPDATE firms SET demo=?,status='demo_draft',updated=? WHERE id=?",(out,now(),cid));c.commit();c.close();log("demo","ok",f"Demoentwurf für #{cid}");return "Demoentwurf erstellt; Hinweis zum Konzeptentwurf ergänzt; Inhalte und Funktionen vor dem Teilen prüfen."
 @app.route("/login",methods=["GET","POST"])
