@@ -291,6 +291,13 @@ def detail(cid):
  lis="".join("<li>"+e(x)+"</li>" for x in items) or "<li>Noch nicht geprüft.</li>"
  preview=f"<p><a class='btn' target='_blank' href='/firm/{cid}/preview'>Demo öffnen</a></p>" if r["demo"] else ""
  body=f"""<h1>{e(r['name'])}</h1><p>{e(r['kind'])} · {e(r['city'])}</p><div class="panel"><h2>Unternehmensdaten</h2><p>Website: {('<a href="'+e(r['website'])+'" target="_blank">'+e(r['website'])+'</a>') if r['website'] else 'In Quelle nicht eingetragen; Existenz nicht widerlegt.'}</p><p>Quelle: <a href="{e(r['source'])}" target="_blank">OpenStreetMap</a></p><p>{e(r['address'])}<br>{e(r['phone'])}<br>{e(r['email'])}</p></div><div class="panel"><h2>Prüfung</h2><div class="score">{r['score'] if r['score'] is not None else '–'}/100</div><ul>{lis}</ul><div class="actions"><form method="post" action="/firm/{cid}/inspect"><button>Erneut prüfen</button></form><form method="post" action="/firm/{cid}/demo"><button class="secondary">Demo bauen</button></form></div>{preview}</div>"""
+ qa={}
+ try:qa=json.loads(r["qa_report"] or "{}")
+ except Exception:pass
+ qa_text=("Bestanden" if qa.get("passed") else "Noch nicht bestanden / Demo manuell prüfen")
+ qa_items="".join("<li>"+e(x)+"</li>" for x in qa.get("issues",[]))
+ email_text=e(r["email_draft"] or "Noch kein E-Mail-Entwurf vorhanden. Starte einen vollständigen Durchgang, um ihn zu erstellen.").replace("\\n","<br>")
+ body+=f"""<div class="panel"><h2>Technische Demo-Prüfung</h2><p><b>{qa_text}</b></p><ul>{qa_items}</ul><p class="small">Regelbasierte Prüfung – kein vollständiger Funktionstest. Demo bitte selbst ansehen.</p></div><div class="panel"><h2>E-Mail-Entwurf</h2><p class="small">Wird nicht automatisch versendet. Vor dem Verwenden bitte Angaben und rechtliche Zulässigkeit prüfen.</p><div id="email-draft" style="white-space:normal;line-height:1.7">{email_text}</div><p><button type="button" onclick="navigator.clipboard.writeText(document.getElementById('email-draft').innerText)">E-Mail kopieren</button></p></div>"""
  return render_template_string(PAGE,title=r["name"],css=CSS,body=body)
 @app.route("/firm/<int:cid>/preview")
 @protected
