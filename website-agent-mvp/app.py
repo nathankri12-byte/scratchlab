@@ -21,7 +21,11 @@ def now():return datetime.now(timezone.utc).isoformat(timespec="seconds")
 def db():
  c=sqlite3.connect(DB);c.row_factory=sqlite3.Row
  c.execute("""CREATE TABLE IF NOT EXISTS firms(id INTEGER PRIMARY KEY,name TEXT,city TEXT,kind TEXT,source TEXT,website TEXT,address TEXT,phone TEXT,email TEXT,status TEXT DEFAULT 'new',score INTEGER,report TEXT,demo TEXT,updated TEXT,UNIQUE(name,city,source))""")
- c.execute("CREATE TABLE IF NOT EXISTS runs(id INTEGER PRIMARY KEY,kind TEXT,status TEXT,msg TEXT,created TEXT)");c.commit();return c
+ c.execute("CREATE TABLE IF NOT EXISTS runs(id INTEGER PRIMARY KEY,kind TEXT,status TEXT,msg TEXT,created TEXT)")
+ cols={x["name"] for x in c.execute("PRAGMA table_info(firms)").fetchall()}
+ if "email_draft" not in cols:c.execute("ALTER TABLE firms ADD COLUMN email_draft TEXT")
+ if "qa_report" not in cols:c.execute("ALTER TABLE firms ADD COLUMN qa_report TEXT")
+ c.commit();return c
 def log(k,s,m):
  c=db();c.execute("INSERT INTO runs(kind,status,msg,created) VALUES(?,?,?,?)",(k,s,m[:600],now()));c.commit();c.close()
 def e(x):return html.escape(str(x or ""),quote=True)
