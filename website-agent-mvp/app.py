@@ -173,17 +173,65 @@ refreshAgentActivity();setInterval(refreshAgentActivity,2500);
 def activity():
  c=db();events=c.execute("SELECT kind,status,msg,created FROM runs ORDER BY id DESC LIMIT 12").fetchall();c.close()
  return {"running":RUN_STATE["running"],"message":RUN_STATE["message"],"events":[dict(x) for x in events]}
+def quality_check(markup):
+ issues=[]
+ low=(markup or "").lower()
+ if not markup or len(markup)<1800:issues.append("Demo ist ungewöhnlich kurz.")
+ if "<!doctype html" not in low:issues.append("HTML-Dokumenttyp fehlt.")
+ if 'name="viewport"' not in low:issues.append("Viewport für mobile Geräte fehlt.")
+ if "<h1" not in low:issues.append("Hauptüberschrift (H1) fehlt.")
+ if "</html>" not in low:issues.append("HTML-Dokument scheint unvollständig.")
+ if "unverbindlicher konzeptentwurf" not in low:issues.append("Hinweis zum Konzeptentwurf fehlt.")
+ return {"passed":not issues,"issues":issues}
+def save_email_draft(cid):
+ c=db();r=c.execute("SELECT * FROM firms WHERE id=?",(cid,)).fetchone()
+ if not r or not r["demo"]:c.close();return
+ base=(os.environ.get("PUBLIC_BASE_URL") or "https://website-agent-mvp.onrender.com").rstrip("/")
+ demo_url=base+"/firm/"+str(cid)+"/preview"
+ draft=f"""Betreff: Unverbindlicher Website-Konzeptentwurf für {r["name"]}
+
+Guten Tag,
+
+ich habe einen unverbindlichen Website-Konzeptentwurf für {r["name"]} vorbereitet. Er zeigt eine mögliche Gestaltungsrichtung und ist noch kein fertiges Angebot.
+
+Hier können Sie den Entwurf ansehen:
+{demo_url}
+
+Falls der Ansatz für Sie interessant ist, kann ich Ihnen gern weitere Informationen dazu schicken. Wenn Sie keine weiteren Nachrichten möchten, ist das natürlich völlig in Ordnung.
+
+Freundliche Grüße"""
+ c.execute("UPDATE firms SET email_draft=?,updated=? WHERE id=?",(draft,now(),cid));c.commit();c.close()
 def background_pipeline():
  try:
-  with RUN_LOCK: RUN_STATE.update({"running":True,"message":"Suche nach Unternehmen läuft …"})
-  discovery_msg=discover()
-  c=db(); row=c.execute("SELECT id,name FROM firms WHERE status='new' ORDER BY id ASC LIMIT 1").fetchone(); c.close()
-  if row:
-   RUN_STATE["message"]="Prüfe und erstelle Demo für: "+row["name"]
-   inspect(row["id"]); demo(row["id"])
-   RUN_STATE["message"]="Fertig: "+row["name"]+". "+discovery_msg
-  else: RUN_STATE["message"]="Kein neuer Kandidat gefunden. "+discovery_msg
- except Exception as err: RUN_STATE["message"]="Fehler: "+str(err)[:180]
+  with RUN_LOCK: RUN_STATE.update({"running":True,"message":"Suche nach einem passenden Unternehmen …"})
+  c=db();row=c.execute("SELECT id,name FROM firms WHERE status='new' ORDER BY id ASC LIMIT 1").fetchone();c.close()
+  if not row:
+   RUN_STATE["message"]="Suche nach genau einem neuen Kandidaten …"
+   discover()
+   c=db();row=c.execute("SELECT id,name FROM firms WHERE status='new' ORDER BY id ASC LIMIT 1").fetchone();c.close()
+  if not row:
+   RUN_STATE["message"]="Kein neuer Kandidat gefunden. Starte später erneut."
+   return
+  cid=row["id"];name=row["name"]
+  RUN_STATE["message"]="1/5 · Prüfe Website von "+name
+  inspect(cid)
+  RUN_STATE["message"]="2/5 · Erstelle individuellen Demoentwurf für "+name
+  demo(cid)
+  RUN_STATE["message"]="3/5 · Prüfe die Demo technisch"
+  c=db();rr=c.execute("SELECT demo FROM firms WHERE id=?",(cid,)).fetchone();c.close()
+  qa=quality_check(rr["demo"] if rr else "")
+  c=db();c.execute("UPDATE firms SET qa_report=? WHERE id=?",(json.dumps(qa,ensure_ascii=False),cid));c.commit();c.close()
+  if qa["passed"]:
+   RUN_STATE["message"]="4/5 · Erstelle einen personalisierten E-Mail-Entwurf"
+   save_email_draft(cid)
+   RUN_STATE["message"]="5/5 · Fertig. Demo geprüft und E-Mail-Entwurf vorbereitet – bitte vor dem Senden selbst kontrollieren."
+   log("workflow","ok",name+": technische Prüfung bestanden; E-Mail-Entwurf vorbereitet.")
+  else:
+   RUN_STATE["message"]="Demo erstellt, aber die technische Prüfung meldet: "+", ".join(qa["issues"])
+   log("workflow","warning",name+": Prüfung: "+", ".join(qa["issues"]))
+ except Exception as err:
+  RUN_STATE["message"]="Fehler: "+str(err)[:180]
+  log("workflow","error",RUN_STATE["message"])
  finally: RUN_STATE["running"]=False
 @app.route("/run-now",methods=["POST"])
 @protected
