@@ -53,7 +53,13 @@ def gemini(prompt,tokens=2400):
   log("gemini","error",LAST_GEMINI_ERROR)
   return None
  try:
-  r=requests.post("https://generativelanguage.googleapis.com/v1beta/models/"+MODEL+":generateContent",params={"key":KEY},json={"contents":[{"parts":[{"text":prompt}]}],"generationConfig":{"temperature":0.3,"maxOutputTokens":tokens}},timeout=60)
+  payload={"contents":[{"parts":[{"text":prompt}]}],"generationConfig":{"temperature":0.3,"maxOutputTokens":tokens}}
+  endpoint="https://generativelanguage.googleapis.com/v1beta/models/"+MODEL+":generateContent"
+  try:
+   r=requests.post(endpoint,params={"key":KEY},json=payload,timeout=(15,180))
+  except requests.exceptions.ReadTimeout:
+   log("gemini","warning","Gemini brauchte länger als 180 Sekunden; einmaliger Wiederholungsversuch.")
+   r=requests.post(endpoint,params={"key":KEY},json=payload,timeout=(15,180))
   if r.status_code>=400:
    try:
     payload=r.json().get("error",{})
