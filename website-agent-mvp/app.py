@@ -9,6 +9,9 @@ ROOT=os.path.dirname(__file__)
 DB=os.environ.get("AGENT_DB_PATH",os.path.join(ROOT,"agent.db"))
 PASS=os.environ.get("DASHBOARD_PASSWORD","")
 KEY=os.environ.get("GEMINI_API_KEY","")
+GROQ_KEY=os.environ.get("GROQ_API_KEY","")
+AI_PROVIDER=os.environ.get("AI_PROVIDER","groq").strip().lower()
+GROQ_MODEL=os.environ.get("GROQ_MODEL","openai/gpt-oss-20b")
 MODEL=os.environ.get("GEMINI_MODEL","gemini-3.8-flash")
 RUN_STATE={"running":False,"message":"Bereit für den nächsten Durchlauf.","firm_id":None,"qa_issues":[]}
 RUN_LOCK=threading.Lock()
@@ -41,25 +44,46 @@ def norm(u):
  if not u:return ""
  if not u.startswith(("http://","https://")):u="https://"+u
  p=urlparse(u)
- if p.scheme not in ("http","https") or not p.hostname or "." not in p.hostname:return ""
- if p.hostname in ("localhost","127.0.0.1","0.0.0.0") or p.hostname.endswith(".local"):return ""
- return u
-LAST_GEMINI_ERROR=""
+ if p.scheme not in ("http",LAST_GEMINI_ERROR=""
 def gemini(prompt,tokens=2400):
  global LAST_GEMINI_ERROR
  LAST_GEMINI_ERROR=""
+ if AI_PROVIDER=="groq":
+  if not GROQ_KEY:
+   LAST_GEMINI_ERROR="GROQ_API_KEY fehlt in den Render-Umgebungsvariablen."
+   log("groq","error",LAST_GEMINI_ERROR)
+   return None
+  try:
+   payload={"model":GROQ_MODEL,"messages":[{"role":"user","content":prompt}],"max_completion_tokens":tokens}
+   r=requests.post("https://api.groq.com/openai/v1/chat/completions",headers={"Authorization":"Bearer "+GROQ_KEY,"Content-Type":"application/json"},json=payload,timeout=(10,90))
+   if r.status_code>=400:
+    try:
+     detail=str(r.json().get("error",{}).get("message") or r.text[:500])
+    except Exception:
+     detail=r.text[:500]
+    LAST_GEMINI_ERROR="Groq API HTTP "+str(r.status_code)+": "+detail[:450]
+    log("groq","error",LAST_GEMINI_ERROR)
+    return None
+   data=r.json()
+   choices=data.get("choices") or []
+   answer=str((choices[0].get("message") or {}).get("content") or "").strip() if choices else ""
+   if not answer:
+    LAST_GEMINI_ERROR="Groq lieferte keine Textantwort."
+    log("groq","error",LAST_GEMINI_ERROR)
+    return None
+   return answer
+  except Exception as x:
+   LAST_GEMINI_ERROR="Groq-Aufruf fehlgeschlagen: "+str(x)[:350]
+   log("groq","error",LAST_GEMINI_ERROR)
+   return None
  if not KEY:
-  LAST_GEMINI_ERROR="GEMINI_API_KEY fehlt in den Render-Umgebungsvariablen."
+  LAST_GEMINI_ERROR="GEMINI_API_KEY fehlt in den Render-Umgebungsvariablen. AI_PROVIDER steht auf gemini."
   log("gemini","error",LAST_GEMINI_ERROR)
   return None
  try:
   payload={"contents":[{"parts":[{"text":prompt}]}],"generationConfig":{"temperature":0.3,"maxOutputTokens":tokens}}
   endpoint="https://generativelanguage.googleapis.com/v1beta/models/"+MODEL+":generateContent"
-  try:
-   r=requests.post(endpoint,params={"key":KEY},json=payload,timeout=(15,240))
-  except requests.exceptions.ReadTimeout:
-   log("gemini","warning","Gemini brauchte länger als 180 Sekunden; einmaliger Wiederholungsversuch.")
-   r=requests.post(endpoint,params={"key":KEY},json=payload,timeout=(15,240))
+  r=requests.post(endpoint,params={"key":KEY},json=payload,timeout=(10,90))
   if r.status_code>=400:
    try:
     payload=r.json().get("error",{})
@@ -86,6 +110,7 @@ def gemini(prompt,tokens=2400):
   LAST_GEMINI_ERROR="Gemini-Aufruf fehlgeschlagen: "+str(x)[:350]
   log("gemini","error",LAST_GEMINI_ERROR)
   return None
+
 def discover():
  c=db();n=c.execute("SELECT COUNT(*) n FROM runs WHERE kind='discovery'").fetchone()["n"];city,lat,lon=CITIES[n%len(CITIES)]
  q=f'''[out:json][timeout:5];(nwr(around:2200,{lat},{lon})["name"]["shop"];nwr(around:4000,{lat},{lon})["name"]["craft"];nwr(around:4000,{lat},{lon})["name"]["office"];nwr(around:4000,{lat},{lon})["name"]["amenity"~"restaurant|cafe|dentist|doctors|car_repair|beauty_salon|school|kindergarten"];);out center tags 60;'''
@@ -461,5 +486,5 @@ def export():
  for r in rows:w.writerow([r[k] for k in r.keys()])
  return Response("\\ufeff"+out.getvalue(),mimetype="text/csv; charset=utf-8",headers={"Content-Disposition":"attachment; filename=website-agent.csv"})
 @app.route("/health")
-def health():return {"status":"ok","gemini_configured":bool(KEY),"password_configured":bool(PASS)}
+def health():return {"status":"ok","ai_provider":AI_PROVIDER,"groq_configured":bool(GROQ_KEY),"gemini_configured":bool(KEY),"password_configured":bool(PASS)}
 if __name__=="__main__":app.run(host="0.0.0.0",port=int(os.environ.get("PORT","5000")))
