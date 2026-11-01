@@ -44,7 +44,10 @@ def norm(u):
  if not u:return ""
  if not u.startswith(("http://","https://")):u="https://"+u
  p=urlparse(u)
- if p.scheme not in ("http",LAST_GEMINI_ERROR=""
+ if p.scheme not in ("http","https") or not p.hostname or "." not in p.hostname:return ""
+ if p.hostname in ("localhost","127.0.0.1","0.0.0.0") or p.hostname.endswith(".local"):return ""
+ return u
+LAST_GEMINI_ERROR=""
 def gemini(prompt,tokens=2400):
  global LAST_GEMINI_ERROR
  LAST_GEMINI_ERROR=""
