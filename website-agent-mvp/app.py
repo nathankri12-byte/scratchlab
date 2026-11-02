@@ -17,7 +17,7 @@ RUN_STATE={"running":False,"message":"Bereit für den nächsten Durchlauf.","fir
 RUN_LOCK=threading.Lock()
 app=Flask(__name__); app.secret_key=os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 app.config.update(SESSION_COOKIE_HTTPONLY=True,SESSION_COOKIE_SAMESITE="Lax")
-CITIES=[("Berlin",52.52,13.405),("Hamburg",53.5511,9.9937),("München",48.1372,11.5756),("Köln",50.9375,6.9603),("Frankfurt",50.1109,8.6821),("Stuttgart",48.7758,9.1829),("Düsseldorf",51.2277,6.7735),("Leipzig",51.3397,12.3731),("Dortmund",51.5136,7.4653),("Bremen",53.0793,8.8017),("Dresden",51.0504,13.7373),("Hannover",52.3759,9.732),("Nürnberg",49.4521,11.0767),("Bonn",50.7374,7.0982),("Mannheim",49.4875,8.466)]
+CITIES=[("Köln",50.9375,6.9603),("Bonn",50.7374,7.0982),("Düsseldorf",51.2277,6.7735),("Dortmund",51.5136,7.4653),("Frankfurt",50.1109,8.6821),("Hamburg",53.5511,9.9937),("Berlin",52.52,13.405),("München",48.1372,11.5756),("Stuttgart",48.7758,9.1829),("Leipzig",51.3397,12.3731),("Bremen",53.0793,8.8017),("Dresden",51.0504,13.7373),("Hannover",52.3759,9.732),("Nürnberg",49.4521,11.0767),("Mannheim",49.4875,8.466)]
 CSS="""body{margin:0;background:#0b1010;color:#eef6f1;font:15px/1.55 system-ui,sans-serif}a{color:#8fd8c2}.wrap{max-width:1100px;margin:auto;padding:22px 15px}.top,.actions{display:flex;gap:9px;align-items:center;justify-content:space-between;flex-wrap:wrap}.brand{font-weight:900}.brand b{color:#d6ff55}h1{font-size:clamp(28px,5vw,43px);line-height:1.1}h2{font-size:19px}.panel{background:#131c1b;border:1px solid #293936;border-radius:15px;padding:17px;margin:14px 0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}.stat{background:#0d1513;border:1px solid #293936;border-radius:12px;padding:13px}.stat strong{display:block;color:#d6ff55;font-size:27px}.muted,.small{color:#a0b2aa}.small{font-size:12px}button,.btn{display:inline-block;background:#d6ff55;color:#152015;border:0;border-radius:9px;padding:10px 13px;font:inherit;font-weight:750;text-decoration:none;cursor:pointer}.secondary{background:#24332e;color:#eef6f1;border:1px solid #3a5148}input{width:95%;background:#0c1312;border:1px solid #344841;color:white;border-radius:9px;padding:12px;font:inherit}table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:9px 6px;border-bottom:1px solid #293936;vertical-align:top}th{color:#a0b2aa;font-size:12px}.notice{padding:12px;background:#292516;border:1px solid #665a2c;border-radius:10px;color:#ffe7a3}.score{font-size:28px;color:#d6ff55;font-weight:900}@media(max-width:650px){.panel{overflow-x:auto;padding:12px}td,th{min-width:90px}}"""
 PAGE="""<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>{{title}} – Website Agent</title><style>{{css}}</style></head><body><main class="wrap"><header class="top"><div class="brand">WEBSITE<b>AGENT</b> · MVP</div>{% if session.get('ok') %}<a class="btn secondary" href="/logout">Abmelden</a>{% endif %}</header>{% for m in get_flashed_messages() %}<p class="notice">{{m}}</p>{% endfor %}{{body|safe}}<p class="small">MVP · Keine automatische E-Mail-Sendung · Kartendaten können unvollständig sein.</p></main></body></html>"""
 def now():return datetime.now(timezone.utc).isoformat(timespec="seconds")
@@ -365,11 +365,11 @@ Freundliche Grüße"""
 def background_pipeline():
  try:
   with RUN_LOCK: RUN_STATE.update({"running":True,"message":"Suche nach einem passenden Unternehmen …","firm_id":None,"qa_issues":[]})
-  c=db();row=c.execute("SELECT id,name,kind FROM firms WHERE status='new' ORDER BY id ASC LIMIT 1").fetchone();c.close()
+  c=db();row=c.execute("SELECT f.id,f.name,f.kind FROM firms f WHERE f.status='new' AND NOT EXISTS (SELECT 1 FROM firms done WHERE done.name=f.name AND done.city=f.city AND done.status='evaluated') ORDER BY f.id DESC LIMIT 1").fetchone();c.close()
   if not row:
    RUN_STATE["message"]="1/5 · Suche nach genau einem neuen Unternehmen …"
    discover()
-   c=db();row=c.execute("SELECT id,name,kind FROM firms WHERE status='new' ORDER BY id ASC LIMIT 1").fetchone();c.close()
+   c=db();row=c.execute("SELECT f.id,f.name,f.kind FROM firms f WHERE f.status='new' AND NOT EXISTS (SELECT 1 FROM firms done WHERE done.name=f.name AND done.city=f.city AND done.status='evaluated') ORDER BY f.id DESC LIMIT 1").fetchone();c.close()
   if not row:
    RUN_STATE["message"]="Fehler: Kein neuer Kandidat gefunden. Starte später erneut."
    return
