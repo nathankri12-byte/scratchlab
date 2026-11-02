@@ -21,9 +21,70 @@ body{background:radial-gradient(ellipse at 50% -15%,#557d3c 0%,#213b25 38%,#101b
 .btn.primary{box-shadow:0 4px 0 #719d4c,0 8px 18px #0004}
 .stat{background:linear-gradient(145deg,#29452e,#172b1d);border-color:#617e48}
 @media(max-width:850px){.plant-card{min-width:142px}.plant-grid{padding:4px}}
+
+/* Refined command-center interface */
+:root{--lime:#c9f18b;--gold:#ffdf78;--line:#486548;--muted:#b5c6ad}
+body{background:radial-gradient(ellipse at 52% -28%,#6c9250 0%,#2a472d 33%,#101b14 78%);letter-spacing:.005em}
+.wrap{max-width:1500px;padding:24px clamp(12px,2.2vw,32px)}
+.header{padding:5px 2px 17px;border-bottom:1px solid #a8c88b2b}
+.brand h1{font-size:21px;letter-spacing:.09em;font-weight:900}
+.brand small{font-size:9px;letter-spacing:.25em;color:#c6dfa9}
+.logo{background:linear-gradient(145deg,#efffc6,#8cc45d 55%,#4f8a45);color:#17331d;font-size:25px}
+.hero{margin:22px 0 17px;align-items:center}
+.hero h2{font-size:clamp(30px,4vw,48px);letter-spacing:-.055em;line-height:1.03}
+.hero p{font-size:13px;max-width:540px;line-height:1.65}
+.eyebrow{font-size:9px;letter-spacing:.24em}
+.stat{min-width:102px;padding:12px 15px;border-radius:14px;background:linear-gradient(150deg,#304e32,#17291c);border-color:#78935b66;box-shadow:0 8px 22px #07110733,inset 0 1px #ffffff12}
+.stat span{font-size:9px;letter-spacing:.16em}
+.stat b{font-size:24px}
+.mission-strip{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:18px;align-items:center;margin:0 0 15px;padding:12px 16px;border:1px solid #78935b66;border-radius:14px;background:linear-gradient(100deg,#1b3222ed,#263f29ed);box-shadow:0 10px 30px #07110735,inset 0 1px #ffffff12}
+.mission-label{display:flex;align-items:center;gap:9px;min-width:0}
+.mission-label>span:nth-child(2),.progress-meta span,.mission-goal span{font-size:8px;font-weight:900;letter-spacing:.18em;color:#a9c18e}
+.mission-label b{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-dot{width:7px;height:7px;flex:none;border-radius:50%;background:#c5f58a;box-shadow:0 0 0 4px #c5f58a20,0 0 12px #c5f58a}
+.wave-progress{min-width:0}
+.progress-meta{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px}
+.progress-meta b{font-size:10px;color:var(--lime)}
+.progress-track{height:6px;border-radius:9px;background:#0d1a11;overflow:hidden;box-shadow:inset 0 1px 3px #0009}
+.progress-track i{display:block;width:0;height:100%;border-radius:9px;background:linear-gradient(90deg,#82b95c,#d4f49b);box-shadow:0 0 12px #b9ef7888;transition:width .2s}
+.mission-goal{border-left:1px solid #78935b55;padding-left:18px}
+.mission-goal span{display:block;margin-bottom:4px}
+.mission-goal b{font-size:11px}
+.game-layout{grid-template-columns:290px minmax(0,1fr);gap:16px}
+.panel,.field-panel{border-radius:17px;border-color:#66804f;background:linear-gradient(150deg,#243d29f5,#14251af7);box-shadow:0 18px 55px #050d0866,inset 0 1px #ffffff16}
+.panel{padding:16px}
+.panel-head strong{font-size:10px;letter-spacing:.17em}
+.panel-head span{font-size:9px}
+.difficulty{gap:6px;margin:13px 0 17px}
+.difficulty button{padding:9px 3px;border-radius:8px;font-size:9px;letter-spacing:.02em}
+.plant-grid{gap:8px;max-height:530px}
+.plant-card{min-height:61px;padding:8px;border-radius:10px;background:linear-gradient(145deg,#304d32,#1b3021);border-color:#58754a88}
+.plant-card:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 7px 16px #0004}
+.plant-card.active{background:linear-gradient(145deg,#4b6c3c,#29482d);border-color:#d0f59a;box-shadow:0 0 0 1px #d0f59a66,0 5px 15px #0004}
+.plant-icon{width:35px;height:35px;border:1px solid #ffffff12}
+.plant-info b{font-size:9px;letter-spacing:.01em}
+.plant-info small{font-size:8px}
+.plant-cost{font-size:8px;letter-spacing:.02em}
+.side-foot{font-size:9px;line-height:1.7;color:#b7c8ae}
+.field-panel{padding:15px}
+.toolbar{margin-bottom:12px}
+.status{font-size:10px;letter-spacing:.06em}
+.controls .btn{min-width:82px}
+.btn{border-radius:8px;font-size:9px;letter-spacing:.04em;padding:9px 13px;transition:transform .15s,filter .15s}
+.btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,#d9f6a6,#a8d76e);border-color:#d9f6a6;color:#1a301d;box-shadow:0 3px 0 #6c984b,0 8px 18px #0004}
+.canvas-wrap{border:5px solid #8da85a;border-radius:12px;box-shadow:0 0 0 1px #d7f4a055,0 14px 35px #0006,inset 0 0 35px #15371955}
+.bottomline{font-size:9px;letter-spacing:.02em;margin-top:12px}
+.dialog{border-radius:16px;max-width:430px;padding:27px}
+.dialog h3{font-size:31px;letter-spacing:-.045em}
+.dialog p{font-size:12px;line-height:1.75}
+.pill{border-color:#6c8854;background:#172b1d;color:#c1d2b8}
+@media(max-width:850px){.wrap{padding:12px 10px}.mission-strip{grid-template-columns:1fr 1fr;gap:12px}.mission-goal{display:none}.game-layout{grid-template-columns:1fr}.panel{padding:12px}.plant-grid{gap:7px}.plant-card{min-width:142px}.field-panel{padding:10px}.hero{margin:17px 0}.stat{min-width:0}}
+@media(max-width:520px){.wrap{padding:10px 8px}.brand h1{font-size:15px}.brand small{font-size:8px}.hero h2{font-size:29px}.mission-strip{padding:10px;grid-template-columns:1fr;gap:9px}.mission-label{display:none}.progress-meta span{font-size:8px}.stats{gap:6px}.stat{padding:9px 8px}.stat b{font-size:20px}.stat span{font-size:8px}.controls .btn{min-width:0;padding:9px 7px}.dialog{padding:19px}.dialog h3{font-size:25px}}
 </style></head><body><div class="wrap">
 <header class="header"><div class="brand"><div class="logo">✦</div><div><small>Dein Garten. Deine Verteidigung.</small><h1>GARDEN GUARDIANS</h1></div></div><div class="head-right"><div class="pill">20 Pflanzen · 8 Gegnertypen</div><div class="pill" id="progressPill">Fortschritt wird gespeichert</div></div></header>
 <section class="hero"><div><div class="eyebrow">Die Nacht kommt näher</div><h2>Ein Garten. Fünf Reihen.<br>Unzählige Möglichkeiten.</h2><p>Sammle Sonnen, stelle dein Team zusammen und halte die Monster auf.</p></div><div class="stats"><div class="stat"><span>Sonnen</span><b id="sunCount">50</b></div><div class="stat"><span>Welle</span><b id="waveCount">1</b></div><div class="stat"><span>Rasenmäher</span><b id="mowerCount">5</b></div><div class="stat"><span>Besiegt</span><b id="killCount">0</b></div></div></section>
+<div class="mission-strip"><div class="mission-label"><span class="live-dot"></span><span>MISSION</span><b id="missionText">Bereite deine Verteidigung vor</b></div><div class="wave-progress"><div class="progress-meta"><span>WELLENFORTSCHRITT</span><b id="waveProgressText">0 %</b></div><div class="progress-track"><i id="waveProgressBar"></i></div></div><div class="mission-goal"><span>HAUPTZIEL</span><b>Schütze alle 5 Reihen</b></div></div>
 <main class="game-layout"><aside class="panel"><div class="panel-head"><strong>Pflanzenbuch</strong><span id="plantCount">5 / 20 frei</span></div><div class="difficulty" id="difficulty"><button data-diff="easy">Leicht</button><button class="active" data-diff="normal">Normal</button><button data-diff="hard">Schwer</button><button data-diff="nightmare">Albtraum</button></div><div class="panel-head"><strong>Deine Samen</strong><span>Wähle eine Pflanze</span></div><div class="plant-grid" id="plantGrid"></div><div class="side-foot">Sonnenblumen produzieren Sonnen. Zusätzlich fallen regelmäßig Sonnen vom Himmel – tippe sie an, bevor sie verschwinden. Neue Pflanzen werden mit deinem Fortschritt freigeschaltet.</div></aside>
 <section class="field-panel"><div class="toolbar"><div class="status">GARTENSTATUS: <b id="status">Wähle deinen Schwierigkeitsgrad</b></div><div class="controls"><button class="btn" id="pauseBtn">Pause</button><button class="btn" id="restartBtn">Neu starten</button><button class="btn primary" id="startBtn">Spiel starten</button></div></div>
 <div class="canvas-wrap"><canvas id="game" width="1000" height="560"></canvas><div class="overlay" id="overlay"><div class="dialog"><div class="eyebrow">Garden Guardians</div><h3>Bereit für die Nacht?</h3><p>Wähle links einen Schwierigkeitsgrad. Pflanze Sonnenblumen, sammle die fallenden Sonnen und verteidige alle fünf Reihen. Je weiter du kommst, desto mehr Pflanzen und Gegner warten auf dich.</p><div class="choice-row"><span class="pill">5 Reihen</span><span class="pill">20 Pflanzen</span><span class="pill">8 Gegner</span></div><button class="btn primary" id="beginBtn">Garten verteidigen</button><div class="tip">Tipp: Sonnenblumen sind deine wichtigste Energiequelle.</div></div></div></div>
@@ -69,7 +130,7 @@ try{const save=JSON.parse(localStorage.getItem('gg-save')||'{}');unlocked=Math.m
 function save(){try{localStorage.setItem('gg-save',JSON.stringify({unlocked}));}catch(e){}}
 function drawCatalog(){const g=$('plantGrid');g.innerHTML='';let count=0;plantsData.forEach(p=>{const open=waveUnlocked(p.unlock);if(open)count++;const b=document.createElement('button');b.className='plant-card'+(selected===p.id?' active':'');b.disabled=!open||!running||paused;b.innerHTML='<span class="plant-icon">'+p.icon+'</span><span class="plant-info"><b>'+p.name+'</b><small>'+p.desc+'</small></span><span class="plant-cost">'+p.cost+' ☀</span>'+(open?'':'<span class="lock">🔒 Welle '+p.unlock+'</span>');b.onclick=()=>{selected=p.id;drawCatalog()};g.appendChild(b)});$('plantCount').textContent=count+' / 20 frei'}
 function waveUnlocked(n){return n<=unlocked||n===0}
-function updateUI(){$('sunCount').textContent=Math.floor(sun);$('waveCount').textContent=wave;$('mowerCount').textContent=mowers.filter(Boolean).length;$('killCount').textContent=kills;$('progressPill').textContent='Bis Welle '+Math.max(1,unlocked+1)+' freigeschaltet';drawCatalog()}
+function updateUI(){$('sunCount').textContent=Math.floor(sun);$('waveCount').textContent=wave;$('mowerCount').textContent=mowers.filter(Boolean).length;$('killCount').textContent=kills;$('progressPill').textContent='Bis Welle '+Math.max(1,unlocked+1)+' freigeschaltet';const pct=Math.min(100,Math.round((spawned/Math.max(1,totalSpawn))*100));$('waveProgressBar').style.width=pct+'%';$('waveProgressText').textContent=pct+' %';$('missionText').textContent=running?(paused?'Spiel pausiert':'Welle '+wave+' · '+enemies.length+' Gegner im Garten'):'Bereite deine Verteidigung vor';drawCatalog()}
 $('difficulty').querySelectorAll('button').forEach(b=>b.onclick=()=>{if(running)return;difficulty=b.dataset.diff;$('difficulty').querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b))});
 function rounded(x,y,w,h,r,fill){ctx.fillStyle=fill;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
 function drawBackground(){
