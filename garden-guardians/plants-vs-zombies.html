@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#10251a"><title>Garden Guardians</title>
+<style>
+:root{--bg:#0b1711;--panel:#14251b;--panel2:#1c3425;--line:#35513b;--lime:#b9ef78;--gold:#ffd76a;--text:#f3f5df;--muted:#a9bba5}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#345b36,#12251a 55%,#09120d);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}button{font:inherit;cursor:pointer;color:inherit}.wrap{max-width:1400px;margin:auto;padding:20px}.header{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:18px}.brand{display:flex;gap:12px;align-items:center}.logo{width:48px;height:48px;border-radius:16px;background:linear-gradient(145deg,#d7ff9b,#63ad4d);display:grid;place-items:center;color:#17351d;font-size:28px;box-shadow:0 8px 25px #0006}.brand h1{margin:0;font-size:20px;letter-spacing:-.05em}.brand small,.muted{color:var(--muted)}.brand small{font-size:10px;letter-spacing:.22em;text-transform:uppercase}.head-right{display:flex;gap:8px;align-items:center}.pill{border:1px solid var(--line);background:#14271b;padding:9px 13px;border-radius:12px;font-size:12px;color:var(--muted)}.hero{display:flex;justify-content:space-between;align-items:end;gap:18px;margin:8px 0 17px}.eyebrow{color:var(--lime);font-weight:900;letter-spacing:.2em;font-size:10px;text-transform:uppercase}.hero h2{font-size:clamp(28px,4vw,43px);letter-spacing:-.06em;line-height:1.02;margin:7px 0}.hero p{margin:0;color:var(--muted);font-size:13px}.stats{display:flex;gap:8px}.stat{min-width:94px;padding:10px 13px;border:1px solid var(--line);border-radius:13px;background:#14271c}.stat span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.14em}.stat b{font-size:21px;color:var(--gold)}.game-layout{display:grid;grid-template-columns:280px minmax(0,1fr);gap:14px;align-items:start}.panel,.field-panel{border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#192e20ed,#102016f2);box-shadow:0 18px 55px #0004}.panel{padding:14px}.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}.panel-head strong{font-size:12px;letter-spacing:.12em;text-transform:uppercase}.panel-head span{font-size:10px;color:var(--muted)}.difficulty{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:14px}.difficulty button{border:1px solid var(--line);border-radius:9px;background:#102016;padding:8px 3px;font-size:10px;color:var(--muted)}.difficulty button.active{background:#b9ef78;color:#15251a;border-color:#b9ef78;font-weight:900}.plant-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;max-height:490px;overflow:auto;padding:1px 3px 1px 1px}.plant-card{position:relative;min-width:0;border:1px solid #38543d;background:#1b3222;border-radius:12px;padding:8px 7px;text-align:left;display:flex;gap:7px;align-items:center;transition:.15s}.plant-card:hover:not(:disabled){border-color:var(--lime);transform:translateY(-1px)}.plant-card.active{border-color:var(--lime);background:#304d2d;box-shadow:inset 0 0 0 1px #b9ef7855}.plant-card:disabled{opacity:.42;cursor:not-allowed;filter:grayscale(.8)}.plant-icon{width:37px;height:37px;flex:none;border-radius:10px;background:#0e1b13;display:grid;place-items:center;font-size:23px}.plant-info{min-width:0}.plant-info b{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.plant-info small{display:block;font-size:9px;color:var(--muted);margin-top:2px}.plant-cost{position:absolute;right:7px;bottom:5px;color:var(--gold);font-size:9px;font-weight:900}.lock{position:absolute;inset:0;border-radius:12px;background:#0b130bc9;display:grid;place-items:center;font-size:10px;color:#e6dcae;font-weight:800}.side-foot{border-top:1px solid var(--line);margin-top:12px;padding-top:10px;color:var(--muted);font-size:10px;line-height:1.5}.field-panel{padding:13px;min-width:0}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}.status{font-size:11px;color:var(--muted)}.status b{color:var(--text)}.controls{display:flex;gap:6px}.btn{border:1px solid var(--line);background:#233b29;border-radius:9px;padding:8px 12px;font-size:10px;font-weight:800}.btn.primary{background:var(--lime);border-color:var(--lime);color:#14251a}.btn:disabled{opacity:.4;cursor:not-allowed}.canvas-wrap{position:relative;border:2px solid #64844b;border-radius:14px;overflow:hidden;background:#4b8c43;box-shadow:inset 0 0 35px #15371955}.canvas-wrap canvas{display:block;width:100%;height:auto;touch-action:manipulation}.bottomline{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:10px;margin-top:10px}.overlay{position:absolute;inset:0;z-index:4;display:grid;place-items:center;padding:18px;background:#07120bc9;backdrop-filter:blur(7px)}.overlay.hidden{display:none}.dialog{width:min(460px,100%);padding:24px;border:1px solid #668451;border-radius:19px;background:linear-gradient(145deg,#203b27,#102016);box-shadow:0 25px 90px #0009;text-align:center}.dialog h3{font-size:29px;letter-spacing:-.05em;margin:7px 0}.dialog p{color:#bdcdb6;font-size:12px;line-height:1.6}.dialog .btn{margin-top:7px;padding:12px 20px}.choice-row{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:13px 0}.tip{font-size:10px;color:var(--muted);margin-top:10px}.sun-note{color:var(--gold)}.mobile-catalog{display:none}
+@media(max-width:850px){.wrap{padding:13px 10px}.game-layout{grid-template-columns:1fr}.panel{padding:10px}.panel-head{margin-bottom:8px}.plant-grid{display:flex;max-height:none;overflow-x:auto;padding-bottom:4px}.plant-card{min-width:125px}.side-foot{display:none}.difficulty{max-width:420px}.hero{display:block}.stats{margin-top:12px}.stat{flex:1;min-width:0}.head-right .pill{display:none}}
+@media(max-width:520px){.brand h1{font-size:16px}.logo{width:40px;height:40px}.hero h2{font-size:30px}.field-panel{padding:8px}.toolbar{align-items:flex-start;flex-direction:column}.controls{width:100%}.controls .btn{flex:1}.bottomline{font-size:9px}.dialog{padding:17px}.dialog h3{font-size:24px}}
+
+/* Visual polish: playful garden-game presentation */
+:root{--lime:#c5f58a;--gold:#ffe27a}
+body{background:radial-gradient(ellipse at 50% -15%,#557d3c 0%,#213b25 38%,#101b14 78%)}
+.logo{border-radius:50%;box-shadow:0 0 0 5px #d6f5a51a,0 9px 28px #0007}
+.hero h2{text-shadow:0 3px 0 #1d3c21}
+.panel,.field-panel{background:linear-gradient(155deg,#29452bfa,#172b1bf5);border-color:#6d8d4d;box-shadow:0 18px 55px #07110766,inset 0 1px #ffffff12}
+.plant-card{background:linear-gradient(145deg,#385a35,#203b27);border-color:#62844c;box-shadow:inset 0 1px #ffffff12}
+.plant-card.active{background:linear-gradient(145deg,#547b3e,#355a31);box-shadow:0 0 0 2px #d0f78b66,inset 0 1px #ffffff22}
+.plant-icon{background:radial-gradient(circle at 35% 25%,#3c5732,#15271a);box-shadow:inset 0 2px 7px #0008}
+.canvas-wrap{border:5px solid #8da85a;box-shadow:0 0 0 2px #293d24,0 12px 28px #0005,inset 0 0 35px #15371955}
+.canvas-wrap canvas{image-rendering:auto}
+.dialog{background:linear-gradient(145deg,#395b35,#1c3422);border:2px solid #9dbd68;box-shadow:0 25px 90px #000a,inset 0 1px #ffffff22}
+.btn.primary{box-shadow:0 4px 0 #719d4c,0 8px 18px #0004}
+.stat{background:linear-gradient(145deg,#29452e,#172b1d);border-color:#617e48}
+@media(max-width:850px){.plant-card{min-width:142px}.plant-grid{padding:4px}}
+
+/* Refined command-center interface */
+:root{--lime:#c9f18b;--gold:#ffdf78;--line:#486548;--muted:#b5c6ad}
+body{background:radial-gradient(ellipse at 52% -28%,#6c9250 0%,#2a472d 33%,#101b14 78%);letter-spacing:.005em}
+.wrap{max-width:1500px;padding:24px clamp(12px,2.2vw,32px)}
+.header{padding:5px 2px 17px;border-bottom:1px solid #a8c88b2b}
+.brand h1{font-size:21px;letter-spacing:.09em;font-weight:900}
+.brand small{font-size:9px;letter-spacing:.25em;color:#c6dfa9}
+.logo{background:linear-gradient(145deg,#efffc6,#8cc45d 55%,#4f8a45);color:#17331d;font-size:25px}
+.hero{margin:22px 0 17px;align-items:center}
+.hero h2{font-size:clamp(30px,4vw,48px);letter-spacing:-.055em;line-height:1.03}
+.hero p{font-size:13px;max-width:540px;line-height:1.65}
+.eyebrow{font-size:9px;letter-spacing:.24em}
+.stat{min-width:102px;padding:12px 15px;border-radius:14px;background:linear-gradient(150deg,#304e32,#17291c);border-color:#78935b66;box-shadow:0 8px 22px #07110733,inset 0 1px #ffffff12}
+.stat span{font-size:9px;letter-spacing:.16em}
+.stat b{font-size:24px}
+.mission-strip{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:18px;align-items:center;margin:0 0 15px;padding:12px 16px;border:1px solid #78935b66;border-radius:14px;background:linear-gradient(100deg,#1b3222ed,#263f29ed);box-shadow:0 10px 30px #07110735,inset 0 1px #ffffff12}
+.mission-label{display:flex;align-items:center;gap:9px;min-width:0}
+.mission-label>span:nth-child(2),.progress-meta span,.mission-goal span{font-size:8px;font-weight:900;letter-spacing:.18em;color:#a9c18e}
+.mission-label b{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-dot{width:7px;height:7px;flex:none;border-radius:50%;background:#c5f58a;box-shadow:0 0 0 4px #c5f58a20,0 0 12px #c5f58a}
+.wave-progress{min-width:0}
+.progress-meta{display:flex;justify-content:space-between;gap:8px;margin-bottom:6px}
+.progress-meta b{font-size:10px;color:var(--lime)}
+.progress-track{height:6px;border-radius:9px;background:#0d1a11;overflow:hidden;box-shadow:inset 0 1px 3px #0009}
+.progress-track i{display:block;width:0;height:100%;border-radius:9px;background:linear-gradient(90deg,#82b95c,#d4f49b);box-shadow:0 0 12px #b9ef7888;transition:width .2s}
+.mission-goal{border-left:1px solid #78935b55;padding-left:18px}
+.mission-goal span{display:block;margin-bottom:4px}
+.mission-goal b{font-size:11px}
+.game-layout{grid-template-columns:290px minmax(0,1fr);gap:16px}
+.panel,.field-panel{border-radius:17px;border-color:#66804f;background:linear-gradient(150deg,#243d29f5,#14251af7);box-shadow:0 18px 55px #050d0866,inset 0 1px #ffffff16}
+.panel{padding:16px}
+.panel-head strong{font-size:10px;letter-spacing:.17em}
+.panel-head span{font-size:9px}
+.difficulty{gap:6px;margin:13px 0 17px}
+.difficulty button{padding:9px 3px;border-radius:8px;font-size:9px;letter-spacing:.02em}
+.plant-grid{gap:8px;max-height:530px}
+.plant-card{min-height:61px;padding:8px;border-radius:10px;background:linear-gradient(145deg,#304d32,#1b3021);border-color:#58754a88}
+.plant-card:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 7px 16px #0004}
+.plant-card.active{background:linear-gradient(145deg,#4b6c3c,#29482d);border-color:#d0f59a;box-shadow:0 0 0 1px #d0f59a66,0 5px 15px #0004}
+.plant-icon{width:35px;height:35px;border:1px solid #ffffff12}
+.plant-info b{font-size:9px;letter-spacing:.01em}
+.plant-info small{font-size:8px}
+.plant-cost{font-size:8px;letter-spacing:.02em}
+.side-foot{font-size:9px;line-height:1.7;color:#b7c8ae}
+.field-panel{padding:15px}
+.toolbar{margin-bottom:12px}
+.status{font-size:10px;letter-spacing:.06em}
+.controls .btn{min-width:82px}
+.btn{border-radius:8px;font-size:9px;letter-spacing:.04em;padding:9px 13px;transition:transform .15s,filter .15s}
+.btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,#d9f6a6,#a8d76e);border-color:#d9f6a6;color:#1a301d;box-shadow:0 3px 0 #6c984b,0 8px 18px #0004}
+.canvas-wrap{border:5px solid #8da85a;border-radius:12px;box-shadow:0 0 0 1px #d7f4a055,0 14px 35px #0006,inset 0 0 35px #15371955}
+.bottomline{font-size:9px;letter-spacing:.02em;margin-top:12px}
+.dialog{border-radius:16px;max-width:430px;padding:27px}
+.dialog h3{font-size:31px;letter-spacing:-.045em}
+.dialog p{font-size:12px;line-height:1.75}
+.pill{border-color:#6c8854;background:#172b1d;color:#c1d2b8}
+@media(max-width:850px){.wrap{padding:12px 10px}.mission-strip{grid-template-columns:1fr 1fr;gap:12px}.mission-goal{display:none}.game-layout{grid-template-columns:1fr}.panel{padding:12px}.plant-grid{gap:7px}.plant-card{min-width:142px}.field-panel{padding:10px}.hero{margin:17px 0}.stat{min-width:0}}
+@media(max-width:520px){.wrap{padding:10px 8px}.brand h1{font-size:15px}.brand small{font-size:8px}.hero h2{font-size:29px}.mission-strip{padding:10px;grid-template-columns:1fr;gap:9px}.mission-label{display:none}.progress-meta span{font-size:8px}.stats{gap:6px}.stat{padding:9px 8px}.stat b{font-size:20px}.stat span{font-size:8px}.controls .btn{min-width:0;padding:9px 7px}.dialog{padding:19px}.dialog h3{font-size:25px}}
+/* Campaign chapters + tactical plant removal */
+#shovelBtn{border-color:#b69c62;background:linear-gradient(140deg,#4c4228,#302b1e);color:#ffe3a0}
+#shovelBtn.primary{background:linear-gradient(140deg,#f3d28b,#c99c4d);color:#33230f;border-color:#ffe1a0}
+.reward-dialog{width:min(510px,100%);border-color:#d7c17c;background:radial-gradient(circle at 50% 0%,#58763c,#203b29 60%,#13251a)}
+.reward-emblem{width:66px;height:66px;margin:14px auto;border-radius:22px;display:grid;place-items:center;font-size:34px;color:#4a3510;background:linear-gradient(145deg,#fff0a9,#e2a83e);box-shadow:0 0 0 7px #f7d77b1c,0 12px 30px #0005}
+.reward-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}
+.reward-grid>div{padding:12px 7px;border:1px solid #d5c47d55;border-radius:12px;background:#12251b77}
+.reward-grid strong{display:block;font-size:20px;color:#ffe28a}
+.reward-grid span{display:block;margin-top:4px;color:#c1d0b3;font-size:9px}
+@media(max-width:520px){.reward-grid{gap:5px}.reward-grid>div{padding:9px 4px}.reward-grid strong{font-size:17px}.reward-grid span{font-size:8px}.controls{flex-wrap:wrap}.controls .btn{flex:1 1 42%}}
+</style></head><body><div class="wrap">
+<header class="header"><div class="brand"><div class="logo">✦</div><div><small>Dein Garten. Deine Verteidigung.</small><h1>GARDEN GUARDIANS</h1></div></div><div class="head-right"><div class="pill">20 Pflanzen · 8 Gegnertypen</div><div class="pill" id="progressPill">Fortschritt wird gespeichert</div></div></header>
+<section class="hero"><div><div class="eyebrow">Die Nacht kommt näher</div><h2>Ein Garten. Fünf Reihen.<br>Unzählige Möglichkeiten.</h2><p>Sammle Sonnen, stelle dein Team zusammen und halte die Monster auf.</p></div><div class="stats"><div class="stat"><span>Sonnen</span><b id="sunCount">50</b></div><div class="stat"><span>Welle</span><b id="waveCount">1</b></div><div class="stat"><span>Rasenmäher</span><b id="mowerCount">5</b></div><div class="stat"><span>Besiegt</span><b id="killCount">0</b></div></div></section>
+<div class="mission-strip"><div class="mission-label"><span class="live-dot"></span><span>MISSION</span><b id="missionText">Bereite deine Verteidigung vor</b></div><div class="wave-progress"><div class="progress-meta"><span>WELLENFORTSCHRITT</span><b id="waveProgressText">0 %</b></div><div class="progress-track"><i id="waveProgressBar"></i></div></div><div class="mission-goal"><span>HAUPTZIEL</span><b>Schütze alle 5 Reihen</b></div></div>
+<main class="game-layout"><aside class="panel"><div class="panel-head"><strong>Pflanzenbuch</strong><span id="plantCount">5 / 20 frei</span></div><div class="difficulty" id="difficulty"><button data-diff="easy">Leicht</button><button class="active" data-diff="normal">Normal</button><button data-diff="hard">Schwer</button><button data-diff="nightmare">Albtraum</button></div><div class="panel-head"><strong>Deine Samen</strong><span>Wähle eine Pflanze</span></div><div class="plant-grid" id="plantGrid"></div><div class="side-foot">Sonnenblumen produzieren Sonnen. Zusätzlich fallen regelmäßig Sonnen vom Himmel – tippe sie an, bevor sie verschwinden. Neue Pflanzen werden mit deinem Fortschritt freigeschaltet.</div></aside>
+<section class="field-panel"><div class="toolbar"><div class="status">GARTENSTATUS: <b id="status">Wähle deinen Schwierigkeitsgrad</b></div><div class="controls"><button class="btn" id="shovelBtn">Pflanze entfernen</button><button class="btn" id="pauseBtn">Pause</button><button class="btn" id="restartBtn">Neu starten</button><button class="btn primary" id="startBtn">Spiel starten</button></div></div>
+<div class="canvas-wrap"><canvas id="game" width="1000" height="560"></canvas><div class="overlay" id="overlay"><div class="dialog"><div class="eyebrow">Garden Guardians</div><h3>Bereit für die Nacht?</h3><p>Wähle links einen Schwierigkeitsgrad. Pflanze Sonnenblumen, sammle die fallenden Sonnen und verteidige alle fünf Reihen. Je weiter du kommst, desto mehr Pflanzen und Gegner warten auf dich.</p><div class="choice-row"><span class="pill">5 Reihen</span><span class="pill">20 Pflanzen</span><span class="pill">8 Gegner</span></div><button class="btn primary" id="beginBtn">Garten verteidigen</button><div class="tip">Tipp: Sonnenblumen sind deine wichtigste Energiequelle.</div></div></div></div>
+<div class="bottomline"><span>Tippe ein Feld, um die gewählte Pflanze zu setzen.</span><span class="sun-note">☀ Sonnen anklicken = Energie sammeln</span></div></section></main></div>
+<script>
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),W=1000,H=560,CW=W/9,RH=H/5;
+const $=id=>document.getElementById(id);
+const plantsData=[
+{id:'sun',name:'Sonnenblume',icon:'🌻',cost:50,hp:90,unlock:0,kind:'sun',desc:'Produziert Sonnen'},
+{id:'pea',name:'Erbsenwerfer',icon:'🌱',cost:100,hp:130,unlock:0,kind:'shoot',damage:25,rate:1.45,desc:'Schießt Erbsen'},
+{id:'wall',name:'Nusswall',icon:'🥜',cost:50,hp:950,unlock:0,kind:'wall',desc:'Hält lange stand'},
+{id:'ice',name:'Frostwerfer',icon:'❄️',cost:175,hp:130,unlock:2,kind:'shoot',damage:18,rate:1.8,slow:true,desc:'Verlangsamt Gegner'},
+{id:'cherry',name:'Knallkirsche',icon:'🍒',cost:150,hp:80,unlock:3,kind:'bomb',damage:220,desc:'Explodiert einmal'},
+{id:'double',name:'Doppelwerfer',icon:'🌿',cost:200,hp:150,unlock:4,kind:'shoot',damage:24,rate:.8,desc:'Feuert doppelt'},
+{id:'mine',name:'Minenknolle',icon:'🥔',cost:75,hp:80,unlock:5,kind:'mine',damage:280,desc:'Versteckte Falle'},
+{id:'repeater',name:'Repeater',icon:'🌾',cost:250,hp:150,unlock:6,kind:'shoot',damage:26,rate:.58,desc:'Schnelle Salven'},
+{id:'tall',name:'Hochwall',icon:'🪵',cost:125,hp:1600,unlock:7,kind:'wall',desc:'Extrem robust'},
+{id:'fire',name:'Feuerblüte',icon:'🔥',cost:225,hp:140,unlock:8,kind:'shoot',damage:48,rate:1.65,desc:'Starker Feuerschuss'},
+{id:'shroom',name:'Nachtschwärmer',icon:'🍄',cost:0,hp:100,unlock:9,kind:'shoot',damage:18,rate:1.35,range:360,desc:'Kostenlos, kurze Reichweite'},
+{id:'twin',name:'Zwillingsblüte',icon:'🌼',cost:125,hp:120,unlock:10,kind:'sun',desc:'Doppelte Sonnen'},
+{id:'cactus',name:'Stachelkaktus',icon:'🌵',cost:175,hp:190,unlock:11,kind:'shoot',damage:32,rate:1.2,desc:'Durchdringende Stacheln'},
+{id:'magnet',name:'Magnetpilz',icon:'🧲',cost:125,hp:120,unlock:12,kind:'support',desc:'Entwaffnet Rüstung'},
+{id:'melon',name:'Melonenwerfer',icon:'🍉',cost:300,hp:180,unlock:13,kind:'shoot',damage:75,rate:2.5,splash:85,desc:'Flächenschaden'},
+{id:'gold',name:'Goldsonne',icon:'🌞',cost:200,hp:120,unlock:14,kind:'sun',desc:'Erzeugt viele Sonnen'},
+{id:'bloom',name:'Dornenbusch',icon:'🌹',cost:100,hp:420,unlock:15,kind:'wall',damage:22,desc:'Verletzt Angreifer'},
+{id:'star',name:'Sternwerfer',icon:'⭐',cost:275,hp:150,unlock:16,kind:'shoot',damage:34,rate:1.1,desc:'Sterne in alle Richtungen'},
+{id:'dragon',name:'Drachenmaul',icon:'🐉',cost:325,hp:190,unlock:18,kind:'shoot',damage:100,rate:2.1,desc:'Atem aus Flammen'},
+{id:'guardian',name:'Gartenwächter',icon:'🌳',cost:400,hp:1300,unlock:20,kind:'support',desc:'Stärkt Pflanzen ringsum'}
+];
+const enemyData={
+walker:{name:'Garten-Gnom',icon:'🧟',hp:100,speed:13,damage:20,score:10},
+runner:{name:'Rennzombie',icon:'🏃',hp:75,speed:27,damage:15,score:15},
+cone:{name:'Kegelkopf',icon:'🧟',hp:230,speed:10,damage:25,score:25,armor:'cone'},
+bucket:{name:'Eimerkopf',icon:'🪖',hp:430,speed:8,damage:30,score:40,armor:'bucket'},
+giant:{name:'Riese',icon:'👹',hp:1050,speed:5,damage:65,score:100},
+football:{name:'Rasenkönig',icon:'🏈',hp:650,speed:20,damage:40,score:75},
+imp:{name:'Mini-Gnom',icon:'👺',hp:55,speed:34,damage:12,score:12},
+boss:{name:'Nachtfürst',icon:'👿',hp:2600,speed:4.5,damage:90,score:300}
+};
+const diffs={easy:{label:'Leicht',hp:.72,speed:.78,spawn:1.25,energy:1.3},normal:{label:'Normal',hp:1,speed:1,spawn:1,energy:1},hard:{label:'Schwer',hp:1.35,speed:1.2,spawn:.78,energy:.9},nightmare:{label:'Albtraum',hp:1.85,speed:1.42,spawn:.62,energy:.78}};
+let difficulty='normal',unlocked=0,selected='sun',removeMode=false,sun=150,wave=1,kills=0,mowers=[true,true,true,true,true],plants=[],enemies=[],shots=[],suns=[],particles=[],running=false,paused=false,gameOver=false,last=0,spawnTimer=0,skyTimer=3,elapsed=0,spawned=0,totalSpawn=8,raf=0;
+try{const save=JSON.parse(localStorage.getItem('gg-save')||'{}');unlocked=Math.max(0,Math.min(20,save.unlocked||0));}catch(e){}
+function save(){try{localStorage.setItem('gg-save',JSON.stringify({unlocked}));}catch(e){}}
+function drawCatalog(){const g=$('plantGrid');g.innerHTML='';let count=0;plantsData.forEach(p=>{const open=waveUnlocked(p.unlock);if(open)count++;const b=document.createElement('button');b.className='plant-card'+(selected===p.id?' active':'');b.disabled=!open||!running||paused;b.innerHTML='<span class="plant-icon">'+p.icon+'</span><span class="plant-info"><b>'+p.name+'</b><small>'+p.desc+'</small></span><span class="plant-cost">'+p.cost+' ☀</span>'+(open?'':'<span class="lock">🔒 Welle '+p.unlock+'</span>');b.onclick=()=>{selected=p.id;drawCatalog()};g.appendChild(b)});$('plantCount').textContent=count+' / 20 frei'}
+function waveUnlocked(n){return n<=unlocked||n===0}
+function updateUI(){$('sunCount').textContent=Math.floor(sun);$('waveCount').textContent=wave;$('mowerCount').textContent=mowers.filter(Boolean).length;$('killCount').textContent=kills;$('progressPill').textContent='Bis Welle '+Math.max(1,unlocked+1)+' freigeschaltet';const pct=Math.min(100,Math.round((spawned/Math.max(1,totalSpawn))*100));$('waveProgressBar').style.width=pct+'%';$('waveProgressText').textContent=pct+' %';$('missionText').textContent=running?(paused?'Spiel pausiert':'Welle '+wave+' · '+enemies.length+' Gegner im Garten'):'Bereite deine Verteidigung vor';drawCatalog()}
+$('difficulty').querySelectorAll('button').forEach(b=>b.onclick=()=>{if(running)return;difficulty=b.dataset.diff;$('difficulty').querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b))});
+function rounded(x,y,w,h,r,fill){ctx.fillStyle=fill;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
+function drawBackground(){
+  const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#b7df86');sky.addColorStop(.42,'#7fb65c');sky.addColorStop(1,'#376c39');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+  // Isometric-feeling garden lanes with perspective, raised soil edges and soft highlights.
+  for(let r=0;r<5;r++){const y=r*RH;ctx.save();ctx.fillStyle=r%2?'#4d9147':'#579a4c';ctx.fillRect(0,y,W,RH);
+    const soil=ctx.createLinearGradient(0,y,0,y+RH);soil.addColorStop(0,'#80b95d');soil.addColorStop(.78,'#579448');soil.addColorStop(1,'#376e39');ctx.fillStyle=soil;ctx.fillRect(0,y,W,RH);
+    ctx.fillStyle='#d5f3a044';ctx.fillRect(0,y,W,3);ctx.fillStyle='#244e2c55';ctx.fillRect(0,y+RH-5,W,5);
+    for(let c=0;c<9;c++){let x=c*CW;ctx.fillStyle=(r+c)%2?'#ffffff09':'#163e1d0b';ctx.fillRect(x,y,CW,RH-4);ctx.strokeStyle='#e6f6c12b';ctx.lineWidth=1;ctx.strokeRect(x+2,y+2,CW-4,RH-8);
+      for(let k=0;k<11;k++){let xx=x+((k*37+c*17+r*11)%CW),yy=y+((k*23+r*13)%Math.max(1,RH-8));ctx.strokeStyle=k%2?'#d6f5a044':'#2c682f44';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(xx,yy);ctx.quadraticCurveTo(xx+2,yy-4,xx+4,yy-7);ctx.stroke()}
+    }
+    ctx.restore();
+  }
+  // Front garden lip creates a little depth.
+  ctx.fillStyle='#285a30';ctx.fillRect(0,H-9,W,9);ctx.fillStyle='#9bc96a';ctx.fillRect(0,H-9,W,2);
+}
+function drawPlant(p){
+  const x=p.col*CW+CW/2,y=p.row*RH+RH/2;ctx.save();ctx.translate(x,y);
+  const wob=Math.sin(elapsed*2+p.col)*2,base=p.data.id==='wall'||p.data.id==='tall';
+  // Ground contact shadow and raised base.
+  ctx.fillStyle='#183c1d66';ctx.beginPath();ctx.ellipse(0,23,25,8,0,0,Math.PI*2);ctx.fill();
+  const pot=ctx.createLinearGradient(-15,0,15,0);pot.addColorStop(0,'#74472b');pot.addColorStop(.45,'#bd8050');pot.addColorStop(1,'#613a25');ctx.fillStyle=pot;ctx.beginPath();ctx.ellipse(0,17,18,6,0,0,Math.PI*2);ctx.fill();ctx.fillRect(-16,10,32,7);ctx.beginPath();ctx.ellipse(0,10,16,5,0,0,Math.PI*2);ctx.fillStyle='#9b623d';ctx.fill();
+  if(base){const rock=ctx.createLinearGradient(-18,-25,18,10);rock.addColorStop(0,'#e0c98d');rock.addColorStop(.45,'#9b9b68');rock.addColorStop(1,'#4e6740');ctx.fillStyle=rock;ctx.beginPath();ctx.roundRect(-19,-28,38,39,12);ctx.fill();ctx.strokeStyle='#e5e0a866';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle='#314a2c';ctx.beginPath();ctx.arc(-6,-11,2.5,0,7);ctx.arc(7,-11,2.5,0,7);ctx.fill();}
+  else {
+    const stem=ctx.createLinearGradient(-5,0,5,0);stem.addColorStop(0,'#24552b');stem.addColorStop(.5,'#72b94b');stem.addColorStop(1,'#285d30');ctx.strokeStyle=stem;ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(0,15);ctx.quadraticCurveTo(-4,0,0,-13+wob);ctx.stroke();
+    // layered leaves with highlights
+    for(const side of [-1,1]){ctx.save();ctx.translate(side*8,5);ctx.rotate(side*.42);const leaf=ctx.createLinearGradient(0,-6,0,7);leaf.addColorStop(0,'#a4df65');leaf.addColorStop(1,'#327b39');ctx.fillStyle=leaf;ctx.beginPath();ctx.ellipse(0,0,13,6,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#d0f59a88';ctx.lineWidth=1;ctx.stroke();ctx.restore()}
+    let colors=p.data.id==='ice'?['#e7fbff','#69cbe7']:p.data.id==='fire'||p.data.id==='dragon'?['#fff0a0','#ed6b28']:p.data.kind==='sun'?['#fff2a1','#eaa52e']:p.data.id==='melon'?['#b5ed78','#348c48']:p.data.id==='shroom'?['#f5c4ef','#a65a9e']:['#c9f58a','#3b963e'];
+    const orb=ctx.createRadialGradient(-6,-20,2,2,-7,23);orb.addColorStop(0,colors[0]);orb.addColorStop(.55,colors[1]);orb.addColorStop(1,'#244b2a');ctx.fillStyle=orb;ctx.beginPath();ctx.ellipse(0,-9+wob,17,18,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#244f2b';ctx.lineWidth=2;ctx.stroke();
+    // glossy highlight and expressive face
+    ctx.fillStyle='#ffffff70';ctx.beginPath();ctx.ellipse(-6,-17+wob,5,3,-.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#20351e';ctx.beginPath();ctx.ellipse(-5,-9+wob,2.2,3,0,0,Math.PI*2);ctx.ellipse(5,-9+wob,2.2,3,0,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#20351e';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(0,-5+wob,4,.15,Math.PI-.15);ctx.stroke();
+    if(p.data.kind==='sun'){ctx.save();ctx.translate(0,-9+wob);ctx.rotate(Math.sin(elapsed*.55)*.16);for(let i=0;i<12;i++){ctx.rotate(Math.PI/6);const petal=ctx.createLinearGradient(0,-30,0,-17);petal.addColorStop(0,'#fff6a8');petal.addColorStop(1,'#edaa2d');ctx.fillStyle=petal;ctx.beginPath();ctx.ellipse(0,-24,5,9,0,0,Math.PI*2);ctx.fill()}const face=ctx.createRadialGradient(-4,-5,1,0,0,12);face.addColorStop(0,'#fff2a0');face.addColorStop(1,'#b96d20');ctx.fillStyle=face;ctx.beginPath();ctx.arc(0,0,12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#49331c';ctx.beginPath();ctx.arc(-4,-2,1.7,0,7);ctx.arc(4,-2,1.7,0,7);ctx.fill();ctx.strokeStyle='#49331c';ctx.beginPath();ctx.arc(0,2,4,.2,Math.PI-.2);ctx.stroke();ctx.restore()}
+  }
+  if(p.hp<p.data.hp){rounded(-19,26,38,5,3,'#172419');rounded(-19,26,38*Math.max(0,p.hp/p.data.hp),5,3,'#a7ef73')}
+  ctx.restore();
+}
+function drawEnemy(e){
+  const x=e.x,y=e.row*RH+RH/2,scale=e.type==='boss'?1.65:e.type==='giant'?1.35:1;ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
+  const bob=Math.sin(elapsed*4+e.x*.025)*2;ctx.fillStyle='#17351d55';ctx.beginPath();ctx.ellipse(0,24,19,7,0,0,7);ctx.fill();
+  // feet, legs and a shaded body give enemies a chunky 3D toy look
+  const body=ctx.createLinearGradient(-16,-10,17,12);body.addColorStop(0,'#c1d09a');body.addColorStop(.38,e.type==='boss'?'#87518a':e.type==='giant'?'#7d9456':'#8ca97a');body.addColorStop(1,'#344d38');ctx.fillStyle=body;ctx.beginPath();ctx.roundRect(-14,-15+bob,28,37,10);ctx.fill();
+  ctx.fillStyle='#405b3b';ctx.beginPath();ctx.ellipse(-7,18,5,7,.15,0,7);ctx.ellipse(8,18,5,7,-.15,0,7);ctx.fill();
+  const skin=ctx.createRadialGradient(-6,-28+bob,2,0,-19+bob,19);skin.addColorStop(0,'#d9e0ae');skin.addColorStop(.62,'#91a77b');skin.addColorStop(1,'#52694c');ctx.fillStyle=skin;ctx.beginPath();ctx.ellipse(0,-20+bob,16,17,0,0,7);ctx.fill();
+  ctx.fillStyle='#fff4d8';ctx.beginPath();ctx.ellipse(-5,-22+bob,4,5,0,0,7);ctx.ellipse(6,-22+bob,4,5,0,0,7);ctx.fill();ctx.fillStyle='#9b3427';ctx.beginPath();ctx.arc(-4,-21+bob,1.8,0,7);ctx.arc(7,-21+bob,1.8,0,7);ctx.fill();
+  ctx.strokeStyle='#35452d';ctx.lineWidth=2;ctx.beginPath();ctx.arc(1,-12+bob,5,.15,Math.PI-.15);ctx.stroke();
+  if(e.type==='cone'){const c=ctx.createLinearGradient(-10,-55,10,-30);c.addColorStop(0,'#ffd08a');c.addColorStop(1,'#d45b22');ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(-13,-30+bob);ctx.lineTo(0,-55+bob);ctx.lineTo(13,-30+bob);ctx.closePath();ctx.fill();ctx.strokeStyle='#853d21';ctx.stroke()}
+  if(e.type==='bucket'){const c=ctx.createLinearGradient(-15,-43,15,-30);c.addColorStop(0,'#f0f5df');c.addColorStop(1,'#62736b');ctx.fillStyle=c;ctx.beginPath();ctx.roundRect(-16,-41+bob,32,12,3);ctx.fill();ctx.strokeStyle='#52645a';ctx.stroke()}
+  if(e.type==='boss'||e.type==='giant'){ctx.fillStyle='#eee0ad';ctx.fillRect(-16,-7+bob,32,5);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(-6,-4+bob,1.5,0,7);ctx.arc(6,-4+bob,1.5,0,7);ctx.fill()}
+  ctx.fillStyle='#1b2a1d';ctx.fillRect(-17,-49,34,5);ctx.fillStyle='#d7e77c';ctx.fillRect(-17,-49,34*Math.max(0,e.hp/e.max),5);
+  ctx.restore();
+}
+function draw(){drawBackground();plants.forEach(drawPlant);enemies.forEach(drawEnemy);shots.forEach(s=>{ctx.fillStyle=s.color;ctx.shadowColor=s.color;ctx.shadowBlur=12;ctx.beginPath();ctx.arc(s.x,s.y,s.radius||6,0,7);ctx.fill();ctx.shadowBlur=0});suns.forEach(s=>{ctx.save();ctx.translate(s.x,s.y);ctx.rotate(elapsed*1.5);ctx.fillStyle='#ffd84f';ctx.shadowColor='#ffe77b';ctx.shadowBlur=17;for(let i=0;i<10;i++){ctx.rotate(Math.PI/5);ctx.fillRect(-3,-19,6,10)}ctx.beginPath();ctx.arc(0,0,12,0,7);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle='#fff4a8';ctx.beginPath();ctx.arc(-4,-4,3,0,7);ctx.fill();ctx.restore()});particles.forEach(p=>{ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,7);ctx.fill();ctx.globalAlpha=1});for(let r=0;r<5;r++)if(mowers[r]){ctx.font='25px serif';ctx.fillText('🚜',5,r*RH+RH-13)}}
+function particle(x,y,color,n=8){for(let i=0;i<n;i++)particles.push({x,y,vx:(Math.random()-.5)*90,vy:(Math.random()-.8)*90,life:.6,size:2+Math.random()*3,color})}
+function addSun(x,y,value=25){suns.push({x,y,value,life:10,vy:18,phase:Math.random()*6})}
+function plantAt(row,col){if(!running||paused||gameOver)return;let data=plantsData.find(p=>p.id===selected);if(!data||!waveUnlocked(data.unlock))return;if(plants.some(p=>p.row===row&&p.col===col))return;if(sun<data.cost){$('status').textContent='Nicht genug Sonnen!';return}sun-=data.cost;plants.push({data,row,col,hp:data.hp,shoot:0,produce:0,armed:data.kind!=='mine'});updateUI();particle(col*CW+CW/2,row*RH+RH/2,'#b6ef72',12);if(data.kind==='bomb'){enemies.filter(e=>e.row===row&&Math.abs(e.x-col*CW-CW/2)<CW*1.7).forEach(e=>damageEnemy(e,data.damage))}}
+function damageEnemy(e,dmg){e.hp-=dmg;if(e.hp<=0&&!e.dead){e.dead=true;kills++;sun+=Math.round((e.data.score||10)/3);particle(e.x,e.row*RH+RH/2,'#d5edaa',10)}}
+function chooseEnemyType(){let pool=['walker','walker','runner'];if(wave>=2)pool.push('cone');if(wave>=3)pool.push('bucket','imp');if(wave>=4)pool.push('football');if(wave>=5)pool.push('giant');if(wave>=10)pool.push('football','bucket');if(wave>=15)pool.push('giant','imp');return pool[Math.floor(Math.random()*pool.length)]}
+function spawnEnemy(){let type=chooseEnemyType();if(wave%5===0&&spawned===0)type='boss';let data=enemyData[type],d=diffs[difficulty],row=Math.floor(Math.random()*5),chapter=Math.floor((wave-1)/5),hp=data.hp*(1+wave*.18+chapter*.12)*d.hp;enemies.push({type,data,row,x:W+20,hp,max:hp,speed:data.speed*d.speed*(1+wave*.045+chapter*.025),attack:0,slow:0,dead:false});spawned++}
+function update(dt){elapsed+=dt;let d=diffs[difficulty];spawnTimer-=dt;skyTimer-=dt;if(skyTimer<=0){addSun(50+Math.random()*(W-100),-10,25);skyTimer=7+Math.random()*4}if(spawnTimer<=0&&spawned<totalSpawn){spawnEnemy();spawnTimer=(Math.max(1.3,4-wave*.18))*d.spawn}
+plants.forEach(p=>{let x=p.col*CW+CW/2,y=p.row*RH+RH/2;if(p.data.kind==='sun'&&(elapsed-p.produce)>(p.data.id==='gold'?5:p.data.id==='twin'?6:8)){p.produce=elapsed;addSun(x,y-20,p.data.id==='twin'?50:p.data.id==='gold'?50:25)}if(p.data.kind==='shoot'&&elapsed-p.shoot>(p.data.rate||1.4)){let target=enemies.find(e=>!e.dead&&e.row===p.row&&e.x>x&&(e.x-x)<(p.data.range||1000));if(target){p.shoot=elapsed;shots.push({x:x+15,y:y-7,row:p.row,target,damage:p.data.damage||25,speed:p.data.id==='melon'?250:390,color:p.data.id==='ice'?'#a8edff':p.data.id==='fire'||p.data.id==='dragon'?'#ff9a48':'#d9f36e',radius:p.data.id==='melon'?10:6,splash:p.data.splash||0,slow:p.data.slow||false})}}if(p.data.kind==='mine'&&!p.armed&&elapsed-p.produce>3){p.armed=true}if(p.data.kind==='mine'&&p.armed){let e=enemies.find(e=>!e.dead&&e.row===p.row&&Math.abs(e.x-x)<22);if(e){damageEnemy(e,p.data.damage);p.hp=0;particle(x,y,'#ffbd64',22)}}if(p.data.kind==='wall'&&p.data.damage){enemies.filter(e=>!e.dead&&e.row===p.row&&Math.abs(e.x-x)<26).forEach(e=>damageEnemy(e,p.data.damage*dt))}});
+shots.forEach(s=>{if(s.dead)return;s.x+=s.speed*dt;let hit=enemies.find(e=>!e.dead&&e.row===s.row&&Math.abs(e.x-s.x)<17);if(hit){damageEnemy(hit,s.damage);if(s.slow)hit.slow=3;if(s.splash)enemies.filter(e=>!e.dead&&e.row===hit.row&&Math.abs(e.x-hit.x)<s.splash).forEach(e=>damageEnemy(e,s.damage*.55));s.dead=true;particle(s.x,s.y,s.color,5)}else if(s.x>W+20)s.dead=true});
+enemies.forEach(e=>{if(e.dead)return;let x=e.x,y=e.row*RH+RH/2;let p=plants.find(p=>p.row===e.row&&Math.abs((p.col*CW+CW/2)-e.x)<28&&p.hp>0);if(p){if(elapsed-e.attack>.75){e.attack=elapsed;p.hp-=e.data.damage*(e.type==='giant'||e.type==='boss'?1.3:1);particle(x,y,'#a9c68a',2);if(p.hp<=0){particle(p.col*CW+CW/2,y,'#c7d9a3',13);plants=plants.filter(q=>q!==p)}}}else{e.x-=e.speed*(e.slow>0?.48:1)*dt;if(e.slow>0)e.slow-=dt;if(e.x<25){if(mowers[e.row]){mowers[e.row]=false;enemies.filter(q=>q.row===e.row).forEach(q=>{q.dead=true;particle(q.x,y,'#f4d26a',10)});particle(30,y,'#ffe17b',25)}else{e.dead=true;endGame(false)}}}});
+enemies=enemies.filter(e=>!e.dead);shots=shots.filter(s=>!s.dead);suns.forEach(s=>{s.y+=s.vy*dt;s.life-=dt;s.phase+=dt});suns=suns.filter(s=>s.life>0&&s.y<H-8);particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.life-=dt});particles=particles.filter(p=>p.life>0);
+if(spawned>=totalSpawn&&enemies.length===0){if(wave>=25){unlocked=20;save();endGame(true);return}if(wave%5===0){completeChapter();return}unlocked=Math.min(20,Math.max(unlocked,wave+1));save();wave++;sun+=50;spawned=0;totalSpawn=Math.round((8+wave*3)*(1+Math.floor((wave-1)/5)*.22));spawnTimer=3;$('status').textContent='Welle geschafft! +50 Sonnen';updateUI()}
+}
+function completeChapter(){running=false;paused=false;cancelAnimationFrame(raf);const chapter=Math.ceil(wave/5),reward=250+chapter*50;sun+=reward;unlocked=Math.min(20,Math.max(unlocked,wave+1));save();$('status').textContent='Abschnitt '+chapter+' abgeschlossen';$('overlay').classList.remove('hidden');$('overlay').innerHTML='<div class="dialog reward-dialog"><div class="eyebrow">ABSCHNITT '+chapter+' ABGESCHLOSSEN</div><div class="reward-emblem">✦</div><h3>Dein Garten wächst!</h3><p>Fünf Wellen überstanden. Die nächste Etappe wird schneller, härter und bringt neue Gegnertypen.</p><div class="reward-grid"><div><strong>+'+reward+'</strong><span>Sonnen-Bonus</span></div><div><strong>'+Math.min(20,unlocked+1)+'/20</strong><span>Pflanzen verfügbar</span></div><div><strong>'+wave+'/25</strong><span>Wellen geschafft</span></div></div><button class="btn primary" id="nextChapterBtn">Nächsten Abschnitt starten</button></div>';$('nextChapterBtn').onclick=()=>{wave++;spawned=0;totalSpawn=Math.round((8+wave*3)*(1+Math.floor((wave-1)/5)*.22));spawnTimer=3;skyTimer=2;running=true;gameOver=false;$('overlay').classList.add('hidden');$('status').textContent='Abschnitt '+Math.ceil(wave/5)+' beginnt';last=performance.now();drawCatalog();raf=requestAnimationFrame(frame)};updateUI()}
+function endGame(win){gameOver=true;running=false;cancelAnimationFrame(raf);$('status').textContent=win?'Garten gerettet':'Garten überrannt';if(!win){unlocked=Math.max(unlocked,Math.min(20,wave-1));save()}else{unlocked=20;save()}updateUI();$('overlay').classList.remove('hidden');$('overlay').innerHTML='<div class="dialog"><div class="eyebrow">'+(win?'Mission erfüllt':'Spiel vorbei')+'</div><h3>'+(win?'Dein Garten blüht!':'Die Monster waren zu stark.')+'</h3><p>Du hast Welle '+wave+' erreicht und '+kills+' Gegner besiegt. '+(win?'Alle Pflanzen sind jetzt freigeschaltet.':'Dein Fortschritt schaltet weitere Pflanzen dauerhaft frei.')+'</p><button class="btn primary" id="againBtn">Nochmal spielen</button></div>';$('againBtn').onclick=reset}
+function frame(t){if(!running||paused)return;let dt=Math.min(.04,(t-last)/1000||0);last=t;update(dt);draw();updateUI();if(running)raf=requestAnimationFrame(frame)}
+function start(){if(running)return;if(spawned===0&&wave===1){totalSpawn=8;spawnTimer=2}running=true;paused=false;gameOver=false;$('overlay').classList.add('hidden');$('startBtn').disabled=true;$('status').textContent='Die Monster kommen!';last=performance.now();raf=requestAnimationFrame(frame);drawCatalog()}
+function reset(){cancelAnimationFrame(raf);plants=[];enemies=[];shots=[];suns=[];particles=[];removeMode=false;sun=150;kills=0;wave=1;mowers=[true,true,true,true,true];spawned=0;totalSpawn=8;spawnTimer=2;skyTimer=2;elapsed=0;running=false;paused=false;gameOver=false;$('startBtn').disabled=false;$('pauseBtn').textContent='Pause';$('status').textContent='Bereit zum Pflanzen';$('overlay').classList.remove('hidden');$('overlay').innerHTML='<div class="dialog"><div class="eyebrow">Garden Guardians</div><h3>Bereit für die Nacht?</h3><p>Wähle links deinen Schwierigkeitsgrad und verteidige den Garten. Sammle die Sonnen, die vom Himmel fallen.</p><button class="btn primary" id="beginBtn">Garten verteidigen</button></div>';$('beginBtn').onclick=start;updateUI();draw()}
+$('beginBtn').onclick=start;$('startBtn').onclick=start;$('restartBtn').onclick=reset;$('shovelBtn').onclick=()=>{if(!running||paused)return;removeMode=!removeMode;$('status').textContent=removeMode?'Wähle eine Pflanze zum Entfernen':'Pflanzmodus aktiv';updateUI()};$('pauseBtn').onclick=()=>{if(!running)return;paused=!paused;$('pauseBtn').textContent=paused?'Weiter':'Pause';$('status').textContent=paused?'Pausiert':'Die Monster kommen!';if(!paused){last=performance.now();raf=requestAnimationFrame(frame)}else cancelAnimationFrame(raf);drawCatalog()};
+canvas.addEventListener('pointerdown',e=>{let rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)/rect.width*W,y=(e.clientY-rect.top)/rect.height*H;let s=suns.find(s=>Math.hypot(s.x-x,s.y-y)<28);if(s){sun+=s.value*diffs[difficulty].energy;suns=suns.filter(q=>q!==s);particle(x,y,'#ffe16b',15);updateUI();return}if(running&&!paused&&!gameOver){let col=Math.floor(x/CW),row=Math.floor(y/RH);if(col>=0&&col<9&&row>=0&&row<5){if(removeMode){const p=plants.find(q=>q.row===row&&q.col===col);if(p){sun+=Math.floor(p.data.cost*.5);plants=plants.filter(q=>q!==p);particle(col*CW+CW/2,row*RH+RH/2,'#e5d7a1',14);$('status').textContent='Pflanze entfernt · 50 % Kosten zurück'}else $('status').textContent='Hier steht keine Pflanze';removeMode=false;updateUI()}else plantAt(row,col)}}});
+window.addEventListener('keydown',e=>{if(e.code==='Space'&&running){e.preventDefault();$('pauseBtn').click()}});
+updateUI();draw();
+</script></body></html>
