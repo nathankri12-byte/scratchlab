@@ -74,6 +74,10 @@ for(let i=0;i<62;i++){const t=i/62*Math.PI*2,side=i%2?1:-1,q=path(t,side*(roadW/
  for(let i=0;i<24;i++){const t=i/24*Math.PI*2,p=path(t,roadW/2+5.5),board=new THREE.Group();const post=new THREE.Mesh(new THREE.BoxGeometry(.18,3.8,.18),mat(0x394a52));post.position.y=1.9;board.add(post);const sign=new THREE.Mesh(new THREE.BoxGeometry(4.2,1.35,.18),mat([0x147b88,0xe2a43c,0x273d59][i%3],.35,.35));sign.position.set(0,3.8,0);board.add(sign);board.position.set(p.x,0,p.z);board.rotation.y=-t;scene.add(board)}
  
 for(let i=0;i<48;i++){let t=i/48*Math.PI*2,p=path(t,roadW/2+3);let pole=new THREE.Group();let post=new THREE.Mesh(new THREE.CylinderGeometry(.12,.18,5,8),mat(0x344754));post.position.y=2.5;pole.add(post);let arm=new THREE.Mesh(new THREE.BoxGeometry(2,.14,.14),mat(0x344754));arm.position.set(.8,4.8,0);pole.add(arm);let lamp=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8),new THREE.MeshBasicMaterial({color:0xb8fff2}));lamp.position.set(1.7,4.7,0);pole.add(lamp);pole.position.set(p.x,0,p.z);pole.rotation.y=-t;scene.add(pole)}
+// Drift smoke and tire marks
+const smokePuffs=[],driftMarks=[];const smokeGeo=new THREE.SphereGeometry(.28,8,7);
+function driftEffect(dt,steer){if(!drifting||Math.abs(steer)<.1)return;for(const side of [-1,1]){const p=player.position.clone().add(new THREE.Vector3(Math.cos(heading)*side*.85,.13,Math.sin(heading)*side*.85));const mark=new THREE.Mesh(new THREE.BoxGeometry(.13,.018,.9),new THREE.MeshBasicMaterial({color:0x101419,transparent:true,opacity:.42}));mark.position.copy(p);mark.rotation.y=heading;scene.add(mark);driftMarks.push(mark);if(driftMarks.length>180)scene.remove(driftMarks.shift())}if(Math.random()<.65){const puff=new THREE.Mesh(smokeGeo,new THREE.MeshBasicMaterial({color:0xe6edf0,transparent:true,opacity:.22,depthWrite:false}));puff.position.copy(player.position).add(new THREE.Vector3((Math.random()-.5)*2,.45,1.5));puff.userData.life=.8;puff.scale.setScalar(.45+Math.random()*.35);scene.add(puff);smokePuffs.push(puff)}}
+function updateSmoke(dt){for(let i=smokePuffs.length-1;i>=0;i--){const p=smokePuffs[i];p.userData.life-=dt;p.position.y+=dt*1.1;p.scale.multiplyScalar(1+dt*.8);p.material.opacity=Math.max(0,p.userData.life*.28);if(p.userData.life<=0){scene.remove(p);p.material.dispose();smokePuffs.splice(i,1)}}}
 // Nitro bottle pickups are placed along the full open-road route
 const pickups=[];const bottleMat=new THREE.MeshStandardMaterial({color:0x22f2ff,metalness:.3,roughness:.18,emissive:0x087c9b,emissiveIntensity:1.4});
 for(let i=0;i<30;i++){const t=(i+1)/31*Math.PI*2,p=path(t,(i%2?3.1:-3.1));const bottle=new THREE.Group();const body=new THREE.Mesh(new THREE.CylinderGeometry(.32,.32,.95,12),bottleMat);bottle.add(body);const neck=new THREE.Mesh(new THREE.CylinderGeometry(.13,.18,.22,10),mat(0xd9ffff,.18,.6));neck.position.y=.56;bottle.add(neck);const cap=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,.12,10),mat(0x087e9b,.2,.4));cap.position.y=.72;bottle.add(cap);bottle.position.set(p.x,.95,p.z);scene.add(bottle);pickups.push({mesh:bottle,taken:false})}
@@ -146,7 +150,7 @@ document.getElementById('how').onclick=()=>{document.getElementById('hint').inne
 function startRace(){
  if(paused){paused=false;document.getElementById('overlay').style.display='none';document.getElementById('pause').textContent='PAUSE';return}
  const ev=events[career.selectedEvent]||events[0];career.selectedEvent=events.indexOf(ev);
- active=true;paused=false;elapsed=0;lap=1;progress=0;lane=0;speed=0;nitro=0;driftScore=0;playerDamage=0;crashCooldown=0;rivalCrashCooldown=0;heading=Math.PI;previousTrackAngle=0;finished=false;raceRewarded=false;player.position.copy(path(0,0));player.rotation.y=heading;
+ active=true;paused=false;elapsed=0;lap=1;progress=0;lane=0;speed=0;nitro=0;driftScore=0;playerDamage=0;crashCooldown=0;rivalCrashCooldown=0;const startTangent=path(.012,0).sub(path(0,0)).normalize();heading=Math.atan2(-startTangent.x,-startTangent.z);previousTrackAngle=0;finished=false;raceRewarded=false;player.position.copy(path(0,0));player.rotation.y=heading;pickups.forEach(p=>{p.taken=false;p.mesh.visible=true});
  rivalProgress=[0,.003,.006];rivalLanes=[-3.4,3.4,-1.8];rivalSpeeds=[0,0,0];
  document.getElementById('overlay').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('pause').style.display='block';document.getElementById('cameraMode').style.display='none';document.getElementById('pause').textContent='PAUSE';document.getElementById('cameraMode').style.display='block';cameraMode=0;cameraButton.textContent='KAMERA: EGO';last=performance.now();
 }
@@ -166,7 +170,7 @@ function animate(now){
   // No automatic curve steering: heading changes only while a steering key is pressed.
   heading+=steer*turnRate*dt;const fx=-Math.sin(heading),fz=-Math.cos(heading),travel=speed/3.6*dt;
   player.position.x+=fx*travel;player.position.z+=fz*travel;player.rotation.y=heading;
-  const routeU=THREE.MathUtils.clamp((player.position.z+TRACK_LENGTH/2)/TRACK_LENGTH,0,1),trackAngle=routeU*Math.PI*2;progress=routeU;previousTrackAngle=trackAngle;
+  const routeU=THREE.MathUtils.clamp((player.position.z+TRACK_LENGTH/2)/TRACK_LENGTH,0,1),trackAngle=routeU*Math.PI*2;progress=routeU;previousTrackAngle=trackAngle;const tangent=path(Math.min(Math.PI*2,trackAngle+.012),0).sub(path(trackAngle,0)).normalize(),roadHeading=Math.atan2(-tangent.x,-tangent.z);heading+=angleDelta(roadHeading,heading)*Math.min(1,dt*1.7);
   const center=path(trackAngle,0),dx=player.position.x-center.x,dz=player.position.z-center.z,dist=Math.hypot(dx,dz);for(const item of pickups){if(!item.taken&&player.position.distanceTo(item.mesh.position)<3.8){item.taken=true;nitro=Math.min(100,nitro+30);item.mesh.visible=false}}
   crashCooldown=Math.max(0,crashCooldown-dt);rivalCrashCooldown=Math.max(0,rivalCrashCooldown-dt);
   if(dist>roadW/2+1.6&&crashCooldown===0){const nx=dx/(dist||1),nz=dz/(dist||1),safe=roadW/2+.45;player.position.x=center.x+nx*safe;player.position.z=center.z+nz*safe;playerDamage=Math.min(100,playerDamage+Math.max(8,Math.min(28,speed*.14)));speed*=.48;crashCooldown=1.05}
@@ -176,7 +180,7 @@ function animate(now){
    const desired=ai.lane+Math.sin(now*.0007+ai.phase)*1.25;rivalLanes[i]=THREE.MathUtils.damp(rivalLanes[i],desired,1.1,dt);positionCar(rivals[i],rivalProgress[i]*Math.PI*2,rivalLanes[i]);
    if(player.position.distanceTo(rivals[i].position)<2.65&&rivalCrashCooldown===0){playerDamage=Math.min(100,playerDamage+Math.max(7,Math.min(22,speed*.11)));speed*=.58;rivalSpeeds[i]*=.72;rivalCrashCooldown=1.15;heading+=player.position.x>=rivals[i].position.x?.12:-.12}
   }
-  if(playerDamage>65)speed=Math.min(speed,spec.max*.82);player.position.y=.12+Math.sin(now*.012)*.025;lap=1;
+  if(playerDamage>65)speed=Math.min(speed,spec.max*.82);player.position.y=.12+Math.sin(now*.012)*.025;lap=1;driftEffect(dt,steer);
   if(progress>=.995&&!raceRewarded){
    finished=true;active=false;raceRewarded=true;const place=1+rivalProgress.filter(v=>v>progress).length,stars=place===1?3:place===2?2:place===3?1:0,credits=ev.reward+(place===1?100:place===2?45:0),xp=place===1?180:place===2?120:80;
    career.credits+=credits;career.xp+=xp;career.stars+=stars;if(place===1)career.wins++;career.completed=Array.from(new Set([...career.completed,career.selectedEvent]));career.best=career.best?Math.min(career.best,elapsed):elapsed;saveCareer();renderGarage();
@@ -184,7 +188,7 @@ function animate(now){
   }
   const forward=new THREE.Vector3(fx,0,fz);cockpit.visible=cameraMode===0;if(cameraMode===0){const cp=player.position.clone().addScaledVector(forward,-2.5);cp.y=1.72;camera.position.copy(cp);const look=player.position.clone().addScaledVector(forward,64);look.y=1.25;camera.lookAt(look)}else{const distance=cameraMode===1?10:17,height=cameraMode===1?5:9,cp=player.position.clone().addScaledVector(forward,-distance);cp.y=height;camera.position.lerp(cp,.12);const look=player.position.clone().addScaledVector(forward,8);look.y=1.1;camera.lookAt(look)}cockpit.rotation.z=THREE.MathUtils.damp(cockpit.rotation.z,-steer*.075,8,dt);updateHud();
  }else if(!active){camera.position.lerp(new THREE.Vector3(105,68,110),.015);camera.lookAt(0,0,0)}
- renderer.render(scene,camera)
+ updateSmoke(dt);renderer.render(scene,camera)
 }
 requestAnimationFrame(animate);addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
 </script></body></html>
