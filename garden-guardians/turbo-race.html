@@ -96,7 +96,7 @@ function startRace(){
  rivalProgress=[0,.006,-.004];rivalLanes=[-3.4,3.4,-1.8];rivalSpeeds=[0,0,0];
  document.getElementById('overlay').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('pause').style.display='block';document.getElementById('pause').textContent='PAUSE';last=performance.now();
 }
-const startButton=document.getElementById('start');startButton.type='button';startButton.addEventListener('click',e=>{if(e.detail===0)startRace()});startButton.addEventListener('pointerup',e=>{if(e.pointerType==='touch'){e.preventDefault();startRace()}},{passive:false});
+const startButton=document.getElementById('start');startButton.type='button';startButton.onclick=()=>startRace();
 function positionCar(car,t,offset,yawOffset=0){let p=path(t,offset);car.position.set(p.x,.1,p.z);const tangent=new THREE.Vector3(-RX*Math.sin(t),0,RZ*Math.cos(t)).normalize();car.rotation.y=Math.atan2(-tangent.x,-tangent.z)+yawOffset}
 function updateHud(){document.getElementById('speed').textContent=String(Math.round(speed)).padStart(3,'0');document.getElementById('lap').textContent=lap+'/3';document.getElementById('position').textContent=(1+rivalProgress.filter(v=>v>progress).length)+'/4';document.getElementById('time').textContent=''+String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(Math.floor(elapsed%60)).padStart(2,'0');document.getElementById('nitroBar').style.width=nitro+'%'}
 let last=performance.now();
