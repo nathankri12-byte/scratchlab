@@ -23,8 +23,17 @@
 <div class="mobile"><button id="left" aria-label="Nach links lenken">‹</button><button id="right" aria-label="Nach rechts lenken">›</button><button id="throttle" class="driveBtn" aria-label="Beschleunigen">GAS</button><button id="boost" class="nitroBtn">NITRO</button></div>
 <div id="overlay"><div class="panel"><div class="eyebrow">LernCampus präsentiert</div><h1>TURBO<br><span>RACE</span></h1><p>Starte deinen Motor. Rase durch eine futuristische Küstenstadt, sammle Nitro und kämpfe um den ersten Platz.</p><div class="career"><div><small>FAHRER-LEVEL</small><b id="driverLevel">1</b></div><div><small>GUTHABEN</small><b id="credits">0</b></div><div><small>BESTZEIT</small><b id="record">--:--</b></div></div><div class="event-title">KARRIERE · WÄHLE DEIN EVENT</div><div class="events" id="events"></div><div class="garage" id="garage"></div><div class="career-note" id="garageNote">Gewinne Rennen und sammle Credits, um neue Autos freizuschalten.</div><div class="actions"><button class="btn" id="start">RENNEN STARTEN</button><button class="btn secondary" id="how">STEUERUNG</button></div><div class="hint" id="hint">W / ↑ oder GAS beschleunigen · S / ↓ bremsen · A / D oder ← / → lenken · Leertaste / NITRO zünden · P Pause<br>Ein eigenständiges Arcade-Rennspiel von LernCampus.</div></div></div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+<script>
+window.addEventListener('error',e=>{const h=document.getElementById('hint');if(h&&e.message)h.textContent='Spiel-Fehler: '+e.message;});
+window.addEventListener('unhandledrejection',e=>{const h=document.getElementById('hint');if(h)h.textContent='Spiel-Fehler: '+(e.reason?.message||String(e.reason||'Unbekannt'));});
+</script>
 <script type="module">
-import * as THREE from 'three';
+let THREE;
+try{THREE=await import('https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js')}
+catch(primaryError){
+ try{THREE=await import('https://unpkg.com/three@0.160.0/build/three.module.js')}
+ catch(fallbackError){const h=document.getElementById('hint');if(h)h.textContent='3D-Modul konnte nicht geladen werden. Bitte Internetverbindung prüfen und neu laden.';throw fallbackError}
+}
 const mount=document.getElementById('game');
 const scene=new THREE.Scene();scene.background=new THREE.Color(0x8ed7f0);scene.fog=new THREE.Fog(0x8ed7f0,180,620);
 const camera=new THREE.PerspectiveCamera(82,innerWidth/innerHeight,.08,900);
@@ -96,7 +105,7 @@ function startRace(){
  rivalProgress=[0,.006,-.004];rivalLanes=[-3.4,3.4,-1.8];rivalSpeeds=[0,0,0];
  document.getElementById('overlay').style.display='none';document.getElementById('hud').style.display='block';document.getElementById('pause').style.display='block';document.getElementById('pause').textContent='PAUSE';last=performance.now();
 }
-const startButton=document.getElementById('start');startButton.type='button';startButton.onclick=()=>startRace();
+const startButton=document.getElementById('start');startButton.type='button';startButton.addEventListener('click',startRace);window.__startTurboRace=startRace;
 function positionCar(car,t,offset,yawOffset=0){let p=path(t,offset);car.position.set(p.x,.1,p.z);const tangent=new THREE.Vector3(-RX*Math.sin(t),0,RZ*Math.cos(t)).normalize();car.rotation.y=Math.atan2(-tangent.x,-tangent.z)+yawOffset}
 function updateHud(){document.getElementById('speed').textContent=String(Math.round(speed)).padStart(3,'0');document.getElementById('lap').textContent=lap+'/3';document.getElementById('position').textContent=(1+rivalProgress.filter(v=>v>progress).length)+'/4';document.getElementById('time').textContent=''+String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(Math.floor(elapsed%60)).padStart(2,'0');document.getElementById('nitroBar').style.width=nitro+'%'}
 let last=performance.now();
