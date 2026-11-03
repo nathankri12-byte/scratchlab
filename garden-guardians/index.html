@@ -25,6 +25,34 @@ h1{font-size:clamp(34px,6vw,58px);line-height:1.02;letter-spacing:-2px;margin:12
 iframe{display:block;width:100%;height:min(76vh,820px);min-height:540px;border:0;background:#07111d}
 footer{text-align:center;color:#7890a1;font-size:11px;margin-top:32px;letter-spacing:.4px}
 @media(max-width:700px){header{height:62px}.tag{display:none}.cards{grid-template-columns:1fr}.card{min-height:205px;padding:21px}.gamebar{height:54px}.small{padding:8px 9px}iframe{height:calc(100dvh - 130px);min-height:500px}main{padding-top:32px}}
+
+/* Premium game-selection lobby */
+body{background:radial-gradient(ellipse at 15% 0%,#2c6671 0,transparent 38%),radial-gradient(ellipse at 100% 15%,#315f43 0,transparent 34%),linear-gradient(145deg,#071722,#0a1d24 55%,#10251c)}
+header{height:82px;background:#07131de0;border-bottom:1px solid #a7e8d933;box-shadow:0 8px 30px #0004}
+.logo{font-size:17px;letter-spacing:3.5px;text-shadow:0 2px 20px #4ee3d4aa}
+main{max-width:1240px;padding-top:clamp(38px,7vw,86px)}
+.intro{margin-bottom:42px}.eyebrow{color:#7ef1d7;text-shadow:0 0 20px #53d9c877}
+h1{font-size:clamp(42px,7vw,76px);letter-spacing:-3px;text-shadow:0 8px 45px #0008}
+.intro p{font-size:15px;color:#bfd1d5;max-width:660px}
+.cards{gap:22px}
+.card{min-height:360px;padding:30px;border-radius:25px;border:1px solid #d2fff22b;box-shadow:0 25px 75px #0007,inset 0 1px #ffffff24;transition:transform .25s,border-color .25s,box-shadow .25s}
+.card:before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 85% 20%,#8fffa522,transparent 42%),linear-gradient(125deg,transparent 35%,#ffffff0a 55%,transparent 75%);pointer-events:none}
+.card:after{content:'🌻';position:absolute;right:28px;top:55px;font-size:clamp(80px,12vw,150px);opacity:.16;filter:drop-shadow(0 15px 20px #0008);transform:rotate(-12deg);pointer-events:none}
+.card.race:after{content:'🏎';opacity:.22;transform:rotate(-10deg)}
+.card:hover{transform:translateY(-7px);border-color:#8ef5dc99;box-shadow:0 34px 85px #0009,inset 0 1px #ffffff38}
+.card .number{color:#a4d5cf;font-size:10px;letter-spacing:2.8px}
+.card h2{font-size:clamp(30px,4vw,43px);text-shadow:0 5px 20px #0007}
+.card p{font-size:14px;color:#c4d4d7;max-width:360px}
+.play{position:relative;z-index:1;border-radius:12px;background:linear-gradient(135deg,#9affdf,#3acdbd);box-shadow:0 4px 0 #167f7c,0 12px 24px #0005;transition:.18s}
+.play:hover{transform:translateY(-2px);filter:brightness(1.08)}
+.card.race{background:radial-gradient(ellipse at 80% 20%,#287d85 0%,transparent 50%),linear-gradient(145deg,#133b4b,#101d32)}
+.card:not(.race){background:radial-gradient(ellipse at 80% 20%,#6c9b4a 0%,transparent 50%),linear-gradient(145deg,#24482d,#102a20)}
+.gameview{border-radius:22px;border-color:#7ae9d455;box-shadow:0 30px 90px #0009}
+.gamebar{height:64px;background:linear-gradient(90deg,#102b36,#10261f)}
+.small{background:#1c3944;border-color:#ffffff35}
+iframe{height:min(82vh,950px);min-height:620px}
+footer{color:#8eaaa8}
+@media(max-width:700px){header{height:65px}.cards{gap:14px}.card{min-height:250px;padding:22px}iframe{height:calc(100dvh - 120px);min-height:520px}}
 </style>
 </head>
 <body>
