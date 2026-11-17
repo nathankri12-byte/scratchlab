@@ -38,7 +38,7 @@ $('load').onclick=loadModel;$('start').onclick=startCamera;$('stop').onclick=sto
 <script>
 (async()=>{
  const gate=document.getElementById("access-gate"),app=document.getElementById("software-app"),title=document.getElementById("access-title"),msg=document.getElementById("access-message"),link=document.getElementById("access-link");
- const auth=window.supabase.createClient("https://jkhioiwuctypeqmmksez.supabase.co","sb_publishable_JR8ELNjSssDgcwoBHw-dvQ_Q0eUkFo3n");
+ const auth=window.supabase.createClient("https://jkhioiwuctypeqmmksez.supabase.co","sb_publishable_JR8ELNjSssDgcwoBHw-dvQ_0eUkFo3n");
  function deny(t,m){title.textContent=t;msg.textContent=m;link.hidden=false;}
  try{
   const {data:{session},error:sessionError}=await auth.auth.getSession();
