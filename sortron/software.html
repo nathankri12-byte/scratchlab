@@ -28,7 +28,7 @@ main{max-width:1240px;margin:0 auto;padding:42px 22px 60px}
 .connection-box{padding:15px;border:1px solid var(--line);border-radius:12px;background:#09160f}.connection-box p{color:var(--muted);font-size:12px;margin:7px 0 0}.device-name{font:600 15px "Space Grotesk";margin-top:8px}.warning{border-left:2px solid var(--amber);padding:9px 11px;background:#2b2415;color:#d9c48f;border-radius:0 8px 8px 0;font-size:11px;margin-top:14px}
 .class-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.class-card{padding:13px;border:1px solid var(--line);border-radius:11px;background:#0b1911}.class-card strong{display:block;font:600 13px "Space Grotesk"}.class-card span{display:block;color:var(--muted);font-size:11px;margin-top:3px}
 .log{height:155px;overflow:auto;white-space:pre-wrap;background:#08130c;border:1px solid var(--line);border-radius:10px;padding:12px;color:#b4c8b9;font:11px/1.7 ui-monospace,SFMono-Regular,monospace}
-.workflow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:14px}.workflow span{border:1px solid var(--line);border-radius:7px;padding:6px 8px;color:#c5d6c9;font-size:10px}.workflow b{color:var(--green);font-size:11px}
+.workflow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:14px}.workflow span{border:1px solid var(--line);border-radius:7px;padding:6px 8px;color:#c5d6c9;font-size:10px}.workflow b{color:var(--green);font-size:11px}.admin-user{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:13px 0;border-top:1px solid var(--line)}.admin-user:first-child{border-top:0}.admin-user strong{display:block;font-size:12px;overflow-wrap:anywhere}.admin-user small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.admin-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.btn.danger{border-color:#70413c;color:#ffaaa1;background:#2b1715}.admin-message{font-size:12px;color:var(--muted);margin-top:10px;min-height:18px}.admin-list{max-height:430px;overflow:auto;margin-top:14px}.admin-empty{color:var(--muted);font-size:12px;padding:12px 0}
 .footer{text-align:center;color:#718679;font-size:11px;padding:22px}
 #access-gate{max-width:700px;margin:90px auto;padding:30px 26px;border:1px solid var(--line);border-radius:17px;background:linear-gradient(145deg,#14281c,#0c1911)}#access-gate h2{font:600 25px "Space Grotesk";margin:10px 0}#access-message{color:var(--muted)}#access-link{display:inline-block;margin-top:12px;text-decoration:none}
 @media(max-width:850px){.grid{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column}.hero-state{width:100%}}
@@ -63,7 +63,8 @@ main{max-width:1240px;margin:0 auto;padding:42px 22px 60px}
   <section class="panel">
    <div class="panel-head"><div class="panel-title"><span class="number">02</span><div><h2>KI-Modell</h2><p class="panel-desc">Teachable Machine Modell laden oder wechseln</p></div></div><span class="tag">AI ENGINE</span></div>
    <div class="field"><label for="modelUrl">Modell-Link oder Modell-ID</label><input class="input" id="modelUrl" value="https://teachablemachine.withgoogle.com/models/8Yg_XSh_o/" placeholder="Teachable-Machine-Link einfügen"></div>
-   <div class="controls"><button class="btn primary full" id="load" type="button">KI-Modell laden</button></div>
+   <div class="controls"><button class="btn primary full" id="load" type="button">Aktuelles Modell laden</button></div>
+   <div class="controls"><button class="btn full" id="saveGlobalModel" type="button" hidden>Modell dauerhaft für alle speichern</button></div>
    <div class="status-line"><i class="status-dot" id="modelDot"></i><span id="modelStatus">Standardmodell noch nicht geladen</span></div>
    <div class="model-summary"><small>Aktiviertes Modell</small><strong id="activeModel">Noch kein Modell geladen</strong></div>
    <p class="panel-desc" style="margin-top:12px">Du kannst jederzeit einen anderen Teachable-Machine-Link einfügen und laden. Das neue Modell ersetzt das bisherige erst, wenn es erfolgreich geladen wurde.</p>
@@ -84,8 +85,17 @@ main{max-width:1240px;margin:0 auto;padding:42px 22px 60px}
    </div>
    <div class="workflow"><span>Kamera</span><b>→</b><span>KI-Modell</span><b>→</b><span>Matrix Mini R4</span><b>→</b><span>Sortierung</span></div>
   </section>
+  <section class="panel" id="adminPanel" style="grid-column:1/-1" hidden>
+   <div class="panel-head"><div class="panel-title"><span class="number">05</span><div><h2>Administration</h2><p class="panel-desc">Admin-Rechte und Kundenlizenzen verwalten</p></div></div><span class="tag">ADMIN ONLY</span></div>
+   <form id="addAdminForm">
+    <div class="field"><label for="newAdminEmail">Neuen Admin hinzufügen</label><div class="input-row"><input class="input" id="newAdminEmail" type="email" placeholder="E-Mail-Adresse des bestehenden Kontos" required><button class="btn primary" type="submit">Admin hinzufügen</button></div></div>
+   </form>
+   <div class="admin-message" id="adminMessage"></div>
+   <div class="panel-head" style="margin:20px 0 0"><div><h2>Konten und Berechtigungen</h2><p class="panel-desc">Admin-Status und aktive Lizenzen</p></div><button class="btn" id="refreshAdminList" type="button">Aktualisieren</button></div>
+   <div class="admin-list" id="adminList"><div class="admin-empty">Konten werden geladen …</div></div>
+  </section>
   <section class="panel" style="grid-column:1/-1">
-   <div class="panel-head"><div class="panel-title"><span class="number">05</span><div><h2>Systemprotokoll</h2><p class="panel-desc">Statusmeldungen und letzte Aktionen</p></div></div><span class="tag">ACTIVITY</span></div>
+   <div class="panel-head"><div class="panel-title"><span class="number">06</span><div><h2>Systemprotokoll</h2><p class="panel-desc">Statusmeldungen und letzte Aktionen</p></div></div><span class="tag">ACTIVITY</span></div>
    <div class="log" id="log">Sortron KI-Steuerzentrale bereit. Lade ein KI-Modell und verbinde deine Hardware.</div>
   </section>
  </div>
@@ -111,6 +121,7 @@ async function connect(){const button=$('connect');try{if(!navigator.bluetooth)t
 function onDisconnected(){characteristic=null;$('disconnect').disabled=true;state('bleDot','bleStatus','Verbindung getrennt');$('deviceName').textContent='Kein Gerät verbunden';log('Matrix-Verbindung getrennt.');updateOverview()}
 function disconnect(){if(device&&device.gatt&&device.gatt.connected)device.gatt.disconnect();onDisconnected()}
 $('load').addEventListener('click',loadModel);$('start').addEventListener('click',startCamera);$('stop').addEventListener('click',stopCamera);$('refreshCameras').addEventListener('click',refreshCameras);$('connect').addEventListener('click',connect);$('disconnect').addEventListener('click',disconnect);
+window.sortronLoadModel=loadModel;
 updateOverview();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -118,15 +129,31 @@ updateOverview();
 (async()=>{
  const gate=$('access-gate'),app=$('software-app'),title=$('access-title'),message=$('access-message'),link=$('access-link');
  const auth=window.supabase.createClient('https://jkhioiwuctypeqmmksez.supabase.co','sb_publishable_JR8ELNjSssDgcwoBHw-dvQ_0eUkFo3n');
+ window.sortronClient=auth;
+ const callAccount=async(payload)=>{const {data,error}=await auth.functions.invoke('sortron-account',{body:payload});if(error){let detail=error.message||'Serveranfrage fehlgeschlagen.';try{if(error.context&&typeof error.context.clone==='function'){const body=await error.context.clone().json();if(body?.error)detail=body.error}}catch{}throw new Error(detail)}if(data?.error)throw new Error(data.error);return data};
+ const adminMessage=(value,error=false)=>{const el=$('adminMessage');el.textContent=value;el.style.color=error?'#ffaaa1':'#a7e56f'};
  function deny(heading,detail){title.textContent=heading;message.textContent=detail;link.hidden=false}
  try{
   const {data:{session},error}=await auth.auth.getSession();if(error)throw error;
   if(!session){deny('Bitte melde dich an.','Die Sortron-KI-Steuerzentrale ist nur für angemeldete Kunden mit aktiver Lizenz und Sortron-Administratoren zugänglich.');return}
-  const admin=session.user.app_metadata?.sortron_admin===true;let licensed=false;
+  const admin=session.user.id==='44d948f2-99be-41d8-972d-3df9907eb1a1'||session.user.app_metadata?.sortron_admin===true;
+  window.sortronIsAdmin=admin;
+  let licensed=false;
   if(!admin){const result=await auth.from('licenses').select('id').eq('user_id',session.user.id).eq('status','active').limit(1);if(result.error)throw result.error;licensed=Array.isArray(result.data)&&result.data.length>0}
   if(!admin&&!licensed){deny('Noch keine aktive Lizenz.','Dein Konto ist angemeldet, aber es ist noch keine aktive Sortron-Lizenz zugeordnet. Bitte wende dich an die Sortron-Administration.');return}
   gate.hidden=true;app.hidden=false;
+  const modelSettings=await callAccount({action:'get_model'});
+  $('modelUrl').value=modelSettings.model_url;
+  $('activeModel').textContent=modelSettings.model_id;
+  $('modelUrl').readOnly=!admin;
+  $('saveGlobalModel').hidden=!admin;
+  if(admin){$('adminPanel').hidden=false;loadAdminUsers().catch(error=>adminMessage(error.message,true));}
+  await window.sortronLoadModel();
  }catch(error){deny('Zugriff konnte nicht geprüft werden.','Aus Sicherheitsgründen bleibt die Software gesperrt. Bitte lade die Seite erneut oder melde dich im Kundenkonto.')}
+  $('saveGlobalModel').addEventListener('click',async()=>{const button=$('saveGlobalModel');button.disabled=true;try{const result=await callAccount({action:'save_model',model_url:$('modelUrl').value});$('modelUrl').value=result.model_url;$('activeModel').textContent=result.model_id;adminMessage(result.message);await window.sortronLoadModel();}catch(error){adminMessage(error.message,true);alert(error.message)}finally{button.disabled=false}});
+  async function loadAdminUsers(){const result=await callAccount({action:'admin_list'});const list=$('adminList');list.replaceChildren();if(!result.users.length){list.append(Object.assign(document.createElement('div'),{className:'admin-empty',textContent:'Noch keine Konten vorhanden.'}));return}for(const person of result.users){const row=document.createElement('div');row.className='admin-user';const info=document.createElement('div');const email=document.createElement('strong');email.textContent=person.email||'Konto ohne E-Mail';info.append(email);const details=document.createElement('small');const licenseText=person.licenses.length?person.licenses.map(item=>(item.product==='clip'?'Clip':'Complete')+' · '+(item.status==='active'?'aktiv':'inaktiv')).join(' | '):'Keine Lizenz';details.textContent=(person.is_owner?'Geschützter Eigentümer':person.is_admin?'Administrator':'Kunde')+' · '+(person.confirmed?'E-Mail bestätigt':'E-Mail nicht bestätigt')+' · '+licenseText;info.append(details);row.append(info);const actions=document.createElement('div');actions.className='admin-actions';if(person.is_admin&&!person.is_owner){const revoke=document.createElement('button');revoke.className='btn danger';revoke.type='button';revoke.textContent='Admin entziehen';revoke.addEventListener('click',async()=>{if(!confirm('Admin-Rechte für '+person.email+' entziehen?'))return;revoke.disabled=true;try{const out=await callAccount({action:'revoke_admin',email:person.email});adminMessage(out.message);await loadAdminUsers()}catch(error){adminMessage(error.message,true);revoke.disabled=false}});actions.append(revoke)}for(const lic of person.licenses.filter(item=>item.status==='active')){const revokeLicense=document.createElement('button');revokeLicense.className='btn danger';revokeLicense.type='button';revokeLicense.textContent=(lic.product==='clip'?'Clip':'Complete')+'-Lizenz entziehen';revokeLicense.addEventListener('click',async()=>{if(!confirm('Diese Lizenz für '+person.email+' entziehen?'))return;revokeLicense.disabled=true;try{const out=await callAccount({action:'revoke_license',email:person.email,product:lic.product});adminMessage(out.message);await loadAdminUsers()}catch(error){adminMessage(error.message,true);revokeLicense.disabled=false}});actions.append(revokeLicense)}if(actions.childNodes.length)row.append(actions);list.append(row)}}
+  $('addAdminForm').addEventListener('submit',async event=>{event.preventDefault();const button=event.currentTarget.querySelector('button');button.disabled=true;try{const result=await callAccount({action:'grant_admin',email:$('newAdminEmail').value.trim()});adminMessage(result.message);$('newAdminEmail').value='';await loadAdminUsers()}catch(error){adminMessage(error.message,true)}finally{button.disabled=false}});
+  $('refreshAdminList').addEventListener('click',()=>loadAdminUsers().catch(error=>adminMessage(error.message,true)));
 })();
 </script>
 </body>
