@@ -136,13 +136,10 @@ updateOverview();
  try{
   const {data:{session},error}=await auth.auth.getSession();if(error)throw error;
   if(!session){deny('Bitte melde dich an.','Die Sortron-KI-Steuerzentrale ist nur für angemeldete Kunden mit aktiver Lizenz und Sortron-Administratoren zugänglich.');return}
-  const admin=session.user.id==='44d948f2-99be-41d8-972d-3df9907eb1a1'||session.user.app_metadata?.sortron_admin===true;
-  window.sortronIsAdmin=admin;
-  let licensed=false;
-  if(!admin){const result=await auth.from('licenses').select('id').eq('user_id',session.user.id).eq('status','active').limit(1);if(result.error)throw result.error;licensed=Array.isArray(result.data)&&result.data.length>0}
-  if(!admin&&!licensed){deny('Noch keine aktive Lizenz.','Dein Konto ist angemeldet, aber es ist noch keine aktive Sortron-Lizenz zugeordnet. Bitte wende dich an die Sortron-Administration.');return}
-  gate.hidden=true;app.hidden=false;
   const modelSettings=await callAccount({action:'get_model'});
+  const admin=modelSettings.is_admin===true;
+  window.sortronIsAdmin=admin;
+  gate.hidden=true;app.hidden=false;
   $('modelUrl').value=modelSettings.model_url;
   $('activeModel').textContent=modelSettings.model_id;
   $('modelUrl').readOnly=!admin;
