@@ -8,7 +8,7 @@
 <body>
 <header><nav><a class="logo" href="index.html">SOR<span>TRON</span></a><div class="links"><a href="index.html">Startseite</a><a href="modelle.html">Modelle</a><a href="geschichte.html">Unsere Geschichte</a><a href="team.html">Team</a><a href="software.html">KI-Steuerung</a><a href="account.html">Kundenkonto</a></div></nav></header>
 <main class="wrap account-main">
-<section class="account-intro"><div class="eyebrow">SORTRON CUSTOMER AREA</div><h1>Dein Sortron.<br><span style="color:var(--green)">Dein Zugang.</span></h1><p class="lead">Melde dich an, verwalte deine Produktlizenzen und erhalte Zugriff auf die Software, die zu deinem Sortron-Modell gehört.</p></section>
+<section class="account-intro"><div class="eyebrow">SORTRON CUSTOMER AREA</div><h1>Dein Sortron.<br><span style="color:var(--green)">Dein Zugang.</span></h1><p class="lead">Melde dich an, verwalte deine Produktlizenzen und lade die Software für dein Sortron-Modell herunter.</p></section>
 <section class="account-panel" id="auth-panel">
 <div class="auth-tabs"><button type="button" id="login-tab" class="active">Anmelden</button><button type="button" id="signup-tab">Konto erstellen</button></div>
 <form id="auth-form">
@@ -17,12 +17,30 @@
 <button class="btn primary auth-submit" type="submit" id="auth-submit">Anmelden</button>
 <p class="auth-message" id="auth-message" role="status"></p>
 </form>
-<p class="auth-foot">Mit der Kontoerstellung erhältst du noch keine Produktlizenz. Diese wird nach einem bestätigten Kauf deinem Konto zugeordnet.</p>
+<p class="auth-foot">Ein Kundenkonto ist kostenlos. Eine Produktlizenz wird erst nach bestätigter Bestellung zugeordnet.</p>
 </section>
 <section class="account-panel account-dashboard" id="dashboard" hidden>
 <div class="dashboard-top"><div><div class="eyebrow">PERSÖNLICHER BEREICH</div><h2>Willkommen zurück.</h2><p id="user-email" class="muted"></p></div><button type="button" id="logout" class="btn">Abmelden</button></div>
 <div class="license-list" id="license-list"><p class="muted">Lizenzen werden geladen …</p></div>
-<p class="auth-foot">Downloads werden hier freigeschaltet, sobald eine passende Software-Version hinterlegt und deine Lizenz bestätigt wurde.</p>
+</section>
+<section class="account-panel" id="admin-panel" hidden>
+<div class="eyebrow">SORTRON INTERNAL</div><h2>Administration</h2>
+<p class="muted">Lizenzen nur nach bestätigter Bestellung vergeben. Software-Dateien zuerst in den privaten Storage-Bucket hochladen.</p>
+<form id="issue-form" class="admin-form">
+<h3>Kundenlizenz vergeben</h3>
+<label for="buyer-email">Kunden-E-Mail</label><input id="buyer-email" type="email" required placeholder="kunde@beispiel.de">
+<label for="issue-product">Produkt</label><select id="issue-product"><option value="clip">Sortron Clip</option><option value="complete">Sortron Complete</option></select>
+<label for="order-reference">Bestellnummer (optional)</label><input id="order-reference" type="text" placeholder="z. B. SOR-2026-001">
+<button class="btn primary" type="submit">Lizenz erstellen</button><p id="issue-message" class="auth-message" role="status"></p>
+</form>
+<form id="release-form" class="admin-form">
+<h3>Software-Version veröffentlichen</h3>
+<label for="release-product">Produkt</label><select id="release-product"><option value="clip">Sortron Clip</option><option value="complete">Sortron Complete</option></select>
+<label for="release-version">Version</label><input id="release-version" required placeholder="1.0.0">
+<label for="storage-path">Storage-Dateipfad</label><input id="storage-path" required placeholder="clip/sortron-clip-1.0.0.zip">
+<label for="release-notes">Versionshinweise (optional)</label><textarea id="release-notes" rows="3"></textarea>
+<button class="btn primary" type="submit">Version freischalten</button><p id="release-message" class="auth-message" role="status"></p>
+</form>
 </section>
 </main>
 <footer><div class="wrap">SORTRON · Der Held der Tonne · <a href="index.html">Zur Startseite</a></div></footer>
