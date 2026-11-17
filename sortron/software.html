@@ -33,7 +33,8 @@ function plan(n){const s=n.toLowerCase();let p=s.includes('papier')?'Position 1 
 async function connect(){try{if(!navigator.bluetooth)throw Error('Web Bluetooth benötigt Chrome/Edge auf einem unterstützten Gerät.');device=await navigator.bluetooth.requestDevice({filters:[{name:'MiniR4 Sorter'}],optionalServices:[SERVICE]});const server=await device.gatt.connect(),svc=await server.getPrimaryService(SERVICE);characteristic=await svc.getCharacteristic(CHAR);state('bleDot','bleStatus','Verbunden: '+device.name,'ok');$('disconnect').disabled=false;log('Matrix Mini R4 per Bluetooth verbunden.')}catch(e){log('Bluetooth: '+e.message);state('bleDot','bleStatus','Nicht verbunden')}}
 function disconnect(){if(device?.gatt?.connected)device.gatt.disconnect();characteristic=null;$('disconnect').disabled=true;state('bleDot','bleStatus','Nicht verbunden')}
 $('load').onclick=loadModel;$('start').onclick=startCamera;$('stop').onclick=stopCamera;$('connect').onclick=connect;$('disconnect').onclick=disconnect;if(!navigator.mediaDevices?.getUserMedia)state('camDot','camStatus','Kamera benötigt HTTPS oder localhost');
-</script>\n<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (async()=>{
  const gate=document.getElementById("access-gate"),app=document.getElementById("software-app"),title=document.getElementById("access-title"),msg=document.getElementById("access-message"),link=document.getElementById("access-link");
