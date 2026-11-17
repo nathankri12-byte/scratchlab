@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sortron Modelle – SORTRON</title>
 <style>
-:root{--bg:#07110d;--panel:#102219;--line:#294737;--green:#a4e66b;--muted:#b2c4b7}
+:root{--bg:#07110d;--line:#294737;--green:#a4e66b;--muted:#b2c4b7}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% 0,#1b432c,transparent 45%),var(--bg);color:#eff8f1;font:16px/1.6 system-ui}
 a{color:inherit;text-decoration:none}.wrap{max-width:1100px;margin:auto;padding:0 22px}
 header{border-bottom:1px solid var(--line)}nav{padding:22px 0;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
@@ -13,8 +13,7 @@ main{padding:65px 0}.eyebrow,.tag{color:var(--green);letter-spacing:.16em;font-s
 h1{font-size:clamp(40px,7vw,68px);line-height:1.02;margin:15px 0}.lead,.muted{color:var(--muted)}.lead{font-size:19px;max-width:760px}
 .products{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:38px}
 .product{padding:28px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(145deg,#14291e,#0b1711)}
-.product h2{font-size:30px;margin:10px 0}.visual{height:175px;border-radius:15px;background:linear-gradient(135deg,#234d31,#0a1710);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;color:var(--green);font-size:34px;font-weight:950;letter-spacing:.14em}
-.visual:before,.visual:after{content:"";position:absolute;border:1px solid #78b95b66;border-radius:18px;width:110px;height:110px;transform:rotate(35deg)}.visual:after{width:150px;height:150px;transform:rotate(-25deg)}
+.product h2{font-size:30px;margin:10px 0}.visual{display:block;width:100%;height:auto;aspect-ratio:900/560;object-fit:cover;border-radius:15px;border:1px solid #31543c}
 .price{font-size:34px;font-weight:900;margin:12px 0 2px;color:#fff}.price-note{font-size:11px;color:#e8c77f;letter-spacing:.08em;font-weight:800}
 .product ul{padding-left:19px;color:var(--muted)}.software{margin-top:15px;padding:15px;border:1px solid var(--line);border-radius:12px;color:#d8e8dc}
 .btn{display:inline-block;margin-top:17px;padding:12px 17px;border-radius:10px;background:var(--green);color:#102015;font-weight:850}
@@ -32,7 +31,8 @@ table{width:100%;border-collapse:collapse;min-width:560px}th,td{text-align:left;
 <p class="lead">Ob als kompakte Erweiterung für deine vorhandene Mülltonne oder als vollständige Sortierstation: Sortron soll Mülltrennung einfacher und intelligenter machen.</p>
 <div class="products">
 <article class="product" id="clip">
-<div class="visual">SORTRON CLIP</div><div class="tag">KOMPAKT · FLEXIBEL</div><h2>Sortron Clip</h2>
+<img class="visual" src="sortron-clip.svg" alt="Konzeptdarstellung des Sortron Clip an einer vorhandenen Mülltonne">
+<div class="tag">KOMPAKT · FLEXIBEL</div><h2>Sortron Clip</h2>
 <p class="muted">Die kompakte Sortron-Version zum Befestigen an einer vorhandenen Mülltonne. Besonders interessant für Camper, kleine Küchen und alle, die vorhandene Behälter weiterverwenden möchten.</p>
 <div class="price">149 €</div><div class="price-note">VORGESEHENER PREIS · NOCH NICHT VERBINDLICH</div>
 <ul><li>Zur Befestigung an einer vorhandenen Tonne</li><li>Vier Sortierpositionen frei zuordenbar</li><li>Eigene Clip-Konfigurationssoftware</li><li>Für unterschiedliche Behälter-Anordnungen gedacht</li></ul>
@@ -40,7 +40,8 @@ table{width:100%;border-collapse:collapse;min-width:560px}th,td{text-align:left;
 <a class="btn" href="mailto:?subject=Anfrage%20Sortron%20Clip">Sortron Clip anfragen</a>
 </article>
 <article class="product" id="complete">
-<div class="visual">SORTRON COMPLETE</div><div class="tag">ALL-IN-ONE · VIER BEHÄLTER</div><h2>Sortron Complete</h2>
+<img class="visual" src="sortron-complete.svg" alt="Konzeptdarstellung der Sortron Complete Sortierstation mit vier Behältern">
+<div class="tag">ALL-IN-ONE · VIER BEHÄLTER</div><h2>Sortron Complete</h2>
 <p class="muted">Die vollständige Sortron-Sortierstation. Vier Müllbehälter sind direkt im Gerät integriert – eine komplette Sortierlösung in einem System.</p>
 <div class="price">499 €</div><div class="price-note">VORGESEHENER PREIS · NOCH NICHT VERBINDLICH</div>
 <ul><li>Vier integrierte Müllbehälter</li><li>KI-Erkennung per Kamera</li><li>Automatisierter Sortierablauf</li><li>Abgestimmte Sortron-Steuerungssoftware</li></ul>
