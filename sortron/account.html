@@ -36,7 +36,7 @@
 <form id="release-form" class="admin-form">
 <h3>Software-Version veröffentlichen</h3>
 <label for="release-product">Produkt</label><select id="release-product"><option value="clip">Sortron Clip</option><option value="complete">Sortron Complete</option></select>
-<label for="release-version">Version</label><input id="release-version" required placeholder="1.0.0">
+<label for="release-version">Version</label><input id="release-version" required placeholder="1.0.0"><label for="release-file">Software-Datei (ZIP, max. 100 MB)</label><input id="release-file" type="file" accept=".zip,.exe,.msi,.dmg,.apk" required>
 <label for="storage-path">Storage-Dateipfad</label><input id="storage-path" required placeholder="clip/sortron-clip-1.0.0.zip">
 <label for="release-notes">Versionshinweise (optional)</label><textarea id="release-notes" rows="3"></textarea>
 <button class="btn primary" type="submit">Version freischalten</button><p id="release-message" class="auth-message" role="status"></p>
