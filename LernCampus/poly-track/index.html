@@ -104,7 +104,6 @@
  el("pt-copy").onclick=async()=>{try{await navigator.clipboard.writeText(room);status("Einladungscode kopiert.")}catch(e){status("Code: "+room)}};
  el("pt-leave").onclick=async()=>{try{if(room&&playerId)await request("/rooms/"+room+"/players/"+playerId,"DELETE")}catch(e){}stop()};
  el("pt-toggle").onclick=()=>{const box=el("polytrack-multiplayer");box.classList.toggle("pt-mini");el("pt-toggle").textContent=box.classList.contains("pt-mini")?"Multiplayer öffnen":"Multiplayer schließen"};
- status("Bereit · ScratchLab-Server wird geprüft");
- request("/rooms/health").catch(()=>{});
+ status("Bereit · erstelle einen Raum oder tritt bei.");
 })();
 </script></body></html>
