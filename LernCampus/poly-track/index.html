@@ -94,7 +94,7 @@
   status("Raum bereit · teile den Code mit Freunden");
   el("pt-code").value=room;
   if(timer)clearInterval(timer);
-  timer=setInterval(refresh,250);
+  timer=setInterval(refresh,50);
  }
  function stop(){
   if(timer)clearInterval(timer);timer=null;
