@@ -98,7 +98,7 @@
  }
  function stop(){
   if(timer)clearInterval(timer);timer=null;
-  room=null;playerId=null;el("pt-room").hidden=true;status("Nicht in einem Raum.");
+  room=null;playerId=null;window.__ptRemotePlayers=[];window.__ptPlayerId=null;el("pt-room").hidden=true;status("Nicht in einem Raum.");
  }
  el("pt-create").onclick=async()=>{try{status("Erstelle Raum …");start(await request("/rooms","POST",{name:el("pt-name").value}))}catch(e){status(e.message)}};
  el("pt-join").onclick=async()=>{try{status("Trete Raum bei …");start(await request("/rooms/join","POST",{code:el("pt-code").value,name:el("pt-name").value}))}catch(e){status(e.message)}};
