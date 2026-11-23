@@ -1,0 +1,56 @@
+name: Sync PolyTrack game files
+
+on:
+  push:
+    paths:
+      - ".github/workflows/sync-polytrack.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-polytrack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout LernCampus repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Checkout original PolyTrack mirror
+        uses: actions/checkout@v4
+        with:
+          repository: poly-trackonline/poly-trackonline.github.io
+          ref: main
+          path: upstream
+          persist-credentials: false
+
+      - name: Copy complete game and configure reupload
+        shell: bash
+        run: |
+          test -d upstream/poly-track
+          rm -rf garden-guardians/poly-track
+          cp -a upstream/poly-track garden-guardians/poly-track
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("garden-guardians/poly-track/index.html")
+          s = p.read_text(encoding="utf-8")
+          config = '<script>window.polytrackModConfiguration = { unblocked: true };</script>'
+          if "window.polytrackModConfiguration" not in s:
+              s = s.replace("</head>", config + "</head>", 1)
+          p.write_text(s, encoding="utf-8")
+          PY
+
+      - name: Commit synchronized game files
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add garden-guardians/poly-track
+          if git diff --cached --quiet; then
+            echo "PolyTrack files are already synchronized."
+          else
+            git commit -m "Add complete PolyTrack game files"
+            git push
+          fi
