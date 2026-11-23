@@ -38,9 +38,7 @@
       requestAnimationFrame(animate);
       const local=window.__ptLocalCarState;
       if(local && Number.isFinite(local.x) && Number.isFinite(local.z)){
-        const rawQ=new THREE.Quaternion(local.qx,local.qy,local.qz,local.qw);
-        const yaw=new THREE.Euler().setFromQuaternion(rawQ,"YXZ").y;
-        const q=new THREE.Quaternion().setFromEuler(new THREE.Euler(0,yaw,0));
+        const q=new THREE.Quaternion(local.qx,local.qy,local.qz,local.qw);
         const offset=new THREE.Vector3(0,1.1,.4).applyQuaternion(q);
         camera.position.set(local.x,local.y,local.z).add(offset);
         camera.quaternion.copy(q).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(0,Math.PI,0)));
