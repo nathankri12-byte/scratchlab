@@ -38,7 +38,9 @@
       requestAnimationFrame(animate);
       const local=window.__ptLocalCarState;
       if(local && Number.isFinite(local.x) && Number.isFinite(local.z)){
-        const q=new THREE.Quaternion(local.qx,local.qy,local.qz,local.qw);
+        const rawQ=new THREE.Quaternion(local.qx,local.qy,local.qz,local.qw);
+        const yaw=new THREE.Euler().setFromQuaternion(rawQ,"YXZ").y;
+        const q=new THREE.Quaternion().setFromEuler(new THREE.Euler(0,yaw,0));
         const offset=new THREE.Vector3(0,1.1,.4).applyQuaternion(q);
         camera.position.set(local.x,local.y,local.z).add(offset);
         camera.quaternion.copy(q).multiply(new THREE.Quaternion().setFromEuler(new THREE.Euler(0,Math.PI,0)));
@@ -53,7 +55,7 @@
           visible.add(p.id);
           let car=cars.get(p.id);
           if(!car){car=makeCar(colors[index%colors.length]);cars.set(p.id,car)}
-          car.visible=true;car.position.lerp(new THREE.Vector3(v.x,v.y,v.z),.24);car.quaternion.slerp(new THREE.Quaternion(v.qx,v.qy,v.qz,v.qw),.24);
+          car.visible=true;car.scale.setScalar(1.55);car.position.lerp(new THREE.Vector3(v.x,v.y,v.z),.32);const remoteQ=new THREE.Quaternion(v.qx,v.qy,v.qz,v.qw);const remoteYaw=new THREE.Euler().setFromQuaternion(remoteQ,"YXZ").y;car.quaternion.slerp(new THREE.Quaternion().setFromEuler(new THREE.Euler(0,remoteYaw,0)),.32);
         });
         for(const [id,car] of cars){if(!visible.has(id))car.visible=false}
         renderer.render(scene,camera);
