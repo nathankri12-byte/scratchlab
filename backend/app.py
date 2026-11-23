@@ -1519,7 +1519,6 @@ class Handler(SimpleHTTPRequestHandler):
 
             if method == "OPTIONS" and path.startswith("/api/polytrack/"):
                 self.send_response(HTTPStatus.NO_CONTENT)
-                self.send_header("Access-Control-Allow-Origin", "*")
                 self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
                 self.send_header("Access-Control-Allow-Headers", "Content-Type")
                 self.end_headers()
