@@ -44,18 +44,47 @@
   if(!r.ok) throw new Error(data.error||"Verbindung fehlgeschlagen.");
   return data;
  }
+ function drawRadar(players){
+  const canvas=el("pt-radar-canvas"),ctx=canvas.getContext("2d");
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle="#081624";ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle="#ffffff18";ctx.lineWidth=1;
+  for(let x=0;x<=canvas.width;x+=35){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke()}
+  for(let y=0;y<=canvas.height;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke()}
+  const active=(players||[]).filter(p=>p.position&&Number.isFinite(p.position.x)&&Number.isFinite(p.position.z));
+  if(!active.length){ctx.fillStyle="#a8bdca";ctx.font="12px system-ui";ctx.textAlign="center";ctx.fillText("Starte eine Strecke, um Positionen zu teilen",140,68);return}
+  let minX=Math.min(...active.map(p=>p.position.x)),maxX=Math.max(...active.map(p=>p.position.x));
+  let minZ=Math.min(...active.map(p=>p.position.z)),maxZ=Math.max(...active.map(p=>p.position.z));
+  if(maxX-minX<20){minX-=10;maxX+=10} if(maxZ-minZ<20){minZ-=10;maxZ+=10}
+  const px=x=>18+(x-minX)/(maxX-minX)*(canvas.width-36);
+  const py=z=>18+(z-minZ)/(maxZ-minZ)*(canvas.height-36);
+  active.forEach(p=>{
+   const x=px(p.position.x),y=py(p.position.z);
+   ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);
+   ctx.fillStyle=p.id===playerId?"#5eead4":"#ffca6a";ctx.fill();
+   ctx.strokeStyle="#ffffff";ctx.lineWidth=1.5;ctx.stroke();
+   ctx.fillStyle="#ffffff";ctx.font="11px system-ui";ctx.textAlign="left";
+   ctx.fillText(p.name.slice(0,12),x+9,y-7);
+  });
+ }
  function render(data){
   el("pt-room-code").textContent=data.code;
   el("pt-players").innerHTML="";
-  (data.players||[]).forEach(p=>{const li=document.createElement("li");li.textContent=p.name+(p.isHost?" (Host)":"");el("pt-players").appendChild(li)});
+  (data.players||[]).forEach(p=>{
+   const li=document.createElement("li");
+   const speed=p.position&&Number.isFinite(p.position.speedKmh)?" · "+Math.round(p.position.speedKmh)+" km/h":"";
+   li.textContent=p.name+(p.isHost?" (Host)":"")+speed;
+   el("pt-players").appendChild(li);
+  });
   el("pt-room").hidden=false;
+  drawRadar(data.players||[]);
  }
  async function refresh(){
   if(!room||busy)return;
   busy=true;
   try{
-   const data=await request("/rooms/"+encodeURIComponent(room)+"/players/"+encodeURIComponent(playerId)+"/heartbeat","POST",{position:null});
-   render(data);status("Verbunden · "+data.players.length+"/"+data.maxPlayers+" Spieler");
+   const data=await request("/rooms/"+encodeURIComponent(room)+"/players/"+encodeURIComponent(playerId)+"/heartbeat","POST",{position:window.__ptLocalCarState||null});
+   render(data);status(data.players.some(p=>p.position)?"Positionen live · "+data.players.length+"/"+data.maxPlayers+" Spieler":"Raum verbunden · starte eine Strecke zum Teilen deiner Position");
   }catch(e){status(e.message);if(/nicht gefunden|abgelaufen/i.test(e.message))stop();}
   finally{busy=false}
  }
