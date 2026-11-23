@@ -1,0 +1,81 @@
+
+<!doctype html><html><head>
+
+	<meta name="robots" content="noindex,nofollow" />
+
+	<meta charset="utf-8"><link rel="preload" href="forced_square.woff2" as="font" type="font/woff2" crossorigin="anonymous"/><link rel="preload" href="images/logo.svg" as="image" type="image/svg+xml"/><link rel="preload" href="images/discord.svg" as="image" type="image/svg+xml"/><link rel="manifest" href="manifest.json"/><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no"><script defer="defer" src="error_screen.bundle.js"></script><script defer="defer" src="main.bundle.js"></script><script>window.polytrackModConfiguration = { unblocked: true };</script></head><body><canvas id="screen"></canvas><div id="ui"></div><div id="transition-layer"></div><style>
+#polytrack-multiplayer{position:fixed;z-index:99999;top:12px;left:12px;width:min(330px,calc(100vw - 24px));font:14px system-ui,sans-serif;color:#eef7ff}
+#polytrack-multiplayer .pt-card{background:rgba(7,18,31,.94);border:1px solid #5eead4;border-radius:14px;padding:14px;box-shadow:0 12px 35px #0008;backdrop-filter:blur(12px)}
+#polytrack-multiplayer h3{margin:0 0 10px;font-size:15px}
+#polytrack-multiplayer input{width:100%;box-sizing:border-box;margin:5px 0;padding:10px;border-radius:8px;border:1px solid #486477;background:#10283b;color:white}
+#polytrack-multiplayer button{border:0;border-radius:8px;padding:10px 12px;margin:4px 3px 4px 0;background:#5eead4;color:#06222a;font-weight:800;cursor:pointer}
+#polytrack-multiplayer .pt-muted{color:#a8bdca;font-size:12px}
+#polytrack-multiplayer .pt-row{display:flex;gap:6px}
+#polytrack-multiplayer .pt-row button{flex:1}
+#polytrack-multiplayer ul{margin:8px 0 0;padding-left:18px}
+#polytrack-multiplayer .pt-status{font-size:12px;color:#9cebdc;margin-top:8px}
+#polytrack-multiplayer.pt-mini{width:auto;max-width:calc(100vw - 24px)}
+#polytrack-multiplayer.pt-mini .pt-card{padding:8px 12px}
+#polytrack-multiplayer.pt-mini .pt-content{display:none}
+</style>
+<div id="polytrack-multiplayer">
+ <div class="pt-card">
+  <h3>Poly Track · Multiplayer</h3>
+  <div class="pt-content">
+   <div class="pt-muted">Erstelle einen privaten Raum oder tritt mit einem Einladungscode bei.</div>
+   <input id="pt-name" maxlength="18" placeholder="Dein Spielername">
+   <div class="pt-row"><button id="pt-create">Raum erstellen</button></div>
+   <div class="pt-row"><input id="pt-code" maxlength="6" placeholder="Einladungscode"><button id="pt-join">Beitreten</button></div>
+   <div id="pt-status" class="pt-status">Verbinde mit LernCampus …</div>
+   <div id="pt-room" hidden><b>Raum: <span id="pt-room-code"></span></b> <button id="pt-copy">Code kopieren</button><div class="pt-muted">Mitspieler im Raum</div><ul id="pt-players"></ul><button id="pt-leave">Raum verlassen</button></div>
+  </div>
+  <button id="pt-toggle" style="margin:8px 0 0">Multiplayer schließen</button>
+ </div>
+</div>
+<script>
+(function(){
+ const API="https://scratchlab.onrender.com/api/polytrack";
+ const el=id=>document.getElementById(id);
+ let room=null, playerId=null, timer=null, busy=false;
+ const status=t=>{el("pt-status").textContent=t};
+ async function request(path,method="GET",body){
+  const r=await fetch(API+path,{method,headers:body?{"Content-Type":"application/json"}:{},body:body?JSON.stringify(body):undefined});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(data.error||"Verbindung fehlgeschlagen.");
+  return data;
+ }
+ function render(data){
+  el("pt-room-code").textContent=data.code;
+  el("pt-players").innerHTML="";
+  (data.players||[]).forEach(p=>{const li=document.createElement("li");li.textContent=p.name+(p.isHost?" (Host)":"");el("pt-players").appendChild(li)});
+  el("pt-room").hidden=false;
+ }
+ async function refresh(){
+  if(!room||busy)return;
+  busy=true;
+  try{
+   const data=await request("/rooms/"+encodeURIComponent(room)+"/players/"+encodeURIComponent(playerId)+"/heartbeat","POST",{position:null});
+   render(data);status("Verbunden · "+data.players.length+"/"+data.maxPlayers+" Spieler");
+  }catch(e){status(e.message);if(/nicht gefunden|abgelaufen/i.test(e.message))stop();}
+  finally{busy=false}
+ }
+ function start(data){
+  room=data.code;playerId=data.playerId;render(data);
+  status("Raum bereit · teile den Code mit Freunden");
+  el("pt-code").value=room;
+  if(timer)clearInterval(timer);
+  timer=setInterval(refresh,1800);
+ }
+ function stop(){
+  if(timer)clearInterval(timer);timer=null;
+  room=null;playerId=null;el("pt-room").hidden=true;status("Nicht in einem Raum.");
+ }
+ el("pt-create").onclick=async()=>{try{status("Erstelle Raum …");start(await request("/rooms","POST",{name:el("pt-name").value}))}catch(e){status(e.message)}};
+ el("pt-join").onclick=async()=>{try{status("Trete Raum bei …");start(await request("/rooms/join","POST",{code:el("pt-code").value,name:el("pt-name").value}))}catch(e){status(e.message)}};
+ el("pt-copy").onclick=async()=>{try{await navigator.clipboard.writeText(room);status("Einladungscode kopiert.")}catch(e){status("Code: "+room)}};
+ el("pt-leave").onclick=async()=>{try{if(room&&playerId)await request("/rooms/"+room+"/players/"+playerId,"DELETE")}catch(e){}stop()};
+ el("pt-toggle").onclick=()=>{const box=el("polytrack-multiplayer");box.classList.toggle("pt-mini");el("pt-toggle").textContent=box.classList.contains("pt-mini")?"Multiplayer öffnen":"Multiplayer schließen"};
+ status("Bereit · ScratchLab-Server wird geprüft");
+ request("/rooms/health").catch(()=>{});
+})();
+</script></body></html>
