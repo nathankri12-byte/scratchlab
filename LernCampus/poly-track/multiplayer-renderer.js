@@ -53,7 +53,7 @@
           visible.add(p.id);
           let car=cars.get(p.id);
           if(!car){car=makeCar(colors[index%colors.length]);cars.set(p.id,car)}
-          car.visible=true;car.position.set(v.x,v.y,v.z);car.quaternion.set(v.qx,v.qy,v.qz,v.qw);
+          car.visible=true;car.position.lerp(new THREE.Vector3(v.x,v.y,v.z),.24);car.quaternion.slerp(new THREE.Quaternion(v.qx,v.qy,v.qz,v.qw),.24);
         });
         for(const [id,car] of cars){if(!visible.has(id))car.visible=false}
         renderer.render(scene,camera);
