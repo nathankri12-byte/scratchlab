@@ -39,6 +39,8 @@ from urllib.request import Request, urlopen
 
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 
+from polytrack_multiplayer import create_room, join_room, get_room, heartbeat_player, leave_player
+
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -1463,6 +1465,9 @@ class Handler(SimpleHTTPRequestHandler):
 
     def end_headers(self) -> None:
 
+        if self.path.startswith("/api/polytrack/"):
+            self.send_header("Access-Control-Allow-Origin", "*")
+
         self.send_header("X-Content-Type-Options", "nosniff")
 
         self.send_header("Referrer-Policy", "strict-origin-when-cross-origin")
@@ -1498,6 +1503,10 @@ class Handler(SimpleHTTPRequestHandler):
 
         self.route_api("DELETE")
 
+    def do_OPTIONS(self) -> None:
+
+        self.route_api("OPTIONS")
+
 
     def route_api(self, method: str) -> None:
 
@@ -1508,7 +1517,43 @@ class Handler(SimpleHTTPRequestHandler):
 
         try:
 
-            if method == "GET" and path == "/api/courses":
+            if method == "OPTIONS" and path.startswith("/api/polytrack/"):
+                self.send_response(HTTPStatus.NO_CONTENT)
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+                self.send_header("Access-Control-Allow-Headers", "Content-Type")
+                self.end_headers()
+
+            elif method == "POST" and path == "/api/polytrack/rooms":
+                payload = self.read_json()
+                self.json_response(create_room(str(payload.get("name", "Spieler"))))
+
+            elif method == "POST" and path == "/api/polytrack/rooms/join":
+                payload = self.read_json()
+                self.json_response(join_room(str(payload.get("code", "")), str(payload.get("name", "Spieler"))))
+
+            elif method == "GET" and path.startswith("/api/polytrack/rooms/"):
+                code = path.rstrip("/").split("/")[-1]
+                room = get_room(code)
+                if room is None:
+                    self.json_response({"error": "Raum nicht gefunden oder abgelaufen."}, HTTPStatus.NOT_FOUND)
+                else:
+                    self.json_response(room)
+
+            elif method == "POST" and path.startswith("/api/polytrack/rooms/") and path.endswith("/heartbeat"):
+                parts = path.strip("/").split("/")
+                if len(parts) != 7:
+                    raise ValueError("Ungültiger Spielerpfad.")
+                payload = self.read_json()
+                self.json_response(heartbeat_player(parts[3], parts[5], payload.get("position")))
+
+            elif method == "DELETE" and path.startswith("/api/polytrack/rooms/") and "/players/" in path:
+                parts = path.strip("/").split("/")
+                if len(parts) != 6:
+                    raise ValueError("Ungültiger Spielerpfad.")
+                self.json_response(leave_player(parts[3], parts[5]))
+
+            elif method == "GET" and path == "/api/courses":
 
                 self.json_response({"courses": load_courses()})
 
