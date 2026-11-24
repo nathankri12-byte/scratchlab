@@ -6,6 +6,14 @@
   const SERVICE = '19b10000-e8f2-537e-4f6c-d104768a1214';
   const CHARACTERISTIC = '19b10001-e8f2-537e-4f6c-d104768a1214';
   const DEVICE_NAME = 'MiniR4 Sorter';
+
+  // In the installed app, use the native BLE plugin (iOS/Android).
+  // The browser implementation below remains the fallback for supported browsers.
+  if (window.SortronNativeBLE) {
+    window.SortronBLE = window.SortronNativeBLE;
+    return;
+  }
+
   let device = null;
   let characteristic = null;
   let disconnectHandler = null;
