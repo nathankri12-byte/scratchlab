@@ -1,0 +1,15 @@
+{
+  "appId": "de.sortron.control",
+  "appName": "Sortron",
+  "webDir": "www",
+  "plugins": {
+    "BluetoothLe": {
+      "displayStrings": {
+        "scanning": "Sortron sucht den Mini R4 …",
+        "cancel": "Abbrechen",
+        "availableDevices": "Verfügbare Geräte",
+        "noDeviceFound": "Kein Mini R4 gefunden"
+      }
+    }
+  }
+}
