@@ -1,0 +1,58 @@
+/* Sortron Control Center — refreshed responsive visual system */
+:root{--bg:#07110d;--panel:#101d16;--panel2:#15271d;--line:rgba(164,220,174,.15);--green:#b6f27c;--mint:#66e0ad;--text:#f2f8f2;--muted:#9aafa0;--shadow:0 22px 65px rgba(0,0,0,.24)}
+html{scroll-behavior:smooth}
+body{background:radial-gradient(ellipse at 12% 0%,rgba(89,164,94,.19),transparent 32%),radial-gradient(ellipse at 92% 18%,rgba(63,139,104,.13),transparent 30%),#07110d;color:var(--text);font-family:"DM Sans",Inter,system-ui,sans-serif}
+.topbar{height:78px;padding-inline:max(22px,calc((100% - 1320px)/2));border-bottom:1px solid var(--line);background:rgba(5,14,9,.82);backdrop-filter:blur(22px)}
+.brand-mark{width:42px;height:42px;border-radius:14px;border:1px solid rgba(182,242,124,.45);background:linear-gradient(145deg,#274b2d,#102016);box-shadow:0 0 30px rgba(182,242,124,.09);font-size:20px}
+.brand-name{letter-spacing:.17em;font-size:18px}.brand-sub{letter-spacing:.22em;font-size:9px}
+.account-link{border-radius:999px;padding:10px 16px;background:rgba(255,255,255,.035);border-color:var(--line);transition:.2s}
+.account-link:hover{border-color:var(--green);background:rgba(182,242,124,.08)}
+main{max-width:1320px;padding:48px 24px 76px}
+.hero{position:relative;isolation:isolate;overflow:hidden;align-items:center;margin-bottom:24px;padding:34px 36px;border:1px solid rgba(182,242,124,.17);border-radius:26px;background:linear-gradient(115deg,rgba(25,54,34,.94),rgba(12,28,19,.97) 62%,rgba(11,26,19,.98));box-shadow:var(--shadow)}
+.hero:after{content:"S";position:absolute;z-index:-1;right:5%;top:-78px;font:700 330px/.95 "Space Grotesk";color:rgba(182,242,124,.035);pointer-events:none}
+.hero h1{font-size:clamp(36px,5vw,58px);letter-spacing:-.055em;margin:11px 0 12px}
+.hero p{max-width:650px;line-height:1.7;font-size:14px}
+.eyebrow{letter-spacing:.22em;font-size:10px}
+.hero-state{min-width:235px;border-radius:18px;padding:18px 19px;background:rgba(4,14,8,.44);border-color:rgba(182,242,124,.18);backdrop-filter:blur(12px)}
+.hero-state strong{font-size:16px}
+.grid{grid-template-columns:minmax(0,1.1fr) minmax(310px,.9fr);gap:18px}
+.panel{position:relative;overflow:hidden;padding:22px;border-radius:20px;border-color:var(--line);background:linear-gradient(145deg,rgba(20,39,28,.96),rgba(10,23,15,.98));box-shadow:0 14px 38px rgba(0,0,0,.15);transition:border-color .2s,transform .2s}
+.panel:hover{border-color:rgba(182,242,124,.27)}
+.panel-head{margin-bottom:19px}
+.number{width:34px;height:34px;border-radius:11px;background:rgba(182,242,124,.11);color:var(--green);font-size:12px}
+.panel h2{font-size:17px;letter-spacing:-.02em}
+.panel-desc{font-size:12px;line-height:1.55}
+.tag{border-color:rgba(182,242,124,.18);background:rgba(182,242,124,.055);color:#c4ddb9;letter-spacing:.08em}
+.video-wrap{min-height:230px;border-radius:16px;border-color:rgba(182,242,124,.18);background:radial-gradient(circle at 50% 40%,#16291d,#050b07 72%)}
+.video-wrap video{border-radius:15px}
+.video-placeholder{color:#a3b7a7}.video-placeholder span{color:var(--green);font-size:34px}
+.field{gap:8px;margin-top:17px}.field label{letter-spacing:.15em;font-size:10px}
+.input,.select{border-radius:12px;border-color:rgba(164,220,174,.2);background:rgba(4,13,8,.68);padding:12px 14px}
+.input:focus,.select:focus{border-color:var(--green);box-shadow:0 0 0 4px rgba(182,242,124,.1)}
+.btn{border-radius:12px;padding:11px 16px;border-color:rgba(182,220,174,.24);background:rgba(255,255,255,.045);transition:transform .18s,border-color .18s,background .18s}
+.btn:hover{border-color:var(--green);background:rgba(182,242,124,.08);transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,#c3f58b,#91d96a);border-color:#b6f27c;color:#102014;box-shadow:0 8px 24px rgba(151,222,106,.12)}
+.btn.primary:hover{background:linear-gradient(135deg,#d1ffa0,#a4e878)}
+.status-line{gap:9px;font-size:12px}
+.status-dot{width:8px;height:8px}
+.result,.model-summary,.connection-box{border-radius:15px;border-color:rgba(164,220,174,.15);background:rgba(4,13,8,.48)}
+.result{padding:17px}
+.result strong{font-size:25px}
+.bar{height:7px;background:rgba(255,255,255,.08)}
+.bar i{background:linear-gradient(90deg,#65d99e,#c3f58b)}
+.connection-box{padding:17px}
+.device-name{font-size:16px}
+.warning{border-radius:0 12px 12px 0;background:rgba(115,83,30,.16);border-left-color:#e6c777;color:#e5d09b;line-height:1.6}
+.class-grid{gap:10px}
+.class-card{border-radius:14px;padding:15px;border-color:rgba(164,220,174,.14);background:linear-gradient(145deg,rgba(23,45,30,.82),rgba(9,21,14,.9));transition:.2s}
+.class-card:hover{border-color:rgba(182,242,124,.38);transform:translateY(-2px)}
+.class-card strong{font-size:14px}.class-card span{font-size:11px}
+.workflow{gap:8px;margin-top:18px}
+.workflow span{border-radius:9px;padding:8px 10px;background:rgba(255,255,255,.025);border-color:rgba(164,220,174,.13)}
+.log{height:180px;border-radius:14px;background:#060f09;border-color:rgba(164,220,174,.13);font-size:11px;line-height:1.8}
+.footer{padding:26px;color:#78907e;letter-spacing:.12em;font-size:10px}
+#access-gate{margin:90px auto;border-radius:22px;border-color:var(--line);background:linear-gradient(145deg,#173422,#0a1910);box-shadow:var(--shadow)}
+#access-gate h2{font-size:29px}
+@media(max-width:850px){main{padding:30px 18px 60px}.hero{padding:27px;gap:20px}.hero-state{min-width:0}.grid{grid-template-columns:1fr}}
+@media(max-width:520px){.topbar{height:68px;padding:0 15px}.brand-mark{width:36px;height:36px}.brand-name{font-size:16px}.account-link{padding:8px 11px;font-size:11px}main{padding:20px 12px 44px}.hero{padding:23px 19px;border-radius:20px}.hero h1{font-size:38px}.hero:after{right:-20px;top:-30px;font-size:210px}.panel{padding:16px;border-radius:17px}.panel-head{gap:8px}.tag{font-size:9px;padding:4px 7px}.input-row{flex-direction:column}.input-row .btn{width:100%}.class-grid{grid-template-columns:1fr 1fr}.workflow span{font-size:9px}.workflow b{font-size:9px}.log{height:150px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
