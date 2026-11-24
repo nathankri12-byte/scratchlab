@@ -26,6 +26,7 @@ The app uses the existing Sortron BLE protocol unchanged:
 - ASCII commands `0`–`4`
 
 ## Android download build
+The repository workflow is `.github/workflows/sortron-android.yml` and builds on changes under `sortron/`.
 A GitHub Actions workflow builds a debug APK when Sortron app files are pushed. Download the APK from the workflow's Artifacts section. Android may ask the user to allow installation from the browser or file manager.
 
 ## iPhone and iPad
