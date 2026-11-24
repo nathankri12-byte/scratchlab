@@ -1,0 +1,22 @@
+{
+  "name": "sortron-control-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Native Sortron control app for Android and iOS",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "cap:sync": "npm run build && cap sync",
+    "android": "npm run build && cap sync android",
+    "ios": "npm run build && cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor-community/bluetooth-le": "^7.0.0",
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/ios": "^7.4.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3",
+    "vite": "^6.4.1"
+  }
+}
